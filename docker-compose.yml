@@ -1,0 +1,8 @@
+services:
+  business-intelligence:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${BI_PORT:-5176}:80"
+    restart: unless-stopped

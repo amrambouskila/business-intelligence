@@ -1,0 +1,38 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '=== BUSINESS INTELLIGENCE SESSION START ===' && echo 'CLAUDE.md and CHARTS.md MUST be read before any code changes.' && echo '' && echo '--- Chart Registry ---' && echo \"Registered charts: $(grep -r 'chartRegistry.register' src/charts/families/ 2>/dev/null | wc -l | tr -d ' ')\" && echo '' && echo '--- Current Version ---' && grep '\"version\"' package.json && echo '' && echo '--- Reminders ---' && echo '1. Read CLAUDE.md before writing code' && echo '2. Read CHARTS.md for chart specifications' && echo '3. One chart definition per file' && echo '4. Run /pre-commit before committing' && echo '5. All charts register via side-effect imports in their family index.ts'",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | { read -r EDITED_FILE; case \"$EDITED_FILE\" in */charts/types.ts|*/charts/registry.ts|*/types/data.ts|*/stores/*) echo \"STATE-SENSITIVE FILE EDITED: $EDITED_FILE\" && echo '' && echo 'You just edited a core type or state file.' && echo 'Before continuing, verify:' && echo '  1. If you changed ChartDefinition or ChartRenderer interface -> update all existing chart implementations' && echo '  2. If you changed DataSet/DataView/ColumnMeta -> update shape-detector and transforms' && echo '  3. If you changed a store -> verify components that consume it still work' && echo '  4. Cross-check against CLAUDE.md architecture section' ;; *) ;; esac; }",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '=== SESSION END CHECK ===' && CHANGED=$(git diff --name-only 2>/dev/null) && STAGED=$(git diff --cached --name-only 2>/dev/null) && if [ -n \"$CHANGED\" ] || [ -n \"$STAGED\" ]; then echo 'UNCOMMITTED CHANGES DETECTED:' && echo \"$CHANGED\" && echo \"$STAGED\" && echo '' && echo 'Before committing, run:' && echo '  npx tsc --noEmit  (type-check)' && echo '  npm run build     (production build)'; else echo 'No uncommitted changes.'; fi",
+            "timeout": 5000
+          }
+        ]
+      }
+    ]
+  }
+}
