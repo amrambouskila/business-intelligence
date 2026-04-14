@@ -1,3 +1,6 @@
+# Claude state
+.claude/
+
 # Dependencies
 node_modules/
 
