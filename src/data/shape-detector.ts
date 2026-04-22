@@ -51,6 +51,14 @@ function inferType(name: string, values: unknown[]): ColumnType {
   if (values.length === 0) return 'unknown';
 
   const sample = values.slice(0, 100);
+  const isNumericSample =
+    sample.every((v) => typeof v === 'number' && !isNaN(v as number));
+
+  // Geo coordinates: name takes precedence over numeric because lat/lng are
+  // always numeric but need special downstream handling (geo_points shape).
+  if (isNumericSample && (/^(lat|latitude)$/i.test(name) || /^(lon|lng|longitude)$/i.test(name))) {
+    return 'geo_point';
+  }
 
   // Check boolean
   if (sample.every((v) => typeof v === 'boolean' || v === 'true' || v === 'false' || v === 0 || v === 1)) {
@@ -58,7 +66,7 @@ function inferType(name: string, values: unknown[]): ColumnType {
   }
 
   // Check numeric
-  if (sample.every((v) => typeof v === 'number' && !isNaN(v as number))) {
+  if (isNumericSample) {
     const allInts = sample.every((v) => Number.isInteger(v));
     return allInts ? 'integer' : 'float';
   }
@@ -79,11 +87,6 @@ function inferType(name: string, values: unknown[]): ColumnType {
     if (parsed.filter((d) => !isNaN(d.getTime())).length > 15) {
       return 'datetime';
     }
-  }
-
-  // Check geo by name
-  if (/^(lat|latitude)$/i.test(name) || /^(lon|lng|longitude)$/i.test(name)) {
-    return 'geo_point';
   }
 
   // Categorical vs text: low unique ratio = category

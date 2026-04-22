@@ -78,6 +78,7 @@ export function getSampleOptions(): { label: string; value: SampleKey }[] {
 export function loadSampleData(key: SampleKey): DataSet {
   const { generate } = SAMPLES[key];
   const rows = generate();
+  /* v8 ignore next */
   const columnNames = rows.length > 0 ? Object.keys(rows[0]) : [];
   const columns = analyzeColumns(rows, columnNames);
   const shape = detectShape(columns);

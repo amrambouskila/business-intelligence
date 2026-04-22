@@ -10,6 +10,7 @@ import { detectShape } from './shape-detector';
  * once the core pipeline is proven.
  */
 export async function loadFile(file: File): Promise<DataSet> {
+  /* v8 ignore next -- split().pop() is never undefined for any string input */
   const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
   let rows: Record<string, unknown>[];
   let columnNames: string[];

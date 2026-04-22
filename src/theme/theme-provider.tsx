@@ -1,13 +1,7 @@
-import { createContext, useContext, useEffect, type ReactNode } from 'react';
-import type { ThemeTokens } from '@/charts/types';
+import { useEffect, type ReactNode } from 'react';
 import { useUIStore } from '@/stores/ui-store';
 import { darkTokens, lightTokens } from './tokens';
-
-const ThemeContext = createContext<ThemeTokens>(darkTokens);
-
-export function useTheme(): ThemeTokens {
-  return useContext(ThemeContext);
-}
+import { ThemeContext } from './theme-context';
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const theme = useUIStore((s) => s.theme);
