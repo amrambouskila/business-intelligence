@@ -1,0 +1,48 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | { read -r TARGET; case \"$TARGET\" in *.env|*.env.*|*credentials.*|*secrets.*|*.pem|*.key|*.p12|*.pfx|*id_rsa*|*id_ed25519*) echo '{\"decision\":\"block\",\"reason\":\"Blocked: refusing to write to sensitive file (' \"$TARGET\" '). Confirm with the user before bypassing.\"}' ;; *) echo '{}' ;; esac; }",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | { read -r EDITED_FILE; case \"$EDITED_FILE\" in */charts/types.ts|*/charts/registry.ts|*/types/data.ts|*/stores/*) echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"STATE-SENSITIVE FILE EDITED. Verify: (1) ChartDefinition/ChartRenderer interface changes propagate to all existing chart implementations. (2) DataSet/DataView/ColumnMeta changes propagate to shape-detector and transforms. (3) Store changes propagate to consuming components. (4) Cross-check against AGENTS.md \u00a76 Data Contracts \u2014 these changes require a master-plan update and a major semver bump.\"}}' ;; */charts/renderers/*) echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"RENDERER FILE EDITED. Verify: (1) WebGL cleanup on unmount (deck.gl/regl). (2) Theme tokens applied. (3) ChartArea still keys on chartType so switches trigger unmount.\"}}' ;; *) ;; esac; }",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '=== SESSION END CHECK ===' && CHANGED=$(git diff --name-only 2>/dev/null) && STAGED=$(git diff --cached --name-only 2>/dev/null) && if [ -n \"$CHANGED\" ] || [ -n \"$STAGED\" ]; then echo 'UNCOMMITTED CHANGES DETECTED:' && echo \"$CHANGED\" && echo \"$STAGED\" && echo '' && echo 'Verification commands (Claude does NOT commit \u2014 user handles git):' && echo '  npm run typecheck' && echo '  npm run lint' && echo '  npm run test:coverage'; else echo 'No uncommitted changes.'; fi",
+            "timeout": 5000
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"systemMessage\":\"SESSION END \u2014 MEMORY REVIEW: Before this session closes, review what was learned and suggest memories the user may want to save. Check ~/.codex/memories/-Users-amrambouskila-IMPORTANT-Projects-business-intelligence/memory/MEMORY.md first to avoid duplicates \u2014 update existing memories rather than creating new ones when the topic already exists. Memory types: user (role, preferences, knowledge), feedback (corrections given, confirmed approaches \u2014 include WHY), project (decisions with external motivation, deadlines, stakeholder context), reference (pointers to external systems). Worth saving: corrections the user gave you, non-obvious approaches they confirmed, project decisions driven by external factors, pointers to external tools/systems, user preferences learned this session. NOT worth saving: anything derivable from code or git history, debugging solutions, ephemeral task details, things already in AGENTS.md. Present a short bulleted list of suggested memories at the end of your response and let the user decide which to save. Memory dir: ~/.codex/memories/-Users-amrambouskila-IMPORTANT-Projects-business-intelligence/memory/\"}'",
+            "timeout": 5000
+          }
+        ]
+      }
+    ]
+  }
+}
