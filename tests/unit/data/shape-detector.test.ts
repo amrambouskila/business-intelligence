@@ -154,6 +154,24 @@ describe('detectShape', () => {
     expect(detectShape(columns)).toBe('geo_points');
   });
 
+  it('detects geo_polygons from a region or geometry plus numeric value', () => {
+    const rows = [
+      { region: 'West', value: 10 },
+      { region: 'East', value: 20 },
+    ];
+    const columns = analyzeColumns(rows, ['region', 'value']);
+    expect(detectShape(columns)).toBe('geo_polygons');
+  });
+
+  it('keeps coordinate datasets as geo_points even when they also include region values', () => {
+    const rows = [
+      { latitude: 40.7, longitude: -74.0, region: 'East', value: 10 },
+      { latitude: 34.0, longitude: -118.2, region: 'West', value: 20 },
+    ];
+    const columns = analyzeColumns(rows, ['latitude', 'longitude', 'region', 'value']);
+    expect(detectShape(columns)).toBe('geo_points');
+  });
+
   it('detects hierarchy from id + parent columns', () => {
     const rows = [
       { id: 1, parent: null, name: 'root' },
@@ -191,6 +209,24 @@ describe('detectShape', () => {
     ];
     const columns = analyzeColumns(rows, ['start', 'end', 'task']);
     expect(detectShape(columns)).toBe('intervals');
+  });
+
+  it('detects survival from time + event columns', () => {
+    const rows = [
+      { time: 12, event: 1, group: 'Treatment' },
+      { time: 20, event: 0, group: 'Control' },
+    ];
+    const columns = analyzeColumns(rows, ['time', 'event', 'group']);
+    expect(detectShape(columns)).toBe('survival');
+  });
+
+  it('detects event_log from user + event + timestamp columns', () => {
+    const rows = [
+      { user: 'u1', event: 'visit', timestamp: '2026-01-01T10:00:00Z' },
+      { user: 'u2', event: 'signup', timestamp: '2026-01-01T10:05:00Z' },
+    ];
+    const columns = analyzeColumns(rows, ['user', 'event', 'timestamp']);
+    expect(detectShape(columns)).toBe('event_log');
   });
 
   it('detects time_series_numeric when time + category + numeric exist', () => {

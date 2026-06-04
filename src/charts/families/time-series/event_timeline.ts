@@ -77,7 +77,7 @@ chartRegistry.register({
   name: 'Event Timeline',
   description: 'Labeled events placed along a time axis',
   renderer: 'echarts',
-  compatibleShapes: ['intervals', 'time_numeric', 'time_series_numeric', 'generic'],
+  compatibleShapes: ['event_log', 'intervals', 'time_numeric', 'time_series_numeric', 'generic'],
   requiredColumns: [
     { role: 'date', acceptedTypes: ['datetime', 'date', 'category', 'text'], label: 'Date' },
     { role: 'label', acceptedTypes: ['category', 'text'], label: 'Label' },

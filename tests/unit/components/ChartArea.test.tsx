@@ -62,6 +62,20 @@ const optionalRole: ChartDefinition = {
   createRenderer: () => ({ render: () => <div data-testid="stub-chart" /> }),
 };
 
+const eventAliasRole: ChartDefinition = {
+  type: '__event_alias_role__',
+  family: 'time-series',
+  name: 'Event Alias Role',
+  description: '',
+  renderer: 'echarts',
+  compatibleShapes: ['event_log'],
+  requiredColumns: [
+    { role: 'date', acceptedTypes: ['datetime', 'date', 'category', 'text'], label: 'Date' },
+    { role: 'label', acceptedTypes: ['category', 'text'], label: 'Label' },
+  ],
+  createRenderer: () => ({ render: () => <div data-testid="stub-chart" /> }),
+};
+
 const rowCountStub: ChartDefinition = {
   type: '__row_count_stub__',
   family: 'distribution',
@@ -190,6 +204,34 @@ describe('ChartArea', () => {
     });
     render(<ChartArea />);
     expect((screen.getByRole('combobox') as HTMLSelectElement).value).toBe('value');
+  });
+
+  it('uses role-name aliases when auto-assigning event-log columns', () => {
+    if (!chartRegistry.get(eventAliasRole.type)) chartRegistry.register(eventAliasRole);
+    useDatasetStore.getState().addDataset(dsWith(
+      [
+        { name: 'user', type: 'category', nullable: false, uniqueCount: 2, nullCount: 0 },
+        { name: 'event', type: 'category', nullable: false, uniqueCount: 2, nullCount: 0 },
+        { name: 'timestamp', type: 'datetime', nullable: false, uniqueCount: 2, nullCount: 0 },
+      ],
+      {
+        user: ['u1', 'u2'],
+        event: ['visit', 'signup'],
+        timestamp: ['2026-01-01', '2026-01-02'],
+      },
+      [
+        { user: 'u1', event: 'visit', timestamp: '2026-01-01' },
+        { user: 'u2', event: 'signup', timestamp: '2026-01-02' },
+      ],
+    ));
+    useChartStore.setState({
+      layers: [{ id: 'l1', chartType: eventAliasRole.type, columns: {}, axis: 'y1', options: {}, visible: true }],
+      activeLayerIndex: 0,
+    });
+    render(<ChartArea />);
+    const [date, label] = screen.getAllByRole('combobox') as HTMLSelectElement[];
+    expect(date.value).toBe('timestamp');
+    expect(label.value).toBe('event');
   });
 
   it('never auto-assigns the same column to two roles (consume-on-assign)', () => {

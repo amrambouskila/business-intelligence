@@ -253,7 +253,7 @@ describe('M3 chart suggestions (contract ↔ detector alignment)', () => {
       col('value', 'float'),
     ])).toContain('candlestick_heatmap_by_hour_day');
 
-    const survivalTypes = suggestedTypes('category_numeric', [
+    const survivalTypes = suggestedTypes('survival', [
       col('time', 'integer'),
       col('event', 'integer'),
       col('group', 'category'),
@@ -388,6 +388,28 @@ describe('M3 chart suggestions (contract ↔ detector alignment)', () => {
       'gantt_chart',
       'swimlane_timeline',
       'range_bar',
+    ]));
+  });
+
+  it('suggests the event timeline for event logs', () => {
+    const types = suggestedTypes('event_log', [
+      col('user', 'category'),
+      col('event', 'category'),
+      col('timestamp', 'datetime'),
+    ]);
+    expect(types).toContain('event_timeline');
+  });
+
+  it('suggests region maps for geo polygon datasets', () => {
+    const types = suggestedTypes('geo_polygons', [
+      col('region', 'category'),
+      col('value', 'integer'),
+    ]);
+    expect(types).toEqual(expect.arrayContaining([
+      'choropleth_map',
+      'filled_map',
+      'cartogram',
+      'tile_grid_map',
     ]));
   });
 

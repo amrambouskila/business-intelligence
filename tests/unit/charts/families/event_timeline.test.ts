@@ -35,6 +35,7 @@ describe('event_timeline', () => {
   it('registers date and label roles', () => {
     const def = chartRegistry.get('event_timeline')!;
     expect(def.family).toBe('time-series');
+    expect(def.compatibleShapes).toContain('event_log');
     expect(def.requiredColumns.map((c) => c.role)).toEqual(['date', 'label']);
   });
 

@@ -2,6 +2,16 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 — Shape detector semantic-shape closeout
+
+No chart-count change: **193/193** registered charts.
+
+- `detectShape` now emits the remaining documented semantic shapes: `geo_polygons`, `survival`, and `event_log`.
+- `geo_polygons` detection covers explicit geometry columns and simple `region,value` tables without reclassifying ordinary region-plus-multiple-metric sales data; coordinate datasets still take `geo_points` precedence.
+- `survival` now covers `time,event[,group]` datasets and keeps the existing survival/cumulative-hazard charts in the ranked suggestion path.
+- `event_timeline` now declares `event_log` compatibility, and chart auto-assignment recognizes common role aliases such as `timestamp` for `date` and `event` for `label`.
+- Verification: focused detector/sample/suggestion/event-timeline/chart-area tests green (**145 tests**); full suite green (**1470 Vitest tests / 100% coverage**); `npx tsc --noEmit`, `npm run typecheck`, `npm run lint`, `npm run build`, and `npm audit` green.
+
 ### 2026-06-04 — Phase 2 catalog completion: 193/193
 
 **Chart count 192 → 193.** Resolved the final catalog/count overlap: `qq_plot` now registers from the Distribution family, and Statistical now has its catalog-specific `confusion_matrix_chart`. Distribution is **21/21**, Statistical is **19/19**, and every family is at target.

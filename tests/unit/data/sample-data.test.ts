@@ -27,7 +27,7 @@ const EXPECTED_SHAPE: Record<SampleKey, DataShape> = {
   orderBook: 'three_numeric',
   yieldCurve: 'two_numeric',
   tradingBuckets: 'category_numeric',
-  survival: 'category_numeric',
+  survival: 'survival',
   embedding: 'category_numeric',
   explainability: 'category_numeric',
   sequence: 'category_numeric',

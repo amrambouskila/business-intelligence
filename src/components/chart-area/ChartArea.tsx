@@ -12,6 +12,17 @@ import type { ChartConfig, ColumnRole } from '@/charts/types';
 import { ColumnPicker } from './ColumnPicker';
 import { ChartCanvas } from './ChartCanvas';
 
+const ROLE_NAME_ALIASES: Record<string, string[]> = {
+  date: ['timestamp', 'datetime', 'time'],
+  label: ['event', 'event_name', 'action', 'name'],
+  region: ['geometry', 'geom', 'polygon', 'geojson'],
+};
+
+function matchesRoleName(columnName: string, role: string): boolean {
+  const normalized = columnName.toLowerCase();
+  return normalized === role.toLowerCase() || (ROLE_NAME_ALIASES[role] ?? []).includes(normalized);
+}
+
 export function ChartArea() {
   const chartRenderRef = useRef<HTMLDivElement>(null);
   const dataset = useActiveDataset();
@@ -84,7 +95,7 @@ export function ChartArea() {
     const candidates = dataset.columns.filter(
       (c) => req.acceptedTypes.includes(c.type) && !used.has(c.name),
     );
-    const match = candidates.find((c) => c.name.toLowerCase() === req.role.toLowerCase()) ?? candidates[0];
+    const match = candidates.find((c) => matchesRoleName(c.name, req.role)) ?? candidates[0];
     if (match) {
       config.columns[req.role] = match.name;
       used.add(match.name);

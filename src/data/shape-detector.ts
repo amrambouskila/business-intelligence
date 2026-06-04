@@ -9,6 +9,10 @@ const CATEGORY_UNIQUE_RATIO = 0.3;
 const CATEGORY_MAX_UNIQUE = 20;
 const MANY_NUMERIC_MIN = 5;
 
+function hasNamedColumn(columns: ColumnMeta[], pattern: RegExp): boolean {
+  return columns.some((c) => pattern.test(c.name));
+}
+
 /** Analyze raw rows and produce column metadata. */
 export function analyzeColumns(
   rows: Record<string, unknown>[],
@@ -149,6 +153,25 @@ export function detectShape(columns: ColumnMeta[]): DataShape {
 
   // Geo
   if (geoCols.length >= 2) return 'geo_points';
+  if (
+    numCols.length >= 1
+    && (
+      hasNamedColumn(columns, /^(geometry|geom|polygon|geojson)$/i)
+      || (catCols.length <= 1 && numCols.length === 1 && hasNamedColumn(columns, /^region$/i))
+    )
+  ) {
+    return 'geo_polygons';
+  }
+
+  // Survival analysis: time-to-event tables should not collapse to ordinary
+  // category/numeric suggestions once Kaplan-Meier charts are available.
+  if (
+    numCols.length >= 1
+    && hasNamedColumn(columns, /^(time|duration|survival_time)$/i)
+    && hasNamedColumn(columns, /^(event|status|censored|observed)$/i)
+  ) {
+    return 'survival';
+  }
 
   // Hierarchy: id + parent columns
   const hasId = columns.some((c) => /^(id|node_id)$/i.test(c.name));
@@ -167,6 +190,15 @@ export function detectShape(columns: ColumnMeta[]): DataShape {
   const hasStart = columns.some((c) => /^(start|begin|start_date)$/i.test(c.name));
   const hasEnd = columns.some((c) => /^(end|finish|end_date)$/i.test(c.name));
   if (hasStart && hasEnd) return 'intervals';
+
+  // Event logs: user/entity + event/action + timestamp/date.
+  if (
+    dtCols.length >= 1
+    && hasNamedColumn(columns, /^(user|user_id|actor|entity|visitor|session|account|customer)$/i)
+    && hasNamedColumn(columns, /^(event|event_name|action)$/i)
+  ) {
+    return 'event_log';
+  }
 
   // Time series variants (numCols >= 1 already guaranteed by the outer guard)
   if (dtCols.length >= 1 && numCols.length >= 1) {
