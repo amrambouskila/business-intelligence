@@ -105,9 +105,9 @@ export function ChartArea() {
   }
 
   return (
-    <div className="flex-1 relative" style={{ background: 'var(--bg-primary)' }}>
+    <div className="flex-1 min-h-0 relative" style={{ background: 'var(--bg-primary)' }}>
       <div
-        className="flex items-center gap-2 px-3 py-1.5 border-b text-xs"
+        className="flex items-center gap-2 px-3 py-1.5 border-b text-xs overflow-x-auto whitespace-nowrap"
         style={{ borderColor: 'var(--border)', background: 'var(--bg-secondary)' }}
       >
         <span className="font-medium">{def.name}</span>
@@ -178,7 +178,7 @@ export function ChartArea() {
         data-testid="chart-render"
         data-chart-active={config.chartType}
         data-chart-unfilled={unfilled.length > 0 ? 'true' : 'false'}
-        className="absolute inset-0 top-9"
+        className="absolute inset-0 top-9 min-h-0"
       >
         {unfilled.length > 0 ? (
           <div className="w-full h-full flex items-center justify-center text-sm" style={{ color: 'var(--text-muted)' }}>

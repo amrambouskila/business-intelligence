@@ -30,7 +30,7 @@ export function App() {
         <Toolbar />
         <CommandPalette />
         {familiesReady ? (
-          <div className="flex flex-1 overflow-hidden">
+          <div className="flex flex-1 min-h-0 overflow-hidden flex-col md:flex-row">
             <Sidebar />
             <ErrorBoundary fallbackMessage="Chart renderer crashed">
               <ChartArea />

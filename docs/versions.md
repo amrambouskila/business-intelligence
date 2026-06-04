@@ -2,6 +2,14 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 — Responsive workspace polish
+
+No chart-count change: **193/193** registered charts.
+
+- The main workspace now stacks sidebar-over-chart on narrow screens while preserving the desktop sidebar/chart row layout.
+- The mobile sidebar has a bounded scrollable height, and the chart header controls can scroll horizontally instead of pushing the page wider than the viewport.
+- Verification: focused Sidebar/ChartArea tests green (**28 tests**); `npx tsc --noEmit`, `npm run lint`, and `npm run build` green; Playwright metrics at 1280×800 and 390×844 showed no page overflow and a visible chart render area.
+
 ### 2026-06-04 — Upload format affordance polish
 
 No chart-count change: **193/193** registered charts.

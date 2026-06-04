@@ -28,7 +28,7 @@ export function Sidebar() {
 
   return (
     <aside
-      className="flex flex-col w-64 shrink-0 border-r h-full"
+      className="flex flex-col w-full h-72 shrink-0 border-b md:h-full md:w-64 md:border-b-0 md:border-r"
       style={{ borderColor: 'var(--border)', background: 'var(--bg-secondary)' }}
     >
       {/* Tab bar */}
