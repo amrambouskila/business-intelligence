@@ -14,7 +14,8 @@ set "PW_ARGS="
 if "%MODE%"=="update" set "PW_ARGS=--update-snapshots"
 
 echo ==^> Playwright visual gate (%MODE%) in %IMAGE%
-docker run --rm --ipc=host -v "%CD%:/work" -v /work/node_modules -w /work %IMAGE% bash -lc "npm ci && npm run build && npx playwright test %PW_ARGS%"
+if "%E2E_WORKERS%"=="" set "E2E_WORKERS=1"
+docker run --rm --ipc=host -v "%CD%:/work" -v /work/node_modules -w /work -e CI=true -e E2E_WORKERS=%E2E_WORKERS% %IMAGE% bash -lc "npm ci && npm run build && npx playwright test %PW_ARGS%"
 if errorlevel 1 (
   echo.
   echo E2E visual gate FAILED - see playwright-report\

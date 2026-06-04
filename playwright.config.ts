@@ -8,13 +8,14 @@ import { defineConfig, devices } from '@playwright/test';
  * deterministic across machines and CI (see run_e2e.sh / .github/workflows/ci.yml).
  */
 const PORT = Number(process.env.E2E_PORT ?? 4173);
+const WORKERS = Number(process.env.E2E_WORKERS ?? (process.env.CI ? 1 : 2));
 
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  workers: process.env.CI ? 2 : undefined,
+  workers: WORKERS,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   // Baselines are keyed only by chart name (no OS/browser suffix) because the
   // suite is always run in the pinned Linux Playwright image — one canonical set.
@@ -25,6 +26,7 @@ export default defineConfig({
     viewport: { width: 1280, height: 800 },
   },
   expect: {
+    timeout: 10_000,
     // ECharts animation is disabled at the renderer for e2e (window.__E2E__), so
     // renders are final-state and stable; `threshold` absorbs per-pixel antialiasing
     // while the tight maxDiffPixelRatio still catches a dropped series / wrong color.

@@ -2,6 +2,15 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 — Visual gate CI hardening
+
+No chart-count change: **193/193** registered charts.
+
+- Hardened the Playwright visual-regression harness by making worker count explicit and conservative: CI and Docker wrappers now default to `E2E_WORKERS=1`, with local override support.
+- Increased Playwright expectation timeout to 10s so slow first screenshots do not rely on retry behavior.
+- Regenerated the pinned Docker `flow_map` baseline after the stable CI-sized render root measured 1056px wide instead of the older 1024px capture.
+- Verification: focused e2e drift/backend-doc tests green (**3 tests**); targeted pinned-Docker `flow_map` and `loess_smoother_plot` checks green; full pinned-Docker Playwright check passed **193/193** charts with `E2E_WORKERS=1`; `npx tsc --noEmit` green.
+
 ### 2026-06-04 — Chart backend catalog annotation
 
 No chart-count change: **193/193** registered charts.

@@ -17,5 +17,7 @@ echo "==> Playwright visual gate ($MODE) in $IMAGE"
 # without clobbering the host's (possibly Windows/macOS) node_modules.
 docker run --rm --ipc=host \
   -v "$(pwd):/work" -v /work/node_modules -w /work \
+  -e CI=true \
+  -e E2E_WORKERS="${E2E_WORKERS:-1}" \
   "$IMAGE" \
   bash -lc "npm ci && npm run build && npx playwright test ${PW_ARGS}"
