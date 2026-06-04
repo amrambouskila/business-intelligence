@@ -2,6 +2,14 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 - Layer axis assignment controls
+
+No chart-count change: **193/193** registered charts.
+
+- The Layers tab now exposes each layer's `axis` field through compact `y1`/`y2` controls, making secondary-axis intent reachable from the UI instead of only existing in store/spec state.
+- Composed chart layer wrappers now include `data-layer-axis`, keeping rendered layer metadata aligned with layer-store state for diagnostics and export-adjacent paths.
+- Verification: focused Sidebar/ChartArea tests green (**35 tests**); full suite green (**1508 Vitest tests / 100% coverage**); `npx tsc --noEmit`, `npm run lint`, and `npm run build` green.
+
 ### 2026-06-04 - Chart-spec layer stack export
 
 No chart-count change: **193/193** registered charts.

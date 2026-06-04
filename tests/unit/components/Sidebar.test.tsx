@@ -374,6 +374,22 @@ describe('Sidebar', () => {
     expect(useChartStore.getState().layers[0].visible).toBe(true);
   });
 
+  it('Layers tab - assigns a layer to either y axis', async () => {
+    useChartStore.setState({
+      layers: [
+        { id: 'l1', chartType: 'histogram', columns: {}, axis: 'y1', options: {}, visible: true },
+      ],
+      activeLayerIndex: 0,
+    });
+    const user = userEvent.setup();
+    render(<Sidebar />);
+    await user.click(screen.getByRole('button', { name: 'Layers' }));
+    expect(screen.getByRole('button', { name: 'Assign histogram to y1 axis' })).toHaveAttribute('aria-pressed', 'true');
+    await user.click(screen.getByRole('button', { name: 'Assign histogram to y2 axis' }));
+    expect(useChartStore.getState().layers[0].axis).toBe('y2');
+    expect(screen.getByRole('button', { name: 'Assign histogram to y2 axis' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
   it('Style tab renders the options panel', async () => {
     const user = userEvent.setup();
     render(<Sidebar />);

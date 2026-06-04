@@ -214,6 +214,7 @@ export function ChartArea() {
               data-testid="chart-layer"
               data-layer-index={state.index}
               data-layer-active={state.index === activeIdx ? 'true' : 'false'}
+              data-layer-axis={state.layer.axis}
               className="absolute inset-0"
             >
               <ChartCanvas chartType={state.config.chartType} data={dataView} config={state.config} theme={theme} />

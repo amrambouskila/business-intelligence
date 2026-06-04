@@ -184,13 +184,15 @@ describe('ChartArea', () => {
     useChartStore.setState({
       layers: [
         { id: 'l1', chartType: stub.type, columns: {}, axis: 'y1', options: {}, visible: true },
-        { id: 'l2', chartType: rowCountStub.type, columns: {}, axis: 'y1', options: {}, visible: true },
+        { id: 'l2', chartType: rowCountStub.type, columns: {}, axis: 'y2', options: {}, visible: true },
       ],
       activeLayerIndex: 0,
     });
     render(<ChartArea />);
     expect(screen.getByTestId('chart-render')).toHaveAttribute('data-chart-layer-count', '2');
-    expect(screen.getAllByTestId('chart-layer')).toHaveLength(2);
+    const chartLayers = screen.getAllByTestId('chart-layer');
+    expect(chartLayers).toHaveLength(2);
+    expect(chartLayers.map((layer) => layer.getAttribute('data-layer-axis'))).toEqual(['y1', 'y2']);
     expect(screen.getByTestId('stub-chart')).toBeInTheDocument();
     expect(screen.getByTestId('row-count').textContent).toBe('3');
   });

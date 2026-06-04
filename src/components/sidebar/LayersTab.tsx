@@ -1,5 +1,8 @@
 import { Eye, EyeOff } from 'lucide-react';
 import { useChartStore } from '@/stores/chart-store';
+import type { LayerConfig } from '@/stores/chart-store';
+
+const AXES: LayerConfig['axis'][] = ['y1', 'y2'];
 
 export function LayersTab() {
   const layers = useChartStore((s) => s.layers);
@@ -21,7 +24,7 @@ export function LayersTab() {
       {layers.map((layer, i) => (
         <div
           key={layer.id}
-          className="flex items-center justify-between px-2 py-1.5 rounded text-xs"
+          className="flex items-center gap-1 px-2 py-1.5 rounded text-xs"
           style={{
             background: activeLayerIndex === i ? 'var(--accent)' : 'var(--bg-tertiary)',
             color: activeLayerIndex === i ? 'var(--bg-primary)' : 'var(--text-primary)',
@@ -41,6 +44,32 @@ export function LayersTab() {
           <button type="button" onClick={() => setActiveLayer(i)} className="min-w-0 flex-1 truncate text-left">
             {layer.chartType}
           </button>
+          <div
+            className="flex h-5 shrink-0 overflow-hidden rounded"
+            style={{ border: `1px solid ${activeLayerIndex === i ? 'var(--bg-primary)' : 'var(--border)'}` }}
+          >
+            {AXES.map((axis) => (
+              <button
+                key={axis}
+                type="button"
+                onClick={() => updateLayer(i, { axis })}
+                className="px-1.5 text-[10px] font-medium uppercase"
+                style={{
+                  background: layer.axis === axis
+                    ? activeLayerIndex === i ? 'var(--bg-primary)' : 'var(--accent)'
+                    : 'transparent',
+                  color: layer.axis === axis
+                    ? activeLayerIndex === i ? 'var(--accent)' : 'var(--bg-primary)'
+                    : activeLayerIndex === i ? 'var(--bg-primary)' : 'var(--text-secondary)',
+                }}
+                aria-label={`Assign ${layer.chartType} to ${axis} axis`}
+                title={`Assign ${layer.chartType} to ${axis} axis`}
+                aria-pressed={layer.axis === axis}
+              >
+                {axis}
+              </button>
+            ))}
+          </div>
           <button
             onClick={() => removeLayer(i)}
             className="text-[10px] px-1 rounded"
