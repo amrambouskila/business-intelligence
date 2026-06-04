@@ -1,13 +1,12 @@
-import type { EChartsOption } from 'echarts';
 import { chartRegistry } from '@/charts/registry';
-import { EChartsBaseRenderer } from '@/charts/renderers/echarts-renderer';
-import { buildTooltip } from '@/charts/echarts/buildTooltip';
+import { Canvas2DBaseRenderer } from '@/charts/renderers/canvas2d-renderer';
 import { resolveOptions } from '@/charts/resolve-options';
 import { reduceFiniteValues, type FiniteReduceOp } from '@/data/stats/reduceFiniteValues';
 import { categoricalColor } from '@/lib/categoricalColor';
 import type { ChartOptionSpec } from '@/charts/option-spec';
 import type { ChartConfig, ThemeTokens } from '@/charts/types';
 import type { DataView } from '@/types/data';
+import type { Canvas2DSize } from '@/charts/renderers/Canvas2DChart';
 
 const optionSpecs: ChartOptionSpec[] = [
   {
@@ -35,7 +34,7 @@ function aggregateOp(config: ChartConfig): FiniteReduceOp {
   return raw === 'max' || raw === 'min' || raw === 'sum' ? raw : 'mean';
 }
 
-class GaugeRenderer extends EChartsBaseRenderer {
+class GaugeRenderer extends Canvas2DBaseRenderer {
   protected isEmpty(data: DataView, config: ChartConfig): boolean {
     return finiteValues(data, config).length === 0;
   }
@@ -44,33 +43,52 @@ class GaugeRenderer extends EChartsBaseRenderer {
     return 'No numeric value to chart';
   }
 
-  buildOption(data: DataView, config: ChartConfig, theme: ThemeTokens): EChartsOption {
+  draw(
+    context: CanvasRenderingContext2D,
+    size: Canvas2DSize,
+    data: DataView,
+    config: ChartConfig,
+    theme: ThemeTokens,
+  ): void {
     const values = finiteValues(data, config);
-    // Round for display so the detail shows e.g. 59.25, not a 15-digit float artifact;
-    // at 2-decimal precision the needle position is visually identical. (ECharts gauge
-    // detail.formatter is unreliable here, so we round the value itself.)
     const value = Math.round(reduceFiniteValues(values, aggregateOp(config)) * 100) / 100;
-
     const maxFinite = reduceFiniteValues(values, 'max');
     const max = maxFinite > 0 ? maxFinite : 100;
+    const ratio = Math.max(0, Math.min(1, value / max));
     const accent = categoricalColor(theme.colorScale, 0, theme.foreground);
 
-    return {
-      tooltip: buildTooltip('item'),
-      series: [{
-        type: 'gauge',
-        min: 0,
-        max,
-        progress: { show: true, itemStyle: { color: accent } },
-        axisLine: { lineStyle: { color: [[1, accent]] } },
-        pointer: { itemStyle: { color: accent } },
-        detail: {
-          color: theme.foreground,
-          formatter: (displayValue: number) => displayValue.toFixed(2),
-        },
-        data: [{ value }],
-      }],
-    };
+    const centerX = size.width / 2;
+    const centerY = size.height * 0.64;
+    const radius = Math.max(16, Math.min(size.width * 0.32, size.height * 0.48));
+    const lineWidth = Math.max(10, radius * 0.13);
+    const startAngle = Math.PI;
+    const endAngle = 0;
+    const valueAngle = startAngle + (endAngle - startAngle) * ratio;
+
+    context.save();
+    context.lineCap = 'round';
+    context.lineWidth = lineWidth;
+
+    context.beginPath();
+    context.strokeStyle = theme.gridColor;
+    context.arc(centerX, centerY, radius, startAngle, endAngle, false);
+    context.stroke();
+
+    context.beginPath();
+    context.strokeStyle = accent;
+    context.arc(centerX, centerY, radius, startAngle, valueAngle, false);
+    context.stroke();
+
+    context.fillStyle = theme.foreground;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.font = `${theme.fontSize.large * 2}px ${theme.fontFamily}`;
+    context.fillText(value.toFixed(2), centerX, centerY - radius * 0.1);
+
+    context.font = `${theme.fontSize.small}px ${theme.fontFamily}`;
+    context.fillStyle = theme.axisColor;
+    context.fillText(`0 - ${max.toFixed(2)}`, centerX, centerY + radius * 0.34);
+    context.restore();
   }
 }
 
@@ -79,7 +97,7 @@ chartRegistry.register({
   family: 'specialized',
   name: 'Gauge',
   description: 'Single KPI value shown on a radial gauge',
-  renderer: 'echarts',
+  renderer: 'canvas2d',
   compatibleShapes: ['single_numeric', 'generic'],
   requiredColumns: [{ role: 'value', acceptedTypes: ['numeric', 'integer', 'float'], label: 'Value' }],
   options: optionSpecs,

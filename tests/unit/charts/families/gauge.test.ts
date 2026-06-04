@@ -1,10 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import '@/charts/families/specialized/gauge';
 import { chartRegistry } from '@/charts/registry';
 import type { ChartConfig, ThemeTokens } from '@/charts/types';
 import type { DataView } from '@/types/data';
-import { EChartsBaseRenderer } from '@/charts/renderers/echarts-renderer';
-import type { EChartsOption } from 'echarts';
+import { Canvas2DBaseRenderer } from '@/charts/renderers/canvas2d-renderer';
 
 function theme(): ThemeTokens {
   return {
@@ -28,27 +27,74 @@ function dataView(value: unknown[]): DataView {
   };
 }
 
-function renderer(): EChartsBaseRenderer {
-  return chartRegistry.get('gauge')!.createRenderer() as EChartsBaseRenderer;
+function renderer(): Canvas2DBaseRenderer {
+  return chartRegistry.get('gauge')!.createRenderer() as Canvas2DBaseRenderer;
 }
 
 function config(options: Record<string, unknown> = {}): ChartConfig {
   return { chartType: 'gauge', columns: { value: 'value' }, options };
 }
 
-interface GaugeSeries {
-  type: string;
-  min: number;
-  max: number;
-  progress: { itemStyle: { color: string } };
-  axisLine: { lineStyle: { color: Array<[number, string]> } };
-  pointer: { itemStyle: { color: string } };
-  detail: { color: string; formatter: (displayValue: number) => string };
-  data: Array<{ value: number }>;
+interface StrokeCall {
+  strokeStyle: string;
+  lineWidth: number;
 }
 
-function gaugeSeries(opt: EChartsOption): GaugeSeries {
-  return (opt.series as GaugeSeries[])[0];
+interface TextCall {
+  text: string;
+  x: number;
+  y: number;
+  fillStyle: string;
+  font: string;
+}
+
+interface ArcCall {
+  startAngle: number;
+  endAngle: number;
+}
+
+function mockContext() {
+  const strokeCalls: StrokeCall[] = [];
+  const textCalls: TextCall[] = [];
+  const arcCalls: ArcCall[] = [];
+  const context = {
+    strokeStyle: '',
+    fillStyle: '',
+    lineWidth: 0,
+    lineCap: 'butt',
+    textAlign: 'start',
+    textBaseline: 'alphabetic',
+    font: '',
+    save: vi.fn(),
+    restore: vi.fn(),
+    beginPath: vi.fn(),
+    arc: vi.fn((_x: number, _y: number, _radius: number, startAngle: number, endAngle: number) => {
+      arcCalls.push({ startAngle, endAngle });
+    }),
+    stroke: vi.fn(() => {
+      strokeCalls.push({
+        strokeStyle: String(context.strokeStyle),
+        lineWidth: Number(context.lineWidth),
+      });
+    }),
+    fillText: vi.fn((text: string, x: number, y: number) => {
+      textCalls.push({
+        text,
+        x,
+        y,
+        fillStyle: String(context.fillStyle),
+        font: String(context.font),
+      });
+    }),
+  } as unknown as CanvasRenderingContext2D;
+
+  return { context, strokeCalls, textCalls, arcCalls };
+}
+
+function drawGauge(values: unknown[], options: Record<string, unknown> = {}, tokens = theme()) {
+  const ctx = mockContext();
+  renderer().draw(ctx.context, { width: 320, height: 200, pixelRatio: 1 }, dataView(values), config(options), tokens);
+  return ctx;
 }
 
 describe('gauge registration', () => {
@@ -58,7 +104,7 @@ describe('gauge registration', () => {
     expect(def!.type).toBe('gauge');
     expect(def!.family).toBe('specialized');
     expect(def!.name).toBe('Gauge');
-    expect(def!.renderer).toBe('echarts');
+    expect(def!.renderer).toBe('canvas2d');
   });
 
   it('requires a numeric value column over single_numeric/generic shapes', () => {
@@ -83,64 +129,59 @@ describe('gauge registration', () => {
   });
 });
 
-describe('gauge buildOption', () => {
-  it('emits a gauge series with the mean by default and max = largest finite value', () => {
-    const opt = renderer().buildOption(dataView([10, 20, 30]), config(), theme()) as EChartsOption;
-    const series = gaugeSeries(opt);
-    expect(series.type).toBe('gauge');
-    expect(series.min).toBe(0);
-    expect(series.max).toBe(30);
-    expect(series.data[0].value).toBe(20);
+describe('gauge draw', () => {
+  it('draws a themed gauge with the mean by default and max = largest finite value', () => {
+    const { context, strokeCalls, textCalls } = drawGauge([10, 20, 30]);
+    expect(context.save).toHaveBeenCalledTimes(1);
+    expect(context.restore).toHaveBeenCalledTimes(1);
+    expect(strokeCalls[0]).toMatchObject({ strokeStyle: '#333' });
+    expect(strokeCalls[1]).toMatchObject({ strokeStyle: '#f00' });
+    expect(strokeCalls[0].lineWidth).toBeCloseTo(12.48);
+    expect(strokeCalls[1].lineWidth).toBeCloseTo(12.48);
+    expect(textCalls.map((call) => call.text)).toEqual(['20.00', '0 - 30.00']);
+    expect(textCalls[0]).toMatchObject({ fillStyle: '#fff', font: '28px Arial' });
+    expect(textCalls[1]).toMatchObject({ fillStyle: '#666', font: '10px Arial' });
   });
 
   it('aggregates with max when selected', () => {
-    const opt = renderer().buildOption(dataView([10, 20, 30]), config({ aggregate: 'max' }), theme()) as EChartsOption;
-    expect(gaugeSeries(opt).data[0].value).toBe(30);
+    expect(drawGauge([10, 20, 30], { aggregate: 'max' }).textCalls[0].text).toBe('30.00');
   });
 
   it('aggregates with min when selected', () => {
-    const opt = renderer().buildOption(dataView([10, 20, 30]), config({ aggregate: 'min' }), theme()) as EChartsOption;
-    expect(gaugeSeries(opt).data[0].value).toBe(10);
+    expect(drawGauge([10, 20, 30], { aggregate: 'min' }).textCalls[0].text).toBe('10.00');
   });
 
   it('aggregates with sum when selected', () => {
-    const opt = renderer().buildOption(dataView([10, 20, 30]), config({ aggregate: 'sum' }), theme()) as EChartsOption;
-    expect(gaugeSeries(opt).data[0].value).toBe(60);
+    expect(drawGauge([10, 20, 30], { aggregate: 'sum' }).textCalls[0].text).toBe('60.00');
+  });
+
+  it('falls back to mean for invalid aggregate options', () => {
+    expect(drawGauge([10, 20, 30], { aggregate: 'median' }).textCalls[0].text).toBe('20.00');
   });
 
   it('falls back to a max of 100 when every finite value is <= 0', () => {
-    const opt = renderer().buildOption(dataView([-5, -10, 0]), config({ aggregate: 'min' }), theme()) as EChartsOption;
-    const series = gaugeSeries(opt);
-    expect(series.max).toBe(100);
-    expect(series.data[0].value).toBe(-10);
-  });
-
-  it('themes the accent from the palette and the detail from the foreground', () => {
-    const opt = renderer().buildOption(dataView([10, 20, 30]), config(), theme()) as EChartsOption;
-    const series = gaugeSeries(opt);
-    expect(series.progress.itemStyle.color).toBe('#f00');
-    expect(series.pointer.itemStyle.color).toBe('#f00');
-    expect(series.axisLine.lineStyle.color).toEqual([[1, '#f00']]);
-    expect(series.detail.color).toBe('#fff');
-    expect(series.detail.formatter(59.251299999999965)).toBe('59.25');
+    const { textCalls } = drawGauge([-5, -10, 0], { aggregate: 'min' });
+    expect(textCalls.map((call) => call.text)).toEqual(['-10.00', '0 - 100.00']);
   });
 
   it('uses the foreground accent when the palette is empty', () => {
-    const opt = renderer().buildOption(dataView([10, 20, 30]), config(), emptyPaletteTheme()) as EChartsOption;
-    expect(gaugeSeries(opt).progress.itemStyle.color).toBe('#fff');
+    expect(drawGauge([10, 20, 30], {}, emptyPaletteTheme()).strokeCalls[1].strokeStyle).toBe('#fff');
   });
 
   it('drops non-finite values before aggregating', () => {
-    const opt = renderer().buildOption(dataView([10, NaN, 20, Infinity, 30, -Infinity]), config({ aggregate: 'sum' }), theme()) as EChartsOption;
-    const series = gaugeSeries(opt);
-    expect(series.data[0].value).toBe(60);
-    expect(series.max).toBe(30);
+    const { textCalls } = drawGauge([10, NaN, 20, Infinity, 30, -Infinity], { aggregate: 'sum' });
+    expect(textCalls.map((call) => call.text)).toEqual(['60.00', '0 - 30.00']);
   });
 
-  it('rounds the displayed value to 2 decimals (no 15-digit float artifact)', () => {
-    // mean of [1,2,2] = 1.6666… → rounded so the gauge detail reads cleanly.
-    const opt = renderer().buildOption(dataView([1, 2, 2]), config(), theme()) as EChartsOption;
-    expect(gaugeSeries(opt).data[0].value).toBe(1.67);
+  it('rounds the displayed value to 2 decimals', () => {
+    expect(drawGauge([1, 2, 2]).textCalls[0].text).toBe('1.67');
+  });
+
+  it('clamps progress above the gauge max and below zero', () => {
+    const aboveMax = drawGauge([10, 20, 30], { aggregate: 'sum' });
+    const belowZero = drawGauge([-5, -10, 0], { aggregate: 'min' });
+    expect(aboveMax.arcCalls[1].endAngle).toBe(0);
+    expect(belowZero.arcCalls[1].endAngle).toBe(Math.PI);
   });
 });
 
@@ -157,9 +198,10 @@ describe('gauge empty guard', () => {
     expect((el.props as { message?: string }).message).toBe('No numeric value to chart');
   });
 
-  it('renders a chart element when finite values are present', () => {
+  it('renders a canvas element when finite values are present', () => {
     const el = renderer().render(dataView([10, 20, 30]), config(), theme());
     expect((el.props as { message?: string }).message).toBeUndefined();
-    expect((el.props as { option?: unknown }).option).toBeDefined();
+    expect((el.props as { 'data-testid'?: string })['data-testid']).toBeUndefined();
+    expect((el.props as { draw?: unknown }).draw).toBeDefined();
   });
 });

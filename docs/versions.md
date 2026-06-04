@@ -2,6 +2,15 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 — First Canvas2D catalog chart: gauge
+
+No chart-count change: **193/193** registered charts.
+
+- Migrated `gauge` from ECharts to `Canvas2DBaseRenderer`, making Canvas2D a proven catalog backend rather than only renderer infrastructure.
+- The Canvas2D gauge preserves aggregate options (`mean`/`max`/`min`/`sum`), finite-value filtering, two-decimal display rounding, empty-state behavior, and theme-token drawing.
+- Regenerated the deterministic Gate-3 `gauge` screenshot baseline and verified it in targeted Docker update/check mode.
+- Verification: focused gauge/Canvas2D/registry/e2e-coverage tests green (**29 tests**); full suite green (**1478 Vitest tests / 100% coverage**); `npx tsc --noEmit`, `npm run typecheck`, `npm run lint`, `npm run build`, and `npm audit` green; pinned Docker Playwright check passed **193/193** charts with `--workers=4`.
+
 ### 2026-06-04 — Regl renderer base backend
 
 No chart-count change: **193/193** registered charts.
