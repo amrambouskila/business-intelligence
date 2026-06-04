@@ -2,6 +2,14 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 — Windows launcher verification
+
+No chart-count change: **193/193** registered charts.
+
+- Verified `bi_service.bat` on Windows with `BI_PORT=5182`.
+- The launcher built the Docker image, started the nginx container, printed the expected service URL/menu, accepted the `k` stop option from stdin, and stopped/removed the container/network while keeping the image.
+- Verification command: `$env:BI_PORT='5182'; 'k' | cmd /c bi_service.bat` exited 0.
+
 ### 2026-06-04 — Filter row-count feedback
 
 No chart-count change: **193/193** registered charts.
