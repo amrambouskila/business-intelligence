@@ -2,6 +2,15 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 — Vendor bundle split
+
+No chart-count change: **193/193** registered charts.
+
+- Added Vite/Rolldown code-splitting groups for stable vendor buckets: React, ECharts/zrender, deck.gl/luma/loaders, D3, Radix/lucide, file-format parsers, and fallback vendor modules.
+- Production build now separates the app entry from heavy vendor libraries; the app entry is ~163 kB minified instead of the prior ~1.68 MB combined app/vendor chunk.
+- The build warning remains for large ECharts/deck.gl vendor chunks; docs now describe that residual risk accurately instead of treating all chunking as future work.
+- Verification: `npx tsc --noEmit`, `npm run lint`, and `npm run build` green.
+
 ### 2026-06-04 — Parquet import
 
 No chart-count change: **193/193** registered charts.
