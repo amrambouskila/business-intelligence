@@ -2,6 +2,15 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 — First regl catalog chart: image_raster_plot
+
+No chart-count change: **193/193** registered charts.
+
+- Migrated `image_raster_plot` from ECharts heatmap output to `ReglBaseRenderer`, making regl a proven catalog backend rather than only renderer infrastructure.
+- The regl raster plot preserves the existing row/column/intensity contract, finite-value filtering, theme-token sequential coloring, flat-range handling, invalid-color fallback, and empty-state behavior.
+- Regenerated the deterministic Gate-3 `image-raster-plot` screenshot baseline and verified it in targeted Docker update/check mode.
+- Verification: focused image-raster/regl/registry/e2e-coverage tests green (**19 tests**); full suite green (**1480 Vitest tests / 100% coverage**); `npx tsc --noEmit`, `npm run typecheck`, `npm run lint`, `npm run build`, and `npm audit` green; pinned Docker Playwright check passed **193/193** charts with `--workers=4`.
+
 ### 2026-06-04 — First Canvas2D catalog chart: gauge
 
 No chart-count change: **193/193** registered charts.
@@ -17,7 +26,7 @@ No chart-count change: **193/193** registered charts.
 
 - Added `ReglBaseRenderer` and `ReglChart`, making `regl` a live renderer backend instead of a reserved type string.
 - `ReglChart` owns a dedicated canvas, creates the WebGL context/regl instance, applies device-pixel-ratio backing-store sizing, redraws on resize, skips drawing when WebGL is unavailable, and destroys both chart-specific resources and the regl instance on unmount.
-- Updated the registry contract harness so future `regl` charts must extend `ReglBaseRenderer`; first regl catalog chart and shader-file conventions remain future M5 follow-on work.
+- Updated the registry contract harness so future `regl` charts must extend `ReglBaseRenderer`; the first regl catalog chart shipped later via `image_raster_plot`, while shader-file conventions remain future M5 follow-on work.
 - Verification: focused regl renderer/registry-contract tests green (**10 tests**); full suite green (**1477 Vitest tests / 100% coverage**); `npx tsc --noEmit`, `npm run typecheck`, `npm run lint`, `npm run build`, and `npm audit` green.
 
 ### 2026-06-04 — Shape detector semantic-shape closeout
