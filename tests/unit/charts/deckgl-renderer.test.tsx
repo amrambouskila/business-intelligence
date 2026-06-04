@@ -2,12 +2,15 @@ import { describe, it, expect, vi } from 'vitest';
 import { render } from '@testing-library/react';
 import { forwardRef, useImperativeHandle } from 'react';
 import type { DeckGLRef } from '@deck.gl/react';
+import { OrbitView, OrthographicView } from '@deck.gl/core';
 import type { Layer } from '@deck.gl/core';
 
 const finalize = vi.fn();
+const deckProps = vi.hoisted(() => [] as Record<string, unknown>[]);
 
 vi.mock('@deck.gl/react', () => {
-  const MockDeckGL = forwardRef<DeckGLRef, Record<string, unknown>>((_, ref) => {
+  const MockDeckGL = forwardRef<DeckGLRef, Record<string, unknown>>((props, ref) => {
+    deckProps.push(props);
     useImperativeHandle(
       ref,
       () => ({
@@ -15,6 +18,8 @@ vi.mock('@deck.gl/react', () => {
         pickObject: vi.fn(),
         pickObjects: vi.fn(),
         pickMultipleObjects: vi.fn(),
+        pickObjectAsync: vi.fn(),
+        pickObjectsAsync: vi.fn(),
       }),
       [],
     );
@@ -31,6 +36,18 @@ import type { DataView } from '@/types/data';
 class TestRenderer extends DeckGLBaseRenderer {
   buildLayers(): Layer[] {
     return [];
+  }
+}
+
+class OrbitRenderer extends TestRenderer {
+  protected getViewKind() {
+    return 'orbit' as const;
+  }
+}
+
+class OrthographicRenderer extends TestRenderer {
+  protected getViewKind() {
+    return 'orthographic' as const;
   }
 }
 
@@ -65,5 +82,13 @@ describe('DeckGLBaseRenderer cleanup', () => {
     expect(finalize).not.toHaveBeenCalled();
     unmount();
     expect(finalize).toHaveBeenCalledTimes(1);
+  });
+
+  it('passes orbit and orthographic view instances to DeckGL', () => {
+    deckProps.length = 0;
+    render(<>{new OrbitRenderer().render(makeDataView(), makeConfig(), makeTheme())}</>);
+    render(<>{new OrthographicRenderer().render(makeDataView(), makeConfig(), makeTheme())}</>);
+    expect(deckProps.at(-2)!.views).toBeInstanceOf(OrbitView);
+    expect(deckProps.at(-1)!.views).toBeInstanceOf(OrthographicView);
   });
 });

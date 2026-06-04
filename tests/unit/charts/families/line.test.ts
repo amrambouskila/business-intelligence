@@ -41,6 +41,7 @@ describe('line buildOption', () => {
     const opt = (def().createRenderer() as EChartsBaseRenderer).buildOption(dv, cfg, theme()) as EChartsOption;
     expect((opt.xAxis as Record<string, unknown>).type).toBe('category');
     expect((opt.xAxis as { data: string[] }).data).toEqual(['a', 'b', 'c']);
+    expect((opt.yAxis as Record<string, unknown>).axisLine).toBeUndefined();
   });
 
   it('uses time axis and paired [x, y] data when x is datetime', () => {
@@ -69,5 +70,27 @@ describe('line buildOption', () => {
     const opt = (def().createRenderer() as EChartsBaseRenderer).buildOption(dv, cfg, theme()) as EChartsOption;
     const series = opt.series as Array<{ data: unknown[] }>;
     expect(series[0].data).toEqual([]);
+  });
+
+  const categoryView = (): DataView => ({
+    sourceId: 'x', rows: [], filters: [],
+    columnArrays: { cat: ['a', 'b', 'c'], y: [1, 2, 3] },
+    columns: [
+      { name: 'cat', type: 'category', nullable: false, uniqueCount: 3, nullCount: 0 },
+      { name: 'y', type: 'integer', nullable: false, uniqueCount: 3, nullCount: 0 },
+    ],
+    rowCount: 3,
+  });
+
+  it('defaults the smooth option to false', () => {
+    const cfg: ChartConfig = { chartType: 'line', columns: { x: 'cat', y: 'y' }, options: {} };
+    const opt = (def().createRenderer() as EChartsBaseRenderer).buildOption(categoryView(), cfg, theme()) as EChartsOption;
+    expect((opt.series as Array<{ smooth: boolean }>)[0].smooth).toBe(false);
+  });
+
+  it('reflects the smooth option when enabled', () => {
+    const cfg: ChartConfig = { chartType: 'line', columns: { x: 'cat', y: 'y' }, options: { smooth: true } };
+    const opt = (def().createRenderer() as EChartsBaseRenderer).buildOption(categoryView(), cfg, theme()) as EChartsOption;
+    expect((opt.series as Array<{ smooth: boolean }>)[0].smooth).toBe(true);
   });
 });

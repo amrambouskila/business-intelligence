@@ -1,1 +1,15 @@
-
+import './bar';
+import './horizontal_bar';
+import './grouped_bar';
+import './stacked_bar';
+import './lollipop';
+import './pareto';
+import './percent_stacked_bar';
+import './cleveland_dot';
+import './dumbbell';
+import './slope';
+import './waffle';
+import './mosaic_plot';
+import './marimekko';
+import './pictogram';
+import './spine_plot';

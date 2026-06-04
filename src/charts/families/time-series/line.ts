@@ -1,8 +1,18 @@
 import type { EChartsOption } from 'echarts';
 import { chartRegistry } from '@/charts/registry';
 import { EChartsBaseRenderer } from '@/charts/renderers/echarts-renderer';
+import { buildCartesianAxes } from '@/charts/echarts/buildCartesianAxes';
+import { buildGrid } from '@/charts/echarts/buildGrid';
+import { buildTooltip } from '@/charts/echarts/buildTooltip';
+import { resolveOptions } from '@/charts/resolve-options';
+import { categoricalColor } from '@/lib/categoricalColor';
+import type { ChartOptionSpec } from '@/charts/option-spec';
 import type { ChartConfig, ThemeTokens } from '@/charts/types';
 import type { DataView } from '@/types/data';
+
+const optionSpecs: ChartOptionSpec[] = [
+  { key: 'smooth', label: 'Smooth', control: 'toggle', default: false },
+];
 
 class LineRenderer extends EChartsBaseRenderer {
   buildOption(data: DataView, config: ChartConfig, theme: ThemeTokens): EChartsOption {
@@ -10,50 +20,35 @@ class LineRenderer extends EChartsBaseRenderer {
     const yCol = config.columns['y'];
     const xData = data.columnArrays[xCol] ?? [];
     const yData = (data.columnArrays[yCol] ?? []) as (number | string)[];
+    const smooth = resolveOptions(optionSpecs, config.options).smooth as boolean;
 
     // Detect if x column is datetime
     const xMeta = data.columns.find((c) => c.name === xCol);
     const isTime = xMeta?.type === 'datetime' || xMeta?.type === 'date';
 
     // For time axis, pair [x, y] as data; for category, use separate axis data
-    const seriesData = isTime
-      ? xData.map((x, i) => [x, yData[i]])
-      : yData;
+    const seriesData = isTime ? xData.map((x, i) => [x, yData[i]]) : yData;
+    const color = categoricalColor(theme.colorScale, 0, theme.foreground);
+    const axes = buildCartesianAxes(
+      theme,
+      isTime ? { type: 'time' } : { type: 'category', data: xData.map(String), splitLine: false },
+      { type: 'value', axisLine: false },
+    );
 
     return {
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: { type: 'cross' },
-      },
-      xAxis: isTime
-        ? {
-            type: 'time',
-            axisLabel: { color: theme.axisColor, fontSize: theme.fontSize.small },
-            axisLine: { lineStyle: { color: theme.gridColor } },
-          }
-        : {
-            type: 'category',
-            data: xData.map(String),
-            axisLabel: { color: theme.axisColor, fontSize: theme.fontSize.small },
-            axisLine: { lineStyle: { color: theme.gridColor } },
-          },
-      yAxis: {
-        type: 'value',
-        axisLabel: { color: theme.axisColor, fontSize: theme.fontSize.small },
-        splitLine: { lineStyle: { color: theme.gridColor } },
-      },
+      tooltip: buildTooltip('axis', { axisPointer: { type: 'cross' } }),
+      xAxis: axes.xAxis,
+      yAxis: axes.yAxis,
       series: [{
         type: 'line',
         data: seriesData as (number | string | (number | string | Date)[])[],
-        smooth: false,
-        lineStyle: { color: theme.colorScale[0], width: 2 },
-        itemStyle: { color: theme.colorScale[0] },
+        smooth,
+        lineStyle: { color, width: 2 },
+        itemStyle: { color },
         symbol: 'none',
       }],
-      grid: { left: 60, right: 20, top: 20, bottom: 40 },
-      dataZoom: [
-        { type: 'inside', xAxisIndex: 0 },
-      ],
+      grid: buildGrid(),
+      dataZoom: [{ type: 'inside', xAxisIndex: 0 }],
     };
   }
 }
@@ -69,5 +64,6 @@ chartRegistry.register({
     { role: 'x', acceptedTypes: ['datetime', 'date', 'numeric', 'integer', 'category'], label: 'X Axis' },
     { role: 'y', acceptedTypes: ['numeric', 'integer', 'float'], label: 'Y Axis' },
   ],
+  options: optionSpecs,
   createRenderer: () => new LineRenderer(),
 });

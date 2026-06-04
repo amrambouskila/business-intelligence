@@ -13,6 +13,7 @@ describe('ThemeProvider', () => {
   beforeEach(() => {
     useUIStore.setState({ theme: 'dark', sidebarOpen: true, sidebarTab: 'data', modal: 'none' });
     document.documentElement.removeAttribute('data-theme');
+    window.localStorage.clear();
   });
 
   it('supplies dark tokens and sets data-theme="dark" on <html>', () => {
@@ -26,5 +27,19 @@ describe('ThemeProvider', () => {
     render(<ThemeProvider><Inner /></ThemeProvider>);
     expect(screen.getByTestId('mode').textContent).toBe('light');
     expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+  });
+
+  it('hydrates the stored theme and persists later changes', () => {
+    window.localStorage.setItem('bi-theme', 'light');
+    render(<ThemeProvider><Inner /></ThemeProvider>);
+    expect(useUIStore.getState().theme).toBe('light');
+    expect(window.localStorage.getItem('bi-theme')).toBe('light');
+  });
+
+  it('ignores an invalid stored theme', () => {
+    window.localStorage.setItem('bi-theme', 'blue');
+    render(<ThemeProvider><Inner /></ThemeProvider>);
+    expect(useUIStore.getState().theme).toBe('dark');
+    expect(window.localStorage.getItem('bi-theme')).toBe('dark');
   });
 });

@@ -1,1 +1,10 @@
-
+import './pie';
+import './donut';
+import './nested_donut';
+import './composition_stacked_bar';
+import './composition_stacked_area';
+import './composition_percent_stacked_bar';
+import './composition_percent_stacked_area';
+import './composition_treemap';
+import './composition_sunburst';
+import './composition_waffle';

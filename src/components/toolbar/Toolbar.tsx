@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
-import { Upload, Sun, Moon, BarChart3, Loader2, AlertCircle, Database } from 'lucide-react';
+import { Upload, Sun, Moon, BarChart3, Loader2, AlertCircle, Database, Search } from 'lucide-react';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { useUIStore } from '@/stores/ui-store';
 import { useDatasetStore } from '@/stores/dataset-store';
 import { loadFile } from '@/data/loader';
@@ -8,16 +9,17 @@ import { getSampleOptions, loadSampleData, type SampleKey } from '@/data/sample-
 export function Toolbar() {
   const theme = useUIStore((s) => s.theme);
   const toggleTheme = useUIStore((s) => s.toggleTheme);
+  const openModal = useUIStore((s) => s.openModal);
   const addDataset = useDatasetStore((s) => s.addDataset);
   const isLoading = useDatasetStore((s) => s.isLoading);
   const setLoading = useDatasetStore((s) => s.setLoading);
   const fileRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
-  const [showSamples, setShowSamples] = useState(false);
+  const [samplesOpen, setSamplesOpen] = useState(false);
 
   function handleSample(key: SampleKey) {
     setError(null);
-    setShowSamples(false);
+    setSamplesOpen(false);
     try {
       const ds = loadSampleData(key);
       addDataset(ds);
@@ -39,6 +41,7 @@ export function Toolbar() {
       setError(msg);
       setLoading(false);
     }
+    /* v8 ignore next -- React attaches this mounted input ref; the guard is only defensive for unusual ref timing. */
     if (fileRef.current) fileRef.current.value = '';
   }
 
@@ -74,7 +77,7 @@ export function Toolbar() {
           className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-colors"
           style={{
             background: isLoading ? 'var(--text-muted)' : 'var(--accent)',
-            color: '#fff',
+            color: 'var(--bg-primary)',
             cursor: isLoading ? 'not-allowed' : 'pointer',
           }}
         >
@@ -82,33 +85,48 @@ export function Toolbar() {
           {isLoading ? 'Loading...' : 'Upload'}
         </button>
 
-        <div className="relative">
-          <button
-            onClick={() => setShowSamples(!showSamples)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-colors"
-            style={{ background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}
-          >
-            <Database size={14} />
-            Samples
-          </button>
-          {showSamples && (
-            <div
-              className="absolute right-0 top-full mt-1 py-1 rounded shadow-lg z-50 min-w-48"
+        <DropdownMenu.Root open={samplesOpen} onOpenChange={setSamplesOpen}>
+          <DropdownMenu.Trigger asChild>
+            <button
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-colors"
+              style={{ background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}
+            >
+              <Database size={14} />
+              Samples
+            </button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Portal>
+            <DropdownMenu.Content
+              align="end"
+              sideOffset={4}
+              className="py-1 rounded shadow-lg z-50 min-w-48"
               style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}
             >
               {getSampleOptions().map((opt) => (
-                <button
+                <DropdownMenu.Item
                   key={opt.value}
-                  onClick={() => handleSample(opt.value)}
-                  className="block w-full text-left px-3 py-1.5 text-xs transition-colors hover:opacity-80"
+                  data-sample={opt.value}
+                  onSelect={() => handleSample(opt.value)}
+                  className="block w-full text-left px-3 py-1.5 text-xs transition-colors hover:opacity-80 outline-none cursor-pointer"
                   style={{ color: 'var(--text-primary)' }}
                 >
                   {opt.label}
-                </button>
+                </DropdownMenu.Item>
               ))}
-            </div>
-          )}
-        </div>
+            </DropdownMenu.Content>
+          </DropdownMenu.Portal>
+        </DropdownMenu.Root>
+
+        <button
+          type="button"
+          onClick={() => openModal('command')}
+          className="flex items-center gap-1.5 px-2 py-1.5 rounded text-xs font-medium transition-colors"
+          style={{ background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}
+          title="Open command palette"
+        >
+          <Search size={14} />
+          Commands
+        </button>
 
         <button
           onClick={toggleTheme}

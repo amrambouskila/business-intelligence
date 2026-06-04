@@ -2,6 +2,634 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 — Phase 2 catalog completion: 193/193
+
+**Chart count 192 → 193.** Resolved the final catalog/count overlap: `qq_plot` now registers from the Distribution family, and Statistical now has its catalog-specific `confusion_matrix_chart`. Distribution is **21/21**, Statistical is **19/19**, and every family is at target.
+
+- `confusion_matrix_chart` renders actual-vs-predicted classification counts as a themed ECharts heatmap with labels and sequential visual mapping.
+- Updated the statistical barrel, distribution barrel, Gate-3 chart/sample map, QQ test expectations, and focused confusion-matrix-chart coverage.
+- Verification: focused QQ/confusion-matrix/registry/e2e-coverage/suggestion tests green (**49 tests**), full suite green (**1463 Vitest tests / 100% coverage**), `npm run typecheck`, `npx tsc --noEmit`, `npm run lint`, `npm run build`, and `npm audit` all green. Chart status is **193/193** with every family complete. The pinned Docker Playwright update pass wrote the `confusion-matrix-chart` baseline and passed **193/193** charts with `--workers=4`; the follow-up Docker check passed **193/193** charts with `--workers=4`.
+
+### 2026-06-04 — M5 3D slice 6: deck.gl OrbitView 3D family
+
+**Chart count 186 → 192.** Added all six 3D catalog charts: `three_d_scatter`, `three_d_surface`, `three_d_wireframe`, `three_d_contour`, `three_d_bar_chart`, and `three_d_volume_rendering`. The 3D family is now **6/6 complete**.
+
+- Added shared 3D helpers for finite x/y/z extraction, normalization into OrbitView coordinates, value/color scaling, binned surface cells, wireframe paths, and elevated contour paths.
+- `three_d_scatter` and `three_d_volume_rendering` render point clouds; `three_d_bar_chart` renders extruded columns; `three_d_surface` renders binned mesh polygons; `three_d_wireframe` and `three_d_contour` render 3D path layers.
+- All six charts use the existing deck.gl OrbitView path, so no new renderer contract was needed.
+- Verification: focused 3D/registry/sample/e2e-coverage tests green (**75 tests**), full suite green (**1459 Vitest tests / 100% coverage**), `npm run typecheck`, `npx tsc --noEmit`, `npm run lint`, `npm run build`, and `npm audit` all green. Chart status is **192/193** with 3D **6/6 complete**. The pinned Docker Playwright update pass wrote the six 3D baselines and passed **192/192** charts with `--workers=4`; the follow-up Docker check passed **192/192** charts with `--workers=4`.
+
+### 2026-06-04 — M5 geographic slice 5: region and flow maps
+
+**Chart count 180 → 186.** Added the final six geographic charts: `choropleth_map`, `filled_map`, `cartogram`, `flow_map`, `isochrone_contour_map`, and `tile_grid_map`. Geographic is now **14/14 complete**.
+
+- Added shared region and flow helpers for deterministic client-side region polygons, tile-grid layout, value-scaled cartogram polygons, finite origin/destination flow extraction, and region/flow-derived MapView state.
+- Expanded the deterministic `geo` sample with `region`, origin/destination coordinate roles, and flow weights so every geographic chart can auto-assign through the real UI path.
+- `choropleth_map` and `filled_map` render region polygons colored by aggregated value; `cartogram` scales region polygons by value; `tile_grid_map` lays region values into compact deterministic tiles.
+- `flow_map` renders weighted great-circle arcs; `isochrone_contour_map` renders weighted geographic contour thresholds.
+- Verification: focused geographic/registry/sample/e2e-coverage tests green (**109 tests**), full suite green (**1450 Vitest tests / 100% coverage**), `npm run typecheck`, `npx tsc --noEmit`, `npm run lint`, `npm run build`, and `npm audit` all green. Chart status is **186/193** with geographic **14/14 complete**. The pinned Docker Playwright update pass wrote the new geographic region/flow baselines and passed **186/186** charts with `--workers=4` after one default-concurrency update hit screenshot timeouts in the geographic deck.gl block; the follow-up Docker check passed **186/186** charts with `--workers=4`.
+
+### 2026-06-04 — M5 geographic slice 4: aggregation and partition maps
+
+**Chart count 176 → 180.** Added four deck.gl geographic charts: `density_map`, `hexbin_map`, `geospatial_heatmap`, and `voronoi_map`. Geographic is now **8/14**.
+
+- `density_map` renders valid latitude/longitude points through a screen-grid aggregation layer with theme-token sequential colors.
+- `hexbin_map` renders weighted hexagonal geographic bins, optionally using the sample `value` role as aggregation weight.
+- `geospatial_heatmap` renders a weighted deck.gl heatmap over point data.
+- `voronoi_map` renders deterministic local geographic partition cells through `PolygonLayer`, keeping the chart client-only and dependency-free beyond deck.gl.
+- Verification: focused geographic/registry/sample/e2e-coverage tests green (**98 tests**), full suite green (**1439 Vitest tests / 100% coverage**), `npm run typecheck`, `npx tsc --noEmit`, `npm run lint`, `npm run build`, and `npm audit` all green. Chart status is **180/193** with geographic **8/14**. The pinned Docker Playwright update pass wrote the `density-map`, `hexbin-map`, `geospatial-heatmap`, and `voronoi-map` baselines and passed **180/180** charts; the follow-up Docker check passed **180/180** charts with `--workers=4`.
+
+### 2026-06-04 — M5 geographic slice 3: point-style deck.gl maps
+
+**Chart count 173 → 176.** Added three deck.gl geographic charts: `bubble_map`, `symbol_map`, and `route_map`. Geographic is now **4/14**.
+
+- Added shared geographic deck.gl helpers for finite coordinate extraction, theme-token RGBA conversion, bounds-centered MapView state, numeric radius scaling, and palette selection.
+- `bubble_map` renders latitude/longitude points sized by a numeric `value`; `symbol_map` renders category-colored points with text initials; `route_map` renders an ordered geographic path plus stop markers.
+- Expanded the deterministic `geo` sample with `category` and `order` roles, and mapped the three new charts into the Gate-3 visual harness.
+- Verification: focused geographic/registry/sample/e2e-coverage tests green (**83 tests**), full suite green (**1430 Vitest tests / 100% coverage**), `npm run typecheck`, `npx tsc --noEmit`, `npm run lint`, `npm run build`, and `npm audit` all green. The pinned Docker Playwright update pass wrote the `bubble-map`, `symbol-map`, and `route-map` baselines and passed **176/176** charts; the follow-up Docker check passed **176/176** charts with `--workers=4` after one default-concurrency run exhausted container memory (`ENOMEM`) before completing.
+
+### 2026-06-04 — M5 renderer slice 2: first deck.gl chart
+
+**Chart count 172 → 173.** Added `point_map`, starting the geographic family at **1/14**.
+
+- Extended deck.gl rendering with Map/Orbit/Orthographic view selection and data-driven initial view state hooks.
+- Added the first real deck.gl catalog chart: `point_map` renders finite latitude/longitude rows through `ScatterplotLayer`, filters invalid coordinates, derives a bounds-centered MapView state, and uses theme-token colors.
+- Added a deterministic `geo` sample dataset, Gate-3 chart/sample mapping, and the new visual baseline `tests/e2e/__screenshots__/point-map.png`.
+- Verification: focused deck.gl/point-map/sample/e2e-coverage tests green (**73 tests**), full suite green (**1415 Vitest tests / 100% coverage**), `npm run lint`, `npm run typecheck`, `npx tsc --noEmit`, `npm run build`, and `npm audit` all green; the pinned Docker Playwright gate is green in both update and check modes with **173/173 Playwright charts**.
+
+### 2026-06-04 — M5 renderer slice 1: Canvas2D base backend
+
+No chart-count change: **172/193** registered charts.
+
+- Added `Canvas2DBaseRenderer` and `Canvas2DChart`, making `canvas2d` a live renderer backend for future simple custom-canvas charts.
+- The wrapper owns a dedicated canvas, device-pixel-ratio backing-store scaling, resize redraw, missing-context safety, empty-state handling through the base renderer, and optional renderer cleanup on unmount.
+- Updated the registry contract harness so future `canvas2d` charts must extend the live base class, while `regl` remains blocked until its renderer base lands.
+- Verification: focused Canvas2D/registry contract tests green (**8 tests**), full suite green (**1404 Vitest tests / 100% coverage**), `npm run lint`, `npm run typecheck`, `npx tsc --noEmit`, `npm run build`, and `npm audit` all green. Playwright baselines were not rerun because no registered chart implementation or visual baseline changed.
+
+### 2026-06-04 — M4 keyboard slice 13: command palette
+
+No chart-count change: **172/193** registered charts.
+
+- Added a command palette reachable from the toolbar and `Ctrl/Cmd+K`, with Escape/backdrop dismissal.
+- Commands now run existing app actions without new state contracts: switch Data/Charts/Layers/Style tabs, toggle theme, and load sample datasets.
+- Verification: focused command-palette/toolbar/ui-store tests green (**25 tests**), full suite green (**1395 Vitest tests / 100% coverage**), `npm run lint`, `npm run typecheck`, `npx tsc --noEmit`, `npm run build`, and `npm audit` all green. Playwright baselines were not rerun because no registered chart implementation or visual baseline changed.
+
+### 2026-06-04 — M4 image-export slice 12: SVG where supported
+
+No chart-count change: **172/193** registered charts.
+
+- Added SVG export from the chart header for renderers that emit an SVG node. The action scopes extraction to the active `chart-render` root, serializes the first SVG with `XMLSerializer`, and downloads an encoded `image/svg+xml` data URL.
+- Extended chart image export helpers with SVG serialization/download coverage, including missing-SVG and serializer-failure handling.
+- Verification: focused image-export/chart-area tests green (**19 tests**), full suite green (**1387 Vitest tests / 100% coverage**), `npm run lint`, `npm run typecheck`, `npx tsc --noEmit`, `npm run build`, and `npm audit` all green. Playwright baselines were not rerun because no registered chart implementation or visual baseline changed.
+
+### 2026-06-04 — M4 image-export slice 11: active chart PNG download
+
+No chart-count change: **172/193** registered charts.
+
+- Added active chart PNG export from the chart header. The action scopes extraction to the active `chart-render` root and downloads the first non-empty canvas as an `image/png` data URL.
+- Added reusable image-export helpers for canvas serialization and data-URL downloads, with defensive handling for missing, empty, non-PNG, or tainted canvases.
+- Verification: focused image-export/chart-area/download tests green (**16 tests**), full suite green (**1383 Vitest tests / 100% coverage**), `npm run lint`, `npm run typecheck`, `npx tsc --noEmit`, `npm run build`, and `npm audit` all green. Playwright baselines were not rerun because no registered chart implementation or visual baseline changed.
+
+### 2026-06-04 — M4 annotation slice 10: dataset-scoped row notes
+
+No chart-count change: **172/193** registered charts.
+
+- Extended `annotation-store` so annotations are scoped by dataset and can be cleared globally or per dataset.
+- Added reachable annotation controls to the Data tab: row index + note text, add/remove, and clear active-dataset annotations.
+- Chart-spec JSON export now includes active-dataset annotations with ISO `createdAt` timestamps.
+- Verification: focused annotation/sidebar/export tests green (**25 tests**), full suite green (**1377 Vitest tests / 100% coverage**), `npm run lint`, `npx tsc --noEmit`, `npm run build`, and `npm audit` all green. Playwright baselines were not rerun because no registered chart implementation or visual baseline changed.
+
+### 2026-06-04 — M4 export slice 9: filtered CSV + chart spec JSON
+
+No chart-count change: **172/193** registered charts.
+
+- Added pure export helpers for filtered `DataView` CSV serialization, stable export filenames, and chart-spec JSON payloads containing dataset metadata, active layer config, options, and filters.
+- The Data tab now exposes CSV and Spec export actions. CSV export uses `applyFilters`, so exported rows match the same filtered view sent to renderers.
+- Added a DOM download helper that creates a temporary Blob URL, clicks a disposable anchor, and revokes the URL.
+- Verification: focused export/sidebar/download tests green (**19 tests**), full suite green (**1374 Vitest tests / 100% coverage**), `npm run lint`, `npx tsc --noEmit`, `npm run build`, and `npm audit` all green. Playwright baselines were not rerun because no registered chart implementation or visual baseline changed.
+
+### 2026-06-04 — M4 data-quality slice 8: locale numeric + date import normalization
+
+No chart-count change: **172/193** registered charts.
+
+- Extended `normalizeParsedValue` / `normalizeParsedRows` to parse locale-style numeric formats before metadata analysis and column indexing: decimal commas, dot/space/apostrophe grouping, localized currency placement, comma-decimal percentages, and accounting negatives.
+- Added conservative date normalization for date-like columns only. Clear slash/dot/month-name formats normalize to ISO `YYYY-MM-DD`; ambiguous localized dates and non-date text columns are preserved to avoid silently changing categorical labels.
+- Loader coverage now proves localized CSV imports produce temporal/numeric metadata, normalized row values, normalized column arrays, and the expected time-series shape.
+- Verification: **1367 Vitest tests / 100% coverage**, `npm run typecheck`, `npx tsc --noEmit`, `npm run lint`, and `npm run build` all green. Playwright baselines were not rerun because no registered chart implementation or visual baseline changed.
+
+### 2026-06-04 — M4 dependency cleanup slice 7: npm audit clean
+
+No chart-count change: **172/193** registered charts.
+
+- Cleared `npm audit`: **0 vulnerabilities** after upgrading `vitest`/`@vitest/coverage-v8` to 4.1.8, `vite` to 8.0.16, compatible Vite plugins, and deck.gl packages to 9.3.3.
+- Updated the deck.gl renderer unit-test mock for the 9.3 `DeckGLRef` async picker methods.
+- Added focused edge-case tests needed under Vitest 4's stricter branch accounting for store no-op mutations, Kagi/point-and-figure reversal thresholds, sequence actor lane de-duplication, and shape-detector date/object branches.
+- Verification: `npm audit` clean, dependency tree pruned/clean, **1362 Vitest tests / 100% coverage**, `npm run typecheck`, `npx tsc --noEmit`, `npm run lint`, and `npm run build` all green. Playwright baselines were not rerun because no registered chart implementation or visual baseline changed.
+
+### 2026-06-04 — M4 cleanup slice 6: Zustand immer adoption
+
+No chart-count change: **172/193** registered charts.
+
+- Wrapped all five Zustand stores with the documented `immer` middleware and converted manual spread updates to draft mutations.
+- Enabled Immer Map/Set support for the dataset store so its `Map<string, DataSet>` can be updated through the same draft path as the array-backed stores.
+- Preserved all public store state and action contracts; existing focused store tests continue to cover IDs, active dataset/layer behavior, filters, annotations, and UI state.
+- Verification: focused store suite green (**28 tests**), full suite green (**1352 Vitest tests**), **100% coverage**, `npm run typecheck`, `npx tsc --noEmit`, `npm run lint`, and `npm run build` all green. Playwright baselines were not rerun because no registered chart implementation or visual baseline changed.
+
+### 2026-06-04 — M4 cleanup slice 5: theme-token foregrounds
+
+No chart-count change: **172/193** registered charts.
+
+- Replaced pre-existing hard-coded white foregrounds in the upload and error-boundary action buttons with `var(--bg-primary)`, keeping action text derived from theme variables.
+- Refactored `mosaic_plot` empty-state detection so it no longer constructs a fake literal-color `ThemeTokens` object; the colorized path still uses the real runtime theme.
+- Added component coverage proving the two action buttons use token-backed foreground styles.
+- Verification: **1352 Vitest tests / 100% coverage**, `npm run typecheck`, `npx tsc --noEmit`, `npm run lint`, and `npm run build` all green. Playwright baselines were not rerun because no registered chart implementation or visual baseline changed.
+
+### 2026-06-04 — M4 validation slice 4: select option membership
+
+No chart-count change: **172/193** registered charts.
+
+- `resolveOptions` now validates `select` options against declared `choices`, so stale/imported invalid values fall back to the chart option default instead of leaking into renderers.
+- Select specs without declared choices remain permissive for arbitrary string values.
+- Added resolver coverage for invalid select membership and choice-less select specs.
+- Verification: **1351 Vitest tests / 100% coverage**, `npm run typecheck`, `npx tsc --noEmit`, `npm run lint`, and `npm run build` all green. Playwright baselines were not rerun because no registered chart implementation or visual baseline changed.
+
+### 2026-06-04 — M4 data-quality slice 3: formatted numeric imports
+
+No chart-count change: **172/193** registered charts.
+
+- Added `normalizeParsedRows` / `normalizeParsedValue` so loaded rows normalize common formatted numeric strings before column metadata and `columnArrays` are built.
+- CSV parsing no longer delegates broad type coercion to PapaParse; it parses as strings and applies the project normalizer, which preserves quoted leading-zero code-like values while still converting ordinary numeric fields.
+- Supported formats include currency symbols, thousands separators, signed values, accounting parentheses, and percentages. Invalid numeric-looking strings and leading-zero codes are left unchanged.
+- Loader coverage now proves formatted CSV values produce numeric column types, `category_numeric` shape detection, normalized row values, and normalized column arrays.
+- Verification: **1349 Vitest tests / 100% coverage**, `npm run typecheck`, `npx tsc --noEmit`, `npm run lint`, and `npm run build` all green. Playwright baselines were not rerun because no registered chart implementation or visual baseline changed.
+
+### 2026-06-04 — M4 analysis-loop slice 2: optional roles + filter coupling
+
+No chart-count change: **172/193** registered charts, all currently implemented charts remain ECharts-native.
+
+- `ChartArea` now renders optional column-role pickers from each chart definition's `optionalColumns`, filters candidates by accepted type, persists selected optional assignments, and removes the assignment when the blank option is selected.
+- Added integration coverage proving filters authored from the Data tab flow through `applyFilters` before renderer invocation, so the visible analysis UI now has tested chart-render coupling.
+- Invalid regex filters now fail closed instead of throwing during render (`applyFilters` returns no matches for malformed regex values).
+- Verification: **1343 Vitest tests / 100% coverage**, `npm run typecheck`, `npx tsc --noEmit`, `npm run lint`, and `npm run build` all green. Playwright baselines were not rerun because no registered chart implementation or visual baseline changed.
+
+### 2026-06-03 — Comprehensive audit + M0 (make it genuinely run)
+
+- **Audit:** ran an 11-agent audit (7-dimension recon + empirical verification + synthesis + adversarial critique). Wrote [`docs/EXECUTION_ROADMAP.md`](EXECUTION_ROADMAP.md) — empirical reality-vs-claims, a concrete "working app" definition, and the M0–M5 milestone plan. Empirically verified (after a clean `npm ci` — the committed `node_modules` was a stale macOS-ARM copy): typecheck clean, lint clean, **191 tests / 100% coverage**, build green.
+- **C1 fix — Tailwind v4 now compiles.** Added the `@tailwindcss/vite` plugin to `vite.config.ts` (`@tailwindcss/vite@4.2.2`). Previously `vite.config.ts` loaded only `react()`, so `@import "tailwindcss"` passed through raw and **no utility classes were generated — the app rendered unstyled**. The build's `@theme`/`@tailwind` lightningcss warnings are gone; CSS is now the tree-shaken compiled output (22.5 kB → 14.1 kB). Verified in a real browser end-to-end through a rendered histogram.
+- **C2 fix — deterministic family registration.** `src/charts/families/index.ts` no longer auto-loads via a 500 ms `setTimeout` (a race against synchronous registry reads on first paint). `ensureAllFamiliesLoaded()` now memoizes a single load promise; `App.tsx` awaits it and gates the registry-reading panels behind a themed "Loading chart library…" state, so the catalog is always complete before the picker/suggester read it.
+- Deferred from M0 after re-examination: the audit's "deck.gl finalize() leak" (C3) is a **false positive** — the mount-snapshot pattern is the correct React idiom; left unchanged. `useActiveChartConfig` resolution moved to M1 (coupled to the config/auto-assign rework).
+- No data-contract changes; no source coverage impact (`App.tsx` + `index.ts` barrels are coverage-excluded). 100% coverage maintained.
+
+### 2026-06-03 — M1: foundation abstractions (before breadth)
+
+Removes the scaling traps the audit found, so chart #4..#193 inherit DRY, self-contained infrastructure instead of copy-paste. All test-driven; **239 tests, 100% coverage**, typecheck/lint/build green.
+
+- **Declarative options schema** (additive contract change — see master plan §2): new `ChartOptionSpec` (`src/charts/option-spec.ts`) + optional `options?: ChartOptionSpec[]` on `ChartDefinition`. `resolveOptions` (`src/charts/resolve-options.ts`) is the single place defaults are applied, so the UI control and renderer can't disagree.
+- **Generic `ChartOptionsPanel`**: renders controls by mapping `def.options` — zero `chartType` branches. Extracted `NumberOption`/`ToggleOption`/`SelectOption`/`ColorOption` into `src/components/sidebar/controls/` (one concept per file). Controls use `accentColor: var(--accent)` (removed the hard-coded `accent-blue-500`).
+- **Dead controls fixed**: `scatter` now reads `pointSize`/`opacity` and `line` reads `smooth` from `config.options` (previously hard-coded and ignored) — verified in-browser (Point Size visibly resizes points).
+- **Shared ECharts helpers** (`src/charts/echarts/`): `buildCartesianAxes`, `buildGrid`, `buildTooltip`. The 3 charts were refactored onto them; no chart file contains literal axis/grid/tooltip theme blocks anymore.
+- **Empty-data guard**: `EChartsBaseRenderer` renders a themed `EmptyChartState` via overridable `isEmpty`/`emptyMessage` hooks; histogram overrides it (`No numeric values to chart`) so an all-non-numeric column no longer yields a NaN axis.
+- **Palette color helper** (`src/lib/categoricalColor.ts`): cycles `theme.colorScale` by series index with a `foreground` fallback for an empty palette. Renamed the misnamed `lib/color.ts` → split into `lib/formatBytes.ts` + `lib/formatNumber.ts`. (The `interpolateSequential`/`interpolateDiverging` value→color scales were initially added here too but **removed during adversarial review as dead code** — no consumer until the heatmap; they land in M3 alongside it.)
+- **Name-aware, consume-on-assign auto-assignment** in `ChartArea`: prefers a column named like the role, never assigns one column to two roles (fixes the OHLCV/x-y "same column everywhere" bug), and shows "No compatible column for: …" when a required role can't be filled (removed the `/* v8 ignore */` on the ColumnPicker fallback — now genuinely reachable + tested).
+- **Registry contract test harness** (`tests/unit/charts/registry-contract.test.ts`): iterates `chartRegistry.all()` after all families load — validates family/shapes/roles/options and `instanceof` the declared backend's base class, plus a guard that **no chart references a backend without a live base class** (catches a chart pointing at the not-yet-built regl/canvas2d). The scalable replacement for per-chart boilerplate tests.
+
+Adversarial multi-agent review fixes (same day):
+- **Histogram empty-guard hardened**: `numericValues` now filters with `Number.isFinite` (was `typeof === 'number'`), so an all-NaN/Infinity column correctly shows the empty state instead of a blank/garbage chart, and binning never sees non-finite edges.
+- **Axis-styling regression closed**: `buildCartesianAxes` gained an `axisLine` flag (default on); the 3 charts pass `axisLine: false` on their value y-axis to exactly match the pre-refactor rendering. Added y-axis assertions to all 3 chart tests + the helper test.
+- **Dead code removed**: deleted the unconsumed `interpolateSequential`/`interpolateDiverging` (see above).
+- **Hardening**: named the number-control default bounds (`DEFAULT_NUMBER_MIN/MAX/STEP`) instead of inline `?? 0/100/1`; typed `buildGrid`/`buildTooltip` override params as ECharts option partials (catches call-site key typos); converted the contract harness from `it.each` (collection-time snapshot) to a loop-in-`it` (runs after families load, so it scales with the catalog); strengthened the renderer `textStyle` test (mock now surfaces the merged color/font) and added a chart-level color assertion to scatter.
+- **Noted, not fixed (out of M1 scope):** pre-existing hard-coded `#fff` in Sidebar/Toolbar/ErrorBoundary, a tautological self-equality assertion in `registry.test.ts`, and an optional discriminated-union typing of `resolveOptions` — all tracked for follow-up.
+
+### 2026-06-03 — M2: wire the shape→ranked-suggestion differentiator
+
+The master-plan headline flow now exists in the running app. Test-driven; **225 tests, 100% coverage**, typecheck/lint/build green; verified in a real browser (the picker shows "Suggested for category numeric data → Histogram" with a "Show all charts" escape hatch).
+
+- **Relevance scoring** (`src/data/chart-suggester.ts`): rewrote `suggestCharts(shape, columns)` to return `ChartDefinition[]` ranked by a new `scoreChart(def, shape, columns)` — shape-compatible **and** column-fillable charts only, most-specialized (fewest compatible shapes) first, name tiebreak. Deleted the drifting `defaultSuggestions` map (it referenced ~50 unregistered chart types).
+- **`ChartPicker` wired** (`src/components/sidebar/ChartPicker.tsx`): reads the active dataset's shape + columns and shows a ranked "Suggested for <shape>" section; "Show all charts" toggles to the full family catalog, "← Back to suggestions" returns. With no active dataset (or no compatible charts) it falls back to the catalog, so existing behavior is preserved.
+- **Shape-detector remediation** (`src/data/shape-detector.ts`):
+  - Relaxed `category_numeric` — now any `category + ≥1 numeric` (was exactly 1 numeric), so common grouped-bar data (`region, sales, profit`) no longer falls through to `generic`. Restructured the numeric ladder: `many_numeric` (≥5) → `category_numeric` (cat + few numerics) → pure `three/two/single_numeric`.
+  - Added `matrix` detection (`row + col + numeric value`) — makes the previously-unreachable `matrix` shape detectable, ready for M3's heatmap.
+  - Fixed the `'at'` substring datetime bug: removed bare `'at'` from the date-name list (it forced columns like `category`/`status`/`latitude` toward `datetime`).
+  - Named all inference/detection thresholds (`SAMPLE_SIZE`, `MANY_NUMERIC_MIN`, etc.) — no more magic numbers.
+- **Also:** fixed the tautological `suggestForShape` self-equality assertion in `registry.test.ts` (now asserts `[]`).
+- **Deliberately deferred (documented):**
+  - **String→number value coercion** in `inferType` (thousands separators, currency): doing it on the *type* alone — without coercing the actual `columnArrays` values in the loader — would create a type/data mismatch (a column typed `float` whose values are still strings would render empty). Needs a coordinated loader change; deferred to a focused data-quality pass.
+  - **`survival`/`event_log`/`geo_polygons` detection**: no chart consumes these until M5, and aggressive name-matching (e.g. a `time`+`event` time series → `survival`) would *degrade* real suggestions to an empty set. Left undetected until their charts land; the enum variants remain for forward-compat.
+
+Adversarial multi-agent review fixes (same day):
+- **`isFillable` now matches DISTINCT columns** (consume-on-assign, mirroring `ChartArea`), so a future chart needing N same-typed columns isn't suggested when fewer exist; `suggestCharts`' `columns` param is now required (removed the empty-default footgun).
+- **`matrix` detection tightened** to require named `row + col + value` (was `row + col + any numeric`), so integer index columns named row/col don't mis-fire — with a negative test.
+- **`showAll` resets on dataset change** in `ChartPicker` (a `useEffect` on `dataset.id`), so loading a 2nd dataset returns to its fresh suggestions instead of stranding the user in the previous catalog.
+- **Removed a dead `&& numCols.length >= 1` predicate** in the time-series branch (already guaranteed by the outer guard).
+- **Test gaps closed:** the suggester is now exercised against the **real** registered charts (pins the actual ranked output per shape — e.g. `category_numeric → histogram`, `two_numeric → line, scatter`); the picker test asserts **DOM order** (specialist before generalist), not just presence.
+- **Doc drift fixed:** the stale `chart-suggester.ts # ... defaultSuggestions` file-tree comment in `CLAUDE.md` + `AGENTS.md` now reads `scoreChart + suggestCharts`.
+- **Noted, not fixed:** the `1 + 1/len` specificity score ignores column-fit and uses a name tiebreak (defensible, tested Phase-2 heuristic — refine in M3 when ordering matters); `numCols === 4 && no category → generic` (pre-existing gap; `isFillable` still surfaces the right charts); `'numeric'` in chart `acceptedTypes` is dead (detector emits `integer`/`float`, never bare `numeric`).
+
+### 2026-06-03 — M3 wave 1: 12 everyday-analyst charts (the "working app" milestone, in progress)
+
+Produced 12 ECharts-native charts via a 12-agent fan-out workflow on the M1 helper layer, then integrated to 100% coverage. **Chart count 3 → 15.** typecheck/lint/build green; confirmed in a real browser — `category_numeric` data now suggests Bar / Donut / Horizontal Bar / Pie / Histogram (ranked, with grouped/stacked bar correctly withheld for a single-category dataset), and a bar chart renders.
+
+- **categorical:** `bar`, `horizontal_bar`, `grouped_bar`, `stacked_bar`
+- **composition:** `pie`, `donut`
+- **time-series:** `area`, `stacked_area`, `multi_line`, `step`
+- **relationships:** `bubble`
+- **matrix:** `heatmap` (exercises M2's new `matrix` shape; ECharts `visualMap` themed via `theme.sequentialScale`)
+- Family barrels wired (categorical/composition/matrix populated, time-series/relationships extended). The per-family lazy chunks now carry real code (categorical 4.3 kB, composition 1.7 kB, matrix 1.3 kB) instead of 0 kB — M1's code-splitting paying off.
+- Every chart declares `compatibleShapes` + `requiredColumns` aligned with the shape detector and the M2 suggester, uses the shared helpers (`buildCartesianAxes`/`buildGrid`/`buildTooltip`, `categoricalColor`), registers via side-effect import, and is validated by the registry contract harness plus a focused `buildOption` test (pivot output, cell mapping, size scaling, empty/missing-column fallback).
+- Coverage: replaced two genuinely-unreachable `?? fallback`s (heatmap cell index, stacked_area series data — both guaranteed-present by construction) with `!`; added non-monotonic-value tests for the heatmap/bubble min-max reduces.
+
+Adversarial multi-agent review fixes (31-agent review; 21 confirmed findings, 2 high):
+- **Root-cause consolidation:** the long-form pivot was reimplemented 3× divergently. Extracted one shared `src/charts/echarts/pivotLongForm.ts` (index-addressed — no string-key collision; sums duplicate (key,group) rows; 0-backfills missing cells; drops non-finite) and refactored grouped_bar, stacked_bar, and stacked_area onto it. This fixes **both high bugs at once**: grouped_bar's `${sub} ${cat}` key **collided on space-bearing labels** ("North"/"West Region" vs "North West"/"Region") and did last-write-wins instead of summing; stacked_area **backfilled `null`** (breaking the stacked baseline) instead of 0.
+- **pie/donut consolidation:** extracted `finiteCategoryValues` shared by both; pie now filters non-finite values and shows the empty state (it previously rendered NaN slices, mislabeling every percentage) — matching donut.
+- **Contract/suggester alignment:** `area`/`step` now list `time_series_numeric` (like `line`) so they're suggested for datetime+category+numeric data; heatmap `row`/`col` accept `integer` so integer-indexed matrices are suggestable; standardized category/subgroup `acceptedTypes` to `['category','text']` (removed inconsistent `'boolean'`).
+- **Tests:** new suggester-level test (`m3-chart-suggestions.test.ts`) verifying every new chart's shape/column wiring (grouped/stacked bar withheld with 1 category, surfaced with 2; bubble for three_numeric; heatmap for matrix; line/area/step for time_series_numeric); grouped_bar duplicate-row-sum + space-label regression tests; pie NaN-drop + empty-state tests; stacked_area `[10,20,0]` (was `null`). Cleaned a degraded type annotation in multi_line.
+- **Noted, not fixed:** bar/pie not suggested when a datetime column dominates the detected shape (the "one dataset, multiple candidate shapes" problem — a suggester-design item for later); line/area/step still duplicate the single-series time-axis block (low, no bug — a cleanup-pass candidate like the pivot was); categorical charts plot one bar per raw row (a group-by **aggregation transform** is the real fix — wave-2 candidate).
+
+### 2026-06-03 — M3 wave 2: stats infra + 10 math/structural charts
+
+**Chart count 15 → 25.** A multi-phase workflow built a reference-validated stats layer (barrier) then fanned out 10 charts on it. typecheck/lint clean, **419 tests / 100% coverage** (after the review pass below), build green.
+
+- **Reference-validated stats infra** (`src/data/stats/`): `quantiles` (type-7/linear-interpolation percentiles — five-number summary), `kernelDensity` (gaussian KDE, Silverman bandwidth with σ===0/n<2 fallback, injectable bandwidth), `buildHierarchy` (flat id/parent/value → nested `TreeNode[]`, roots = null/absent parent, self-parent guard). Each tested against documented reference values (no-mock-math).
+- **Charts:** distribution `box_plot` (per-group quantiles), `ecdf`, `kde`; finance `candlestick` (OHLCV → `[open,close,low,high]`), `volume`; network-flow `sankey` (source∪target nodes + links), `funnel`; hierarchical `treemap`, `sunburst` (via `buildHierarchy`); categorical `lollipop`. All 5 affected family barrels wired; finance/network-flow/hierarchical chunks now carry real code.
+- **Integration coverage fixes:** corrected the KDE "integral≈1" test (its premise was wrong — Silverman gives a large `h` here, so the density genuinely extends beyond `[min,max]`; pinned a small bandwidth so the in-range integral ≈1); added non-monotonic-input and grouped-non-finite / absent-group-column tests for the kernelDensity/box_plot min-max + branch paths; cast `el.props` in the kde/sankey empty-guard tests (union-type narrowing).
+
+Adversarial multi-agent review fixes (same day; 15 confirmed findings, 8 actioned → **405 → 419 tests**, 100% coverage held):
+- **`buildHierarchy` infinite-tree hang (high).** A parent chain that closed a cycle (mutual `a↔b`, or a longer ring `a→b→c→b`) produced an infinite, mutually-referential tree that **hangs ECharts treemap/sunburst** — only the self-parent case was guarded. Added a `leadsTo` back-edge check: a link that would close a cycle breaks (the node becomes a root) so the output is always a finite forest. Tests: two-node mutual cycle (both roots) + longer ring (the non-cycle node attaches under its parent; the ring nodes stay roots) — covers both `leadsTo` branches.
+- **KDE Silverman used the POPULATION sd (biased).** `populationStd` (÷n) → `sampleStd` (÷(n−1)), matching the canonical normal-reference rule (R `bw.nrd`, scipy/statsmodels). Reference tests recomputed against the sample sd (σ̂ = √2 for `[0,2]`).
+- **`quantiles([])` returned a NaN summary** (percentile arithmetic on an empty array). Added an all-zero guard for empty / all-non-finite input, with tests.
+- **`candlestick` hardening:** empty-state guard (`validRows` = rows with all-finite OHLC; `isEmpty` → `'No OHLC rows to chart'`); up/down candles now themed from `theme.colorScale` via `categoricalColor` (`color`/`color0`/`borderColor`/`borderColor0`) instead of ECharts defaults; non-finite OHLC rows dropped from both candles and the date axis. Tests: non-finite drop, themed colors, empty render.
+- **`volume` hardening:** empty-state guard (`validRows` = finite-volume rows → `'No volume to chart'`); non-finite-volume rows dropped from bars + axis. Tests: non-finite drop, empty render.
+- **`funnel` empty message:** added `emptyMessage()` `'No values to chart'` (was inheriting the generic default); funnel tests assert the chart-specific message.
+- **Suggester alignment:** `ecdf` + `kde` gained `category_numeric` in `compatibleShapes`, so the common `category + numeric` dataset surfaces them (matching M2's detector relaxation). Registration tests + a wave-2 `m3-chart-suggestions` block now pin the ranked output per shape (`single_numeric → box_plot/ecdf/kde`, `ohlcv → candlestick/volume`, `category_numeric → funnel/lollipop`, `source_target_value → sankey`, `hierarchy → treemap/sunburst`).
+- **Noted, not fixed (out of scope):** the KDE x-grid spans `[min,max]`, so with the Silverman default `h` the genuine tail mass beyond the data range isn't plotted (defensible; grid-padding is a wave-3+ enhancement); `'numeric'` in chart `acceptedTypes` remains dead (the detector emits `integer`/`float`, never bare `numeric`) — pre-existing, tracked. `box_plot`'s optional `group` picker was closed later in M4 analysis-loop slice 2.
+
+### 2026-06-03 — M3 wave 3: statistical family + everyday remainder + group-by aggregation
+
+**Chart count 25 → 43.** A producer workflow built a reference-validated compute layer (barrier) then fanned out 18 ECharts charts on it; integrated to 100% coverage, then a second adversarial-review workflow scrutinized everything. typecheck/lint clean, **683 tests / 100% coverage**, build green.
+
+- **Compute / transform infra** (each reference-validated, no-mock-math): `rocCurve` (ROC + trapezoidal AUC), `prCurve` (PR + average precision), `calibrationCurve` (reliability bins), `normalQuantile` (Acklam probit) + `qqPoints`, `histogramBins` (shared equal-width binning — `histogram` was refactored onto it), `groupByAggregate` (sum/mean/count/min/max/median group-by), plus shared `isPositiveLabel`, `reduceFiniteValues`, and `alignedScores` helpers.
+- **Charts (18):** statistical `error_bar`/`residual_plot`/`actual_vs_predicted`/`roc_curve`/`pr_curve`/`calibration_curve`/`qq_plot`/`feature_importance`; distribution `frequency_polygon`; categorical `pareto`/`percent_stacked_bar`; time-series `calendar_heatmap`/`streamgraph`; matrix `annotated_heatmap`; hierarchical `tree`; network-flow `force_directed_graph`; finance `ohlc`; specialized `gauge`. All 9 affected family barrels wired (statistical + specialized populated for the first time); each is suggester-pinned per shape in `m3-chart-suggestions.test.ts`.
+- **Group-by aggregation wired:** `bar` and `horizontal_bar` now aggregate by category via `groupByAggregate('sum')` — long-form data renders one bar per category (not one per raw row, the wave-1 bug) and non-finite values are dropped (they previously cast `unknown[]` straight to `number[]`).
+
+Adversarial multi-agent review (36 agents; 32 raised → 22 confirmed → ~13 distinct, all actioned):
+- **ROC/PR AUC/AP were order-dependent for TIED scores (high).** The per-row threshold sweep gave AUC 0/1 (instead of 0.5) for all-tied input purely from row order. Both now collapse tied scores into one threshold step; `prCurve` AP switched to the tie-stable recall-delta estimator Σ(R_k−R_{k−1})·P_k. Regression tests pin AUC/AP 0.5 for tied input.
+- **`pr_curve` score coercion (high).** Used `Number(v)` (turns `null`/`''`/`false` into a finite 0; numeric strings survive) and its empty-guard disagreed with its render path. Now shares `alignedScores` (`typeof v === 'number' ? v : NaN`, index-aligned with labels) with `roc_curve`/`calibration_curve`.
+- **`bar`/`horizontal_bar` non-finite (high)** — fixed by the aggregation wiring above (resolves the dead-code finding on `groupByAggregate` too).
+- **`isPositiveLabel` triplicated + divergent (med):** `rocCurve` was case-sensitive while `prCurve`/`calibrationCurve` trimmed+lowercased, so `'TRUE'` classified differently per chart. Extracted one shared `isPositiveLabel` (trim + case-insensitive).
+- **`pareto` divide-by-zero (med):** all-zero/negative columns produced NaN/Infinity cumulative lines. Now drops non-positive values (Pareto magnitudes are non-negative) → total > 0 guaranteed, all-non-positive shows the empty state.
+- **`calendar_heatmap` off-by-one-day (med):** local-timezone getters on UTC-parsed ISO dates shifted cells a day west of UTC. Switched to UTC getters.
+- **`gauge` stack-overflow (med):** `Math.max(...values)` overflows on large columns. Now uses `reduceFiniteValues` (reduce-based), which also de-duplicates gauge's hand-rolled aggregator and types the op.
+- **`histogramBins` silent data loss (med):** `binCount=0` bypassed the `||1` guard (Infinity is truthy). Clamped to ≥1.
+- **Consolidations:** `histogram` refactored onto `histogramBins`; `groupByAggregate` min/max switched off the spread; `alignedScores`/`isPositiveLabel`/`reduceFiniteValues` extracted to single sources of truth.
+- **Refuted (10, correctly):** tooltip-label polish (Phase-3, intended convention), `two_numeric` on the classifier charts (the detector genuinely emits it for score+0/1-label), intended time-series shape scoping, and several cosmetic spread-vs-index / wording nits.
+- **Noted, not fixed (deliberate follow-ups):** aggregation not yet extended to `pie`/`donut`/`lollipop`/`pareto` (they already drop non-finite; aggregating repeated keys there is an enhancement, not a bug) — tracked for a focused pass; the `gauge` aggregate-op `select` still isn't membership-validated by `resolveOptions` (guarded locally instead).
+
+### 2026-06-03 — Gate 3: Playwright visual-regression harness
+
+The "renders correctly in a real browser" gate that jsdom unit tests structurally cannot provide (they mock canvas/WebGL). Built, verified (43/43 charts non-blank + deterministic screenshot baselines, regenerated and re-checked clean across multiple Docker runs), and CI-wired. **714 vitest tests / 100% coverage**, typecheck/lint/build green. **All work this session is uncommitted (git is the user's).**
+
+- **Harness** (`tests/e2e/charts.spec.ts` + `playwright.config.ts`): drives the REAL UI per chart (load a sample → "Show all charts" → click `[data-chart-type]` → wait for ChartArea auto-assign + canvas), then asserts BOTH a non-blank canvas (reads pixels in-page; WebGL-safe for future deck.gl) AND `toHaveScreenshot`. Single chromium project; baselines keyed by chart name only (always run in the pinned Linux image). `force_directed_graph` is floor-only (no screenshot) — its ECharts force layout is `Math.random()`-seeded, so no stable baseline exists.
+- **Determinism:** 11 seeded (`mulberry32`) sample generators in `src/data/sample-data.ts` (data no longer varies run-to-run — required for stable baselines); `window.__E2E__` flag read by `EChartsBaseRenderer` to set `animation: false` (Playwright's `animations:'disabled'` does NOT touch ECharts' canvas rAF loop); `maxDiffPixelRatio: 0.01` + `threshold: 0.2`.
+- **Plumbing:** `run_e2e.{sh,bat}` (Docker wrappers, check / `update` modes, `mcr.microsoft.com/playwright:v1.60.0-noble` pinned to match `@playwright/test`); a `Visual Regression (Playwright)` CI job in the same image; `data-sample`/`data-chart-type`/`data-testid="chart-render"`(+`data-chart-active`/`data-chart-unfilled`) test hooks; a vitest drift guard (`tests/unit/charts/e2e-coverage.test.ts`) failing if any registered chart lacks a mapping; `tests/e2e/__screenshots__/` baselines + `playwright-report/`/`test-results/` gitignored.
+
+Adversarial multi-agent review of the harness (25 agents; 21 raised → 13 confirmed, all actioned — the gate caught real chart bugs my spot-check missed):
+- **treemap/sunburst rendered collapsed** (single zero-value root) → gave hierarchy-sample parents their summed child values so the area/radius charts partition correctly.
+- **pie/donut/lollipop/pareto showed one slice/stem/bar per raw row** (16 duplicate-label slices for the sales sample) → routed through a new `aggregatedCategoryValues` (layers grouping over `finiteCategoryValues`), matching `bar`. Completes the wave-3 aggregation rollout.
+- **ROC/PR AUC/AP were order-dependent for tied scores** → collapse tied scores into one threshold step; PR uses the recall-delta estimator. **`pr_curve`'s `Number(v)`** turned null/''/false into a finite 0 → shared `alignedScores` (`typeof v==='number'?v:NaN`) across roc/pr/calibration. **`isPositiveLabel`** extracted (was triplicated + divergent). **`calendar_heatmap`** UTC date getters (was shifting a day west of UTC). **`gauge`** `Math.max(...spread)` → `reduceFiniteValues`. **`histogramBins`** clamps `binCount<1`. **`@playwright/test`** pinned exact to the image tag.
+- **Refuted (correctly):** the non-blank check being "weak" (the screenshot is the fidelity gate), the showAll race (React 19 flushes discrete events synchronously), the missing-baseline silent-pass (Playwright hard-fails on missing snapshots), and several footgun/nice-to-haves.
+
+### 2026-06-03 — Gate 3 cosmetic fixes + Windows visual wrapper
+
+- Fixed the `gauge` detail precision issue by adding an explicit two-decimal ECharts `detail.formatter`, with a unit assertion for the full-precision artifact case.
+- Fixed legend/x-axis overlap on `grouped_bar`, `stacked_bar`, `percent_stacked_bar`, `multi_line`, `stacked_area`, and `streamgraph` by keeping the legend at the bottom and reserving bottom plot space (`grid.bottom` or `singleAxis.bottom`) instead of relying on ECharts' `top`/`bottom:'auto'` merge behavior.
+- Regenerated the affected visual baselines and verified Gate 3 in Docker check mode: **43/43 Playwright charts passed**.
+- Rewrote `run_e2e.bat` as an ASCII, non-interactive Windows wrapper and verified it runs the pinned Docker visual gate successfully.
+- Ran `npm ci` on Windows and `git rm -r --cached node_modules dist` to untrack the pre-existing generated artifacts while leaving them on disk.
+
+### 2026-06-03 — M3 wave 4 tranche 1: finance breadth
+
+**Chart count 43 → 48.** Added 5 ECharts-native finance charts: `heikin_ashi`, `price_volume`, `drawdown`, `equity_curve`, and `return_series_line`.
+
+- `heikin_ashi` transforms OHLC rows into Heikin-Ashi candles and drops non-finite OHLC rows.
+- `price_volume` renders aligned candlestick and volume panels from OHLCV rows.
+- `drawdown` computes percentage drawdown from the running equity peak.
+- `equity_curve` and `return_series_line` render finite time/value points with empty-state guards.
+- Wired the finance family barrel and Gate-3 chart/sample mapping; generated 5 new visual baselines.
+- Verification: **740 vitest tests / 100% coverage**, `npx tsc --noEmit` clean, `npm run build` green, and `run_e2e.bat` green with **48/48 Playwright charts**.
+
+### 2026-06-03 — M3 wave 4 tranche 2: categorical breadth
+
+**Chart count 48 → 52.** Added 4 ECharts-native categorical charts: `cleveland_dot`, `dumbbell`, `slope`, and `waffle`.
+
+- `cleveland_dot` renders aggregated category/value pairs as a horizontal dot plot.
+- `dumbbell` renders finite category/value-a/value-b pairs with themed connector lines and paired endpoints.
+- `slope` renders finite label/start/end comparisons as two-point slope lines.
+- `waffle` renders positive category/value proportions as a deterministic 10×10 grid.
+- Wired the categorical family barrel, suggestion coverage, and Gate-3 chart/sample mapping; generated 4 new visual baselines.
+- Verification: **756 vitest tests / 100% coverage**, `npx tsc --noEmit` clean, `npm run build` green, and `run_e2e.bat` green with **52/52 Playwright charts**.
+
+### 2026-06-03 — M3 wave 4 tranche 3: statistical breadth
+
+**Chart count 52 → 57.** Added 5 ECharts-native statistical/model-evaluation charts: `mean_ci_band`, `forest_plot`, `bland_altman`, `lift_chart`, and `gain_chart`.
+
+- `mean_ci_band` renders finite x/mean/lower/upper rows as a mean line with a confidence interval band.
+- `forest_plot` renders finite label/estimate/lower/upper rows as horizontal interval lines with estimate markers.
+- `bland_altman` renders paired measurements as mean-vs-difference points with bias and limits-of-agreement reference lines.
+- `lift_chart` and `gain_chart` render sorted finite x/value pairs with baseline reference lines.
+- Wired the statistical family barrel, suggestion coverage, and Gate-3 chart/sample mapping; generated 5 new visual baselines.
+- Verification: **775 vitest tests / 100% coverage**, `npx tsc --noEmit` clean, `npm run build` green, and `run_e2e.bat` green with **57/57 Playwright charts**.
+
+### 2026-06-03 — M3 wave 4 tranche 4: relationships breadth
+
+**Chart count 57 → 62.** Added 5 ECharts-native relationships charts: `colored_scatter`, `regression_plot`, `polar_scatter`, `polar_line`, and `ternary`.
+
+- `colored_scatter` groups finite x/y points into one themed scatter series per category.
+- `regression_plot` renders finite x/y observations with an ordinary least-squares trend line, including a zero-x-variance fallback.
+- `polar_scatter` and `polar_line` render finite radius/angle pairs in ECharts polar coordinates; `polar_line` sorts by angle before connecting points.
+- `ternary` projects positive finite compositional triples into an equilateral triangle with a themed boundary.
+- Wired the relationships family barrel, suggestion coverage, and Gate-3 chart/sample mapping; generated 5 new visual baselines.
+- Verification: **793 vitest tests / 100% coverage**, `npx tsc --noEmit` clean, `npm run build` green, and `run_e2e.bat` green with **62/62 Playwright charts**.
+
+### 2026-06-03 — M3 wave 4 tranche 5: distribution breadth
+
+**Chart count 62 → 67.** Added 5 ECharts-native distribution charts: `rug_plot`, `strip_plot`, `dot_plot`, `violin_plot`, and `ridgeline_plot`.
+
+- `rug_plot` renders finite numeric values as compact axis ticks for dense one-dimensional distributions.
+- `strip_plot` and `dot_plot` render grouped finite numeric points with first-seen group ordering and themed scatter marks.
+- `violin_plot` uses the reference-validated `kernelDensity` helper to render mirrored density outlines by group.
+- `ridgeline_plot` stacks per-group kernel-density ridges with themed area fills.
+- Wired the distribution family barrel, suggestion coverage, and Gate-3 chart/sample mapping; generated 5 new visual baselines.
+- Verification: **817 vitest tests / 100% coverage**, `npx tsc --noEmit` clean, `npm run build` green, and `run_e2e.bat` green with **67/67 Playwright charts**.
+
+### 2026-06-03 — M3 wave 4 tranche 6: time-series breadth
+
+**Chart count 67 → 72.** Added 5 ECharts-native time-series charts: `percent_stacked_area`, `sparkline`, `run_chart`, `control_chart`, and `fan_chart`.
+
+- `percent_stacked_area` pivots long-form date/series/value rows and normalizes each time bucket to 100%.
+- `sparkline` renders a compact finite-value trend with hidden axes for dense UI contexts.
+- `run_chart` renders finite process values with a mean reference line.
+- `control_chart` renders finite process values with upper/lower control-limit lines.
+- `fan_chart` renders forecast quantile lines (`p10`/`p25`/`p50`/`p75`/`p90`) over time.
+- Added deterministic `process` and `forecast` sample datasets, wired the time-series family barrel, suggestion coverage, and Gate-3 chart/sample mapping; generated 5 new visual baselines.
+- Verification: **848 vitest tests / 100% coverage**, `npx tsc --noEmit` clean, `npm run lint` clean, `npm run build` green, and the pinned Docker Playwright gate green with **72/72 Playwright charts**.
+
+### 2026-06-03 — M3 wave 4 tranche 7: categorical completion
+
+**Chart count 72 → 76.** Added the final 4 ECharts-native categorical charts: `mosaic_plot`, `marimekko`, `pictogram`, and `spine_plot`. The categorical family is now **15/15**.
+
+- `mosaic_plot` renders positive two-category contingency counts as a nested treemap area plot.
+- `marimekko` renders variable-width stacked rectangles from category/subgroup/value/width-metric rows.
+- `pictogram` renders aggregated positive category magnitudes as repeated pictorial bars.
+- `spine_plot` renders two-category count tables as variable-width, normalized stacked rectangles.
+- Wired the categorical family barrel, suggestion coverage, and Gate-3 chart/sample mapping; generated 4 new visual baselines.
+- Verification: **868 vitest tests / 100% coverage**, `npx tsc --noEmit` clean, `npm run lint` clean, `npm run build` green, and the pinned Docker Playwright gate green with **76/76 Playwright charts**.
+
+### 2026-06-03 — M3 wave 4 tranche 8: distribution breadth
+
+**Chart count 76 → 81.** Added 5 ECharts-native distribution charts: `beeswarm`, `joy_plot`, `pp_plot`, `probability_plot`, and `cumulative_distribution_plot`. The distribution family is now **15/21**.
+
+- `beeswarm` renders grouped finite numeric values with deterministic local offsets so same-valued points separate without random jitter.
+- `joy_plot` renders overlapping grouped kernel-density ridges using the shared `kernelDensity` helper and drops non-finite values before density generation.
+- `pp_plot` compares empirical cumulative probabilities against normal-theory probabilities using the new `normalCdf` helper.
+- `probability_plot` plots ordered sample values against normal-theory quantiles.
+- `cumulative_distribution_plot` renders sorted finite values as an empirical cumulative distribution line.
+- Wired the distribution family barrel, suggestion coverage, and Gate-3 chart/sample mapping; generated 5 new visual baselines.
+- Verification: **894 vitest tests / 100% coverage**, `npm run typecheck` clean, `npm run lint` clean, `npm run build` green, and the pinned Docker Playwright gate green with **81/81 Playwright charts**.
+
+### 2026-06-03 — M3 wave 4 tranche 9: distribution breadth
+
+**Chart count 81 → 86.** Added 5 ECharts-native distribution charts: `stem_and_leaf`, `raincloud_plot`, `sina_plot`, `letter_value_plot`, and `quantile_dot_plot`. The distribution family is now **20/21** by registered family; the remaining catalog item, `qq_plot`, is already implemented and Gate-3-covered under statistical.
+
+- `stem_and_leaf` buckets rounded finite values by stem and exposes sorted leaves in the tooltip.
+- `raincloud_plot` combines grouped density clouds, raw observations, and median summaries.
+- `sina_plot` spreads grouped observations by local density using the shared `kernelDensity` helper.
+- `letter_value_plot` renders progressively deeper grouped quantile boxes.
+- `quantile_dot_plot` renders evenly spaced quantile dots for single or grouped distributions.
+- Wired the distribution family barrel, suggestion coverage, and Gate-3 chart/sample mapping; generated 5 new visual baselines.
+- Verification: **918 vitest tests / 100% coverage**, `npm run typecheck` clean, `npm run lint` clean, `npm run build` green, and the pinned Docker Playwright gate green with **86/86 Playwright charts**.
+
+### 2026-06-03 — M3 wave 4 tranche 10: time-series breadth
+
+**Chart count 86 → 91.** Added 5 ECharts-native time-series charts: `horizon_chart`, `seasonal_subseries_plot`, `lag_plot`, `autocorrelation_plot`, and `forecast_cone`. The time-series family is now **17/22**.
+
+- `horizon_chart` renders dense time/value data as folded magnitude bands.
+- `seasonal_subseries_plot` groups dated values by UTC month for seasonal comparison.
+- `lag_plot` renders current values against lag-one ordered values.
+- `autocorrelation_plot` renders lag correlations from a new reference-tested `autocorrelation` stats helper.
+- `forecast_cone` renders center/lower/upper forecast bounds over time; the forecast sample now exposes `center`/`lower`/`upper` aliases alongside the existing fan-chart quantiles.
+- Wired the time-series family barrel, suggestion coverage, and Gate-3 chart/sample mapping; generated 5 new visual baselines.
+- Verification: **941 vitest tests / 100% coverage**, `npm run typecheck` clean, `npx tsc --noEmit` clean, `npm run lint` clean, `npm run build` green, and the pinned Docker Playwright gate green with **91/91 Playwright charts**.
+
+### 2026-06-03 — M3 wave 4 tranche 11: matrix/grid breadth
+
+**Chart count 91 → 96.** Added 5 ECharts-native matrix/grid charts: `clustermap`, `confusion_matrix`, `calendar_matrix`, `tile_map`, and `quilt_plot`. The matrix family is now **7/10**.
+
+- `clustermap` renders row/column/value heatmaps ordered by descending mean intensity.
+- `confusion_matrix` renders actual-vs-predicted count cells with class labels on both axes.
+- `calendar_matrix` maps UTC dates to week-by-week weekday cells from finite date/value rows.
+- `tile_map` and `quilt_plot` render categorical row/column/value grids with themed heatmap encodings.
+- Added shared `matrixGrid` helpers for finite cell extraction and deterministic row/column reordering.
+- Wired the matrix family barrel, suggestion coverage, and Gate-3 chart/sample mapping; generated 5 new visual baselines.
+- Verification: **968 vitest tests / 100% coverage**, `npm run typecheck` clean, `npx tsc --noEmit` clean, `npm run lint` clean, `npm run build` green, and the pinned Docker Playwright gate green with **96/96 Playwright charts**.
+
+### 2026-06-03 — M3 wave 4 tranche 12: specialized breadth
+
+**Chart count 96 → 101.** Added 5 ECharts-native specialized charts: `kpi_card`, `bullet_chart`, `funnel_area`, `pyramid_chart`, and `population_pyramid`. The specialized family is now **6/17**.
+
+- `kpi_card` renders the first finite metric/value pair as a themed KPI display.
+- `bullet_chart` renders actual values against targets and qualitative ranges.
+- `funnel_area` renders funnel stages as area-scaled ECharts funnel slices.
+- `pyramid_chart` renders paired category values as mirrored horizontal bars.
+- `population_pyramid` pivots age-band/segment/count rows into mirrored population bars and normalizes missing cells to zero.
+- Added deterministic `kpi` and `demographics` samples, wired the specialized family barrel, suggestion coverage, and Gate-3 chart/sample mapping; generated 5 new visual baselines.
+- Verification: **1001 vitest tests / 100% coverage**, `npm run typecheck` clean, `npx tsc --noEmit` clean, `npm run lint` clean, `npm run build` green, and the pinned Docker Playwright gate green with **101/101 Playwright charts**.
+
+### 2026-06-03 — M3 wave 4 tranche 13: time-series completion
+
+**Chart count 101 → 106.** Added the final 5 ECharts-native time-series charts: `partial_autocorrelation_plot`, `event_timeline`, `gantt_chart`, `swimlane_timeline`, and `range_bar`. The time-series family is now **22/22 complete**.
+
+- `partial_autocorrelation_plot` renders lag-wise PACF bars from a new reference-tested `partialAutocorrelation` helper.
+- `event_timeline` renders labeled events along a time/category axis.
+- `gantt_chart`, `swimlane_timeline`, and `range_bar` render start/end intervals as ECharts custom series with themed bars and empty-state guards.
+- Added deterministic `timeline` sample data, wired the time-series barrel, suggestion coverage, and Gate-3 chart/sample mapping; generated 5 new visual baselines.
+- Verification: **1027 vitest tests / 100% coverage**, `npm run typecheck` clean, `npx tsc --noEmit` clean, `npm run lint` clean, `npm run build` green, and the pinned Docker Playwright gate green with **106/106 Playwright charts**.
+
+### 2026-06-03 — M3 wave 4 tranche 14: specialized analytics breadth
+
+**Chart count 106 → 111.** Added 5 ECharts-native specialized analytics charts: `topic_term_bubble`, `cohort_retention_heatmap`, `retention_curve`, `conversion_path_chart`, and `bump_chart`. The specialized family is now **11/17**.
+
+- `topic_term_bubble` renders topic/term/weight rows as a categorical bubble grid with scaled symbols.
+- `cohort_retention_heatmap` renders cohort/period/retention rows as a themed heatmap with percentage labels.
+- `retention_curve` averages duplicate period rows into a smooth retention line.
+- `conversion_path_chart` renders source/target/count transitions as an ECharts Sankey path chart.
+- `bump_chart` renders ranked entities over time with rank one at the top.
+- Added deterministic `topics`, `cohort`, `conversionPath`, and `ranking` sample datasets, wired the specialized barrel, suggestion coverage, and Gate-3 chart/sample mapping; generated 5 new visual baselines.
+- Verification: **1062 vitest tests / 100% coverage**, `npm run typecheck` clean, `npx tsc --noEmit` clean, `npm run lint` clean, `npm run build` green, and the pinned Docker Playwright gate green with **111/111 Playwright charts**.
+
+### 2026-06-03 — M3 wave 4 tranche 15: finance/statistical breadth
+
+**Chart count 111 → 117.** Added 6 ECharts-native finance/statistical charts: `rolling_volatility_plot`, `order_book_depth_chart`, `yield_curve`, `candlestick_heatmap_by_hour_day`, `survival_curve`, and `cumulative_hazard_plot`. Finance is now **12/15** and statistical is now **15/19**.
+
+- `rolling_volatility_plot` renders finite date/rolling-volatility points as a percent line/area; the stock sample now exposes deterministic `rolling_vol`.
+- `order_book_depth_chart` renders sorted price levels as cumulative bid/ask depth curves.
+- `yield_curve` parses numeric or labeled maturities and renders sorted maturity/yield points.
+- `candlestick_heatmap_by_hour_day` renders weekday/hour/value buckets as a themed heatmap.
+- `survival_curve` and `cumulative_hazard_plot` use a new reference-tested `survivalCurve` helper for Kaplan-Meier survival and Nelson-Aalen cumulative hazard.
+- Added deterministic `orderBook`, `yieldCurve`, `tradingBuckets`, and `survival` samples, wired the finance/statistical barrels, suggestion coverage, and Gate-3 chart/sample mapping; generated 6 new visual baselines.
+- Verification: **1101 vitest tests / 100% coverage**, `npx tsc --noEmit` clean, `npm run lint` clean, `npm run build` green, and the pinned Docker Playwright gate green with **117/117 Playwright charts**.
+
+### 2026-06-03 — M3 wave 4 tranche 16: relationships breadth
+
+**Chart count 117 → 123.** Added 6 ECharts-native relationships charts: `loess_smoother_plot`, `faceted_scatter`, `pca_scatter`, `t_sne_plot`, `umap_plot`, and `radar`. Relationships is now **13/26**.
+
+- `loess_smoother_plot` renders sorted finite x/y observations with a deterministic local smoother line.
+- `faceted_scatter` splits finite x/y points into one small-multiple grid per facet.
+- `pca_scatter`, `t_sne_plot`, and `umap_plot` render finite embedding coordinates with themed scatter marks.
+- `radar` renders metric/value rows as an ECharts radar profile with themed indicators and area fill.
+- Added deterministic `embedding` sample data, wired the relationships barrel, suggestion coverage, and Gate-3 chart/sample mapping; generated 6 new visual baselines.
+- Verification: **1122 vitest tests / 100% coverage**, `npx tsc --noEmit` clean, `npm run typecheck` clean, `npm run lint` clean, `npm run build` green, and the pinned Docker Playwright gate green with **123/123 Playwright charts**.
+
+### 2026-06-03 — M3 wave 4 tranche 17: hierarchical completion
+
+**Chart count 123 → 128.** Added the final 5 ECharts-native hierarchical charts: `icicle`, `dendrogram`, `radial_tree`, `circle_packing`, and `partition_chart`. Hierarchical is now **8/8 complete**.
+
+- `icicle` uses a themed ECharts treemap view with shallow leaf focus and hierarchy-derived values.
+- `partition_chart` uses a sunburst partition layout with explicit level radii and themed hierarchy styling.
+- `circle_packing` flattens the hierarchy into a circular graph with value-scaled symbols and parent-child links.
+- `radial_tree` and `dendrogram` render the same hierarchy through radial and orthogonal ECharts tree layouts.
+- Wired the hierarchical barrel, suggestion coverage, and Gate-3 chart/sample mapping; generated 5 new visual baselines.
+- Verification: **1141 vitest tests / 100% coverage**, `npx tsc --noEmit` clean, `npm run typecheck` clean, `npm run lint` clean, `npm run build` green, and the pinned Docker Playwright gate green with **128/128 Playwright charts**.
+
+### 2026-06-03 — M3 wave 4 tranche 18: network-flow/composition breadth
+
+**Chart count 128 → 133.** Added 5 ECharts-native network-flow/composition charts: `arc_diagram`, `chord_diagram`, `alluvial_diagram`, `waterfall_chart`, and `nested_donut`. Network-flow is now **7/10** and composition is now **3/10**.
+
+- `arc_diagram` lays ordered source/target nodes along one axis and connects them with weighted curved graph edges.
+- `chord_diagram` renders source/target/value flows as a circular ECharts graph with weighted chords.
+- `alluvial_diagram` converts three-stage categorical path rows into adjacent aggregated Sankey links.
+- `waterfall_chart` renders sequential positive/negative deltas with a transparent base and running-total line.
+- `nested_donut` aggregates two categorical levels into inner/outer proportional donut rings.
+- Added deterministic `journey` sample data, wired the network-flow/composition barrels, suggestion coverage, and Gate-3 chart/sample mapping; generated 5 new visual baselines.
+- Verification: **1166 vitest tests / 100% coverage**, `npx tsc --noEmit` clean, `npm run typecheck` clean, `npm run lint` clean, `npm run build` green, and the pinned Docker Playwright gate green with **133/133 Playwright charts**.
+
+### 2026-06-03 — M3 wave 4 tranche 19: finance completion
+
+**Chart count 133 → 136.** Added the final 3 ECharts-native finance charts: `renko`, `kagi`, and `point_and_figure`. The finance family is now **15/15 complete**.
+
+- `renko` converts finite close prices into adaptive price-movement bricks rendered as themed candlestick bricks.
+- `kagi` renders reversal-based close-price segments with themed rising/falling line colors.
+- `point_and_figure` converts finite close prices into X/O box columns rendered as themed scatter labels.
+- Wired the finance barrel, suggestion coverage, and Gate-3 chart/sample mapping; generated 3 new visual baselines.
+- Verification: **1187 vitest tests / 100% coverage**, `npx tsc --noEmit` clean, `npm run typecheck` clean, `npm run lint` clean, `npm run build` green, and the pinned Docker Playwright gate green with **136/136 Playwright charts**.
+
+### 2026-06-04 — M3 wave 4 tranche 20: statistical completion
+
+**Chart count 136 → 140.** Added the final 4 ECharts-native statistical/model-explainability charts: `shap_summary_beeswarm`, `shap_dependence_plot`, `partial_dependence_plot`, and `ice_plot`. The statistical family is now **19/19 complete**.
+
+- `shap_summary_beeswarm` orders features by mean absolute SHAP magnitude and renders deterministic swarm offsets for finite SHAP rows.
+- `shap_dependence_plot` renders sorted feature-value versus SHAP-value scatter points.
+- `partial_dependence_plot` averages duplicate feature values into a smooth predicted-response curve.
+- `ice_plot` groups finite entity/feature/prediction rows into one sorted conditional-expectation line per entity.
+- Added a deterministic `explainability` sample dataset, wired the statistical barrel, suggestion coverage, and Gate-3 chart/sample mapping; generated 4 new visual baselines.
+- Verification: **1212 vitest tests / 100% coverage**, `npx tsc --noEmit` clean, `npm run typecheck` clean, `npm run lint` clean, `npm run build` green, and the pinned Docker Playwright gate green with **140/140 Playwright charts**.
+
+### 2026-06-04 — M3 wave 4 tranche 21: matrix completion
+
+**Chart count 140 → 143.** Added the final 3 ECharts-native matrix charts: `correlation_matrix`, `distance_matrix_heatmap`, and `image_raster_plot`. The matrix family is now **10/10 complete**.
+
+- `correlation_matrix` renders long-form row/column/correlation values as a labeled heatmap using the theme's diverging scale.
+- `distance_matrix_heatmap` renders pairwise row/column distance values as a sequential heatmap with a zero floor.
+- `image_raster_plot` renders row/column/intensity raster cells with inverted row ordering for image-like orientation.
+- Wired the matrix barrel, suggestion coverage, and Gate-3 chart/sample mapping; generated 3 new visual baselines.
+- Verification: **1228 vitest tests / 100% coverage**, `npx tsc --noEmit` clean, `npm run typecheck` clean, `npm run lint` clean, `npm run build` green, and the pinned Docker Playwright gate green with **143/143 Playwright charts**.
+
+### 2026-06-04 — M3 wave 4 tranche 22: specialized breadth
+
+**Chart count 143 → 146.** Added 3 ECharts-native specialized charts: `word_cloud`, `sequence_diagram`, and `ranking_table_with_sparklines`. The specialized family is now **14/17**.
+
+- `word_cloud` renders weighted terms as deterministic themed text graphics without adding a new dependency.
+- `sequence_diagram` renders ordered actor-to-actor interactions as action-labeled lane links.
+- `ranking_table_with_sparklines` renders latest entity ranks with compact rank-history sparklines in an ECharts graphic table.
+- Added a deterministic `sequence` sample and `word` aliases in the topics sample, wired the specialized barrel, suggestion coverage, and Gate-3 chart/sample mapping; generated 3 new visual baselines.
+- Verification: **1248 vitest tests / 100% coverage**, `npx tsc --noEmit` clean, `npm run typecheck` clean, `npm run lint` clean, `npm run build` green, and the pinned Docker Playwright gate green with **146/146 Playwright charts**.
+
+### 2026-06-04 — M3 wave 4 tranche 23: network-flow completion
+
+**Chart count 146 → 149.** Added the final 3 ECharts-native network-flow charts: `network_graph`, `dependency_graph`, and `adjacency_matrix`. The network-flow family is now **10/10 complete**.
+
+- `network_graph` renders directed weighted edges in a deterministic circular graph layout.
+- `dependency_graph` infers dependency depth from source/target edges and renders fixed-position directed links.
+- `adjacency_matrix` aggregates directed edge weights into a themed source-by-target heatmap.
+- Wired the network-flow barrel, suggestion coverage, and Gate-3 chart/sample mapping; generated 3 new visual baselines.
+- Verification: **1264 vitest tests / 100% coverage**, `npx tsc --noEmit` clean, `npm run typecheck` clean, `npm run lint` clean, `npm run build` green, and the pinned Docker Playwright gate green with **149/149 Playwright charts**.
+
+### 2026-06-04 — M3 wave 4 tranche 24: specialized completion
+
+**Chart count 149 → 152.** Added the final 3 ECharts-native specialized charts: `table`, `small_multiples`, and `faceted_dashboard_grid`. The specialized family is now **17/17 complete**.
+
+- `table` renders arbitrary rows and columns as a compact themed ECharts graphic table.
+- `small_multiples` aggregates facet/category/value rows into repeated mini bar charts.
+- `faceted_dashboard_grid` renders facet-level KPI cards with compact category breakdown bars.
+- Wired the specialized barrel, suggestion coverage, and Gate-3 chart/sample mapping; generated 3 new visual baselines.
+- Verification: **1273 vitest tests / 100% coverage**, `npx tsc --noEmit` clean, `npm run typecheck` clean, `npm run lint` clean, `npm run build` green, and the pinned Docker Playwright gate green with **152/152 Playwright charts**.
+
+### 2026-06-04 — M3 wave 4 tranche 25: relationships density/contour breadth
+
+**Chart count 152 → 157.** Added 5 ECharts-native relationship charts: `joint_plot`, `hexbin_plot`, `two_d_density_plot`, `contour_plot`, and `filled_contour`. Relationships is now **18/26**.
+
+- `joint_plot` renders finite x/y points with marginal x and y histograms.
+- `hexbin_plot` bins finite x/y points into density-scaled hexagonal scatter markers.
+- `two_d_density_plot` renders binned x/y density as a themed heatmap.
+- `contour_plot` and `filled_contour` grid finite x/y/z triples into mean z bands using discrete and continuous diverging color encodings.
+- Added shared `relationshipGrid` helpers for finite point extraction plus deterministic density/mean grid binning.
+- Wired the relationships barrel, suggestion coverage, and Gate-3 chart/sample mapping; generated 5 new visual baselines.
+- Verification: **1296 vitest tests / 100% coverage**, `npx tsc --noEmit` clean, `npm run typecheck` clean, `npm run lint` clean, `npm run build` green, and the pinned Docker Playwright gate green with **157/157 Playwright charts**.
+
+### 2026-06-04 — M3 wave 4 tranche 26: relationships multivariate breadth
+
+**Chart count 157 → 164.** Added 7 ECharts-native relationship charts: `biplot`, `andrews_curves`, `radviz`, `parallel_coordinates`, `scatter_matrix`, `correlation_heatmap`, and `covariance_heatmap`. Relationships is now **25/26**.
+
+- `biplot` renders finite PCA score points with themed loading vectors.
+- `andrews_curves` transforms finite feature rows into multivariate Fourier curves.
+- `radviz` projects normalized feature rows around deterministic feature anchors.
+- `parallel_coordinates` renders finite feature rows across parallel numeric axes.
+- `scatter_matrix` lays out the first three numeric features as a 3x3 matrix of pairwise scatter cells.
+- `correlation_heatmap` and `covariance_heatmap` render feature association matrices with themed visual maps.
+- Added shared `multivariate` ECharts helpers, wired the relationships barrel, suggestion coverage, and Gate-3 chart/sample mapping; generated 7 new visual baselines.
+- Verification: **1314 vitest tests / 100% coverage**, `npx tsc --noEmit` clean, `npm run typecheck` clean, `npm run lint` clean, `npm run build` green, and the pinned Docker Playwright gate green with **164/164 Playwright charts**.
+
+### 2026-06-04 — M3 wave 4 tranche 27: composition completion
+
+**Chart count 164 → 171.** Added 7 ECharts-native composition charts: `composition_stacked_bar`, `composition_percent_stacked_bar`, `composition_stacked_area`, `composition_percent_stacked_area`, `composition_treemap`, `composition_sunburst`, and `composition_waffle`. Composition is now **10/10 complete**.
+
+- `composition_stacked_bar` and `composition_percent_stacked_bar` render long-form category/subgroup/value composition with stacked and 100%-normalized bars.
+- `composition_stacked_area` and `composition_percent_stacked_area` render long-form time/subgroup/value composition with stacked and 100%-normalized area series.
+- `composition_treemap` and `composition_sunburst` reuse the validated hierarchy builder for part-to-whole hierarchy views under composition-prefixed registry keys.
+- `composition_waffle` renders aggregate category shares into a deterministic 10x10 pictorial grid.
+- Used composition-prefixed registry keys for catalog concepts that overlap categorical/time-series/hierarchical chart names, keeping registry type IDs unique while completing the catalog family.
+- Wired the composition barrel, suggestion coverage, deterministic `sales`/`stock`/`hierarchy` visual sample mappings, and 7 new Gate-3 baselines.
+- Verification: **1330 vitest tests / 100% coverage**, `npx tsc --noEmit` clean, `npm run typecheck` clean, `npm run lint` clean, `npm run build` green, and the pinned Docker Playwright gate green with **171/171 Playwright charts**.
+
+### 2026-06-04 — M3 wave 4 tranche 28: relationship completion
+
+**Chart count 171 → 172.** Added `pair_plot`, completing relationships at **26/26**.
+
+- `pair_plot` renders a 3x3 multivariate grid with per-feature histograms on the diagonal and pairwise scatter cells off diagonal.
+- Wired the relationships barrel, suggestion coverage, deterministic `numeric` visual sample mapping, and a new Gate-3 baseline (`pair-plot.png`).
+- Verification: **1331 vitest tests / 100% coverage**, `npx tsc --noEmit` clean, `npm run typecheck` clean, `npm run lint` clean, `npm run build` green, and the pinned Docker Playwright gate green with **172/172 Playwright charts**.
+
+### 2026-06-04 — M4 analysis-loop slice 1: usable data controls
+
+Shipped the first M4 interaction slice without changing chart count (**172/193**).
+
+- Data tab now includes a 5-row preview table, multi-dataset switcher, and reachable filter controls for add/toggle/remove/clear using the existing filter store.
+- Layers tab can activate an existing layer, not only remove it.
+- Samples menu now uses the existing Radix dropdown primitive for managed open/close behavior.
+- Theme state can be set explicitly and persists through `localStorage` under `bi-theme`.
+- Verification: **1340 vitest tests / 100% coverage**, `npx tsc --noEmit` clean, `npm run typecheck` clean, `npm run lint` clean, and `npm run build` green.
+
+### Earlier (v0.3.0 — Full Alignment Pass)
+
 - Enabled TypeScript `strict: true` in both `tsconfig.app.json` and `tsconfig.test.json` (zero cascading errors — codebase was already strict-safe)
 - Fixed pre-existing `inferType` bug in `src/data/shape-detector.ts`: geo name pattern (`lat`/`lng`/`lon`/`longitude`) now takes precedence over numeric classification so geo columns with numeric values receive the `geo_point` type
 - Split `src/components/chart-area/ChartArea.tsx` per "one concept per file": extracted `ColumnPicker.tsx` and `ChartCanvas.tsx` into their own files; `ChartArea` now only orchestrates

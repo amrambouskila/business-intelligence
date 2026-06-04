@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
 import type { ChartConfig } from '@/charts/types';
 
 export interface LayerConfig {
@@ -22,44 +23,43 @@ interface ChartState {
 
 let layerCounter = 0;
 
-export const useChartStore = create<ChartState>((set) => ({
+export const useChartStore = create<ChartState>()(
+  immer((set) => ({
   layers: [],
   activeLayerIndex: 0,
 
   addLayer: (chartType) =>
-    set((s) => ({
-      layers: [
-        ...s.layers,
-        {
-          id: `layer-${++layerCounter}`,
-          chartType,
-          columns: {},
-          axis: 'y1' as const,
-          options: {},
-          visible: true,
-        },
-      ],
-      activeLayerIndex: s.layers.length,
-    })),
+    set((s) => {
+      s.layers.push({
+        id: `layer-${++layerCounter}`,
+        chartType,
+        columns: {},
+        axis: 'y1',
+        options: {},
+        visible: true,
+      });
+      s.activeLayerIndex = s.layers.length - 1;
+    }),
 
   removeLayer: (index) =>
     set((s) => {
-      const layers = s.layers.filter((_, i) => i !== index);
-      return {
-        layers,
-        activeLayerIndex: Math.min(s.activeLayerIndex, Math.max(0, layers.length - 1)),
-      };
+      s.layers.splice(index, 1);
+      s.activeLayerIndex = Math.min(s.activeLayerIndex, Math.max(0, s.layers.length - 1));
     }),
 
   updateLayer: (index, patch) =>
-    set((s) => ({
-      layers: s.layers.map((l, i) => (i === index ? { ...l, ...patch } : l)),
-    })),
+    set((s) => {
+      const layer = s.layers[index];
+      if (layer) {
+        Object.assign(layer, patch);
+      }
+    }),
 
   setActiveLayer: (index) => set({ activeLayerIndex: index }),
 
   clearLayers: () => set({ layers: [], activeLayerIndex: 0 }),
-}));
+})),
+);
 
 /** Build a ChartConfig from the active layer. */
 export function useActiveChartConfig(): ChartConfig | null {

@@ -21,6 +21,12 @@ describe('useFilterStore', () => {
     expect(useFilterStore.getState().filters).toHaveLength(0);
   });
 
+  it('ignores remove requests for unknown filter ids', () => {
+    useFilterStore.getState().addFilter({ column: 'v', op: 'gt', value: 10 });
+    useFilterStore.getState().removeFilter('missing');
+    expect(useFilterStore.getState().filters).toHaveLength(1);
+  });
+
   it('toggles a filter active flag', () => {
     useFilterStore.getState().addFilter({ column: 'v', op: 'gt', value: 10 });
     const id = useFilterStore.getState().filters[0].id;
@@ -38,6 +44,12 @@ describe('useFilterStore', () => {
     const [a, b] = useFilterStore.getState().filters;
     expect(a.active).toBe(false);
     expect(b.active).toBe(true);
+  });
+
+  it('ignores toggles for unknown filter ids', () => {
+    useFilterStore.getState().addFilter({ column: 'v', op: 'gt', value: 10 });
+    useFilterStore.getState().toggleFilter('missing');
+    expect(useFilterStore.getState().filters[0].active).toBe(true);
   });
 
   it('clears all filters', () => {

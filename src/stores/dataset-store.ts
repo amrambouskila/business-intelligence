@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
+import { enableMapSet } from 'immer';
 import type { DataSet } from '@/types/data';
 
 interface DatasetState {
@@ -12,7 +14,10 @@ interface DatasetState {
   setLoading: (loading: boolean, progress?: number) => void;
 }
 
-export const useDatasetStore = create<DatasetState>((set) => ({
+enableMapSet();
+
+export const useDatasetStore = create<DatasetState>()(
+  immer((set) => ({
   datasets: new Map(),
   activeDatasetId: null,
   isLoading: false,
@@ -20,23 +25,25 @@ export const useDatasetStore = create<DatasetState>((set) => ({
 
   addDataset: (ds) =>
     set((s) => {
-      const next = new Map(s.datasets);
-      next.set(ds.id, ds);
-      return { datasets: next, activeDatasetId: ds.id, isLoading: false, loadProgress: 100 };
+      s.datasets.set(ds.id, ds);
+      s.activeDatasetId = ds.id;
+      s.isLoading = false;
+      s.loadProgress = 100;
     }),
 
   removeDataset: (id) =>
     set((s) => {
-      const next = new Map(s.datasets);
-      next.delete(id);
-      const activeId = s.activeDatasetId === id ? (next.keys().next().value ?? null) : s.activeDatasetId;
-      return { datasets: next, activeDatasetId: activeId };
+      s.datasets.delete(id);
+      if (s.activeDatasetId === id) {
+        s.activeDatasetId = s.datasets.keys().next().value ?? null;
+      }
     }),
 
   setActive: (id) => set({ activeDatasetId: id }),
 
   setLoading: (loading, progress = 0) => set({ isLoading: loading, loadProgress: progress }),
-}));
+})),
+);
 
 /** Convenience selector: get the currently active dataset. */
 export function useActiveDataset(): DataSet | undefined {

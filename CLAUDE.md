@@ -25,7 +25,7 @@ The ultimate universal charting and data analysis platform — a single tool tha
 - Not a notebook environment.
 - Not backed by a server in Phase 1–3. Pure client-side app.
 
-**Current phase: Phase 2 — Chart Coverage.** 3 of 193 target chart types implemented. The architecture is frozen; Phase 2 work is purely additive — new files under `src/charts/families/<family>/<chart>.ts` that register via side-effect imports.
+**Current phase: Phase 2 — Chart Coverage.** **43 of 193** chart types implemented (M0–M3 waves 1–3 + Gate 3 visual-regression harness). **[`docs/status.md`](docs/status.md) is the authoritative live count + current state — read it.** Phase 2 chart work is additive — new files under `src/charts/families/<family>/<chart>.ts` that register via side-effect imports, each landing with a unit test AND a Gate-3 visual baseline — but note ~30–70 of the 193 are blocked on renderer infrastructure (regl/Canvas2D, deck.gl view abstraction, variadic columns) not yet built (roadmap M5), so "additive" holds only for the ~130–140 ECharts-reachable charts.
 
 **Do NOT in this phase:**
 - Introduce a backend (Phase 4).
@@ -147,7 +147,7 @@ business-intelligence/
     ├── data/
     │   ├── loader.ts                    # loadFile(File) → DataSet
     │   ├── shape-detector.ts            # analyzeColumns + detectShape
-    │   ├── chart-suggester.ts           # suggestCharts + defaultSuggestions
+    │   ├── chart-suggester.ts           # scoreChart + suggestCharts (shape→ranked suggestions)
     │   ├── transforms.ts                # applyFilters + matchFilter
     │   ├── sample-data.ts               # Stock + numeric sample generators
     │   └── parsers/

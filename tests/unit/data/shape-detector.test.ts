@@ -45,6 +45,23 @@ describe('analyzeColumns', () => {
     expect(col.dateRange!.max).toBeInstanceOf(Date);
   });
 
+  it('leaves date-named columns as category when values do not parse as dates', () => {
+    const rows = [
+      { due_date: 'soon' },
+      { due_date: 'later' },
+      { due_date: 'eventually' },
+    ];
+    const [col] = analyzeColumns(rows, ['due_date']);
+    expect(col.type).toBe('category');
+    expect(col.dateRange).toBeUndefined();
+  });
+
+  it('does not set a date range when date-typed values are invalid', () => {
+    const [col] = analyzeColumns([], ['x']);
+    const invalidDateColumn = { ...col, type: 'date' as const };
+    expect(invalidDateColumn.dateRange).toBeUndefined();
+  });
+
   it('classifies datetime columns by string-value parsing when name does not hint', () => {
     const rows = Array.from({ length: 20 }, (_, i) => ({
       when: `2026-01-${String((i % 28) + 1).padStart(2, '0')}T00:00:00Z`,
@@ -73,6 +90,16 @@ describe('analyzeColumns', () => {
     expect(col.topValues!.length).toBe(3);
   });
 
+  it('does not misclassify a "category"-named column as datetime (the "at" substring bug)', () => {
+    const rows = [
+      { duration_category: '2018' },
+      { duration_category: '2019' },
+      { duration_category: '2020' },
+    ];
+    const [col] = analyzeColumns(rows, ['duration_category']);
+    expect(col.type).toBe('category');
+  });
+
   it('classifies high-cardinality string columns as text', () => {
     const rows = Array.from({ length: 100 }, (_, i) => ({
       phrase: `unique phrase number ${i} with some extra variation ${i * 7}`,
@@ -80,6 +107,15 @@ describe('analyzeColumns', () => {
     const [col] = analyzeColumns(rows, ['phrase']);
     expect(col.type).toBe('text');
     expect(col.topValues).toBeDefined();
+  });
+
+  it('classifies object-like values as category without string-date parsing', () => {
+    const rows = [
+      { meta: { a: 1 } },
+      { meta: { b: 2 } },
+    ];
+    const [col] = analyzeColumns(rows, ['meta']);
+    expect(col.type).toBe('category');
   });
 
   it('returns unknown for columns with only null values', () => {
@@ -214,6 +250,32 @@ describe('detectShape', () => {
     }));
     const columns = analyzeColumns(rows, ['group', 'amount']);
     expect(detectShape(columns)).toBe('category_numeric');
+  });
+
+  it('detects category_numeric for a category with several (but <5) numerics', () => {
+    const rows = Array.from({ length: 20 }, (_, i) => ({
+      region: ['A', 'B', 'C'][i % 3],
+      sales: i * 1.1,
+      profit: i * 0.4,
+    }));
+    const columns = analyzeColumns(rows, ['region', 'sales', 'profit']);
+    expect(detectShape(columns)).toBe('category_numeric');
+  });
+
+  it('detects matrix from row + col + value columns', () => {
+    const rows = Array.from({ length: 9 }, (_, i) => ({
+      row: ['r1', 'r2', 'r3'][i % 3],
+      col: ['c1', 'c2', 'c3'][Math.floor(i / 3)],
+      value: i * 1.0,
+    }));
+    const columns = analyzeColumns(rows, ['row', 'col', 'value']);
+    expect(detectShape(columns)).toBe('matrix');
+  });
+
+  it('does not treat integer-indexed row/col columns (no value) as a matrix', () => {
+    const rows = Array.from({ length: 6 }, (_, i) => ({ row: i, col: i * 2 }));
+    const columns = analyzeColumns(rows, ['row', 'col']);
+    expect(detectShape(columns)).not.toBe('matrix');
   });
 
   it('detects single_numeric for lone numeric column', () => {

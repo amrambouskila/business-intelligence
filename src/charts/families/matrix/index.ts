@@ -1,1 +1,10 @@
-
+import './heatmap';
+import './annotated_heatmap';
+import './clustermap';
+import './confusion_matrix';
+import './calendar_matrix';
+import './tile_map';
+import './quilt_plot';
+import './correlation_matrix';
+import './distance_matrix_heatmap';
+import './image_raster_plot';

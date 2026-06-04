@@ -1,33 +1,43 @@
-import type { DataShape } from '@/types/data';
+import type { DataShape, ColumnMeta } from '@/types/data';
+import type { ChartDefinition } from '@/charts/types';
 import { chartRegistry } from '@/charts/registry';
 
-/** Given a detected shape, return ranked chart type keys. */
-export function suggestCharts(shape: DataShape): string[] {
-  const defs = chartRegistry.suggestForShape(shape);
-  return defs.map((d) => d.type);
+/**
+ * Whether every required role can be filled by a DISTINCT column — mirrors the
+ * consume-on-assign matching in ChartArea, so a chart needing N same-typed
+ * columns is not suggested when fewer than N exist.
+ */
+function isFillable(def: ChartDefinition, columns: ColumnMeta[]): boolean {
+  const used = new Set<string>();
+  return def.requiredColumns.every((role) => {
+    const match = columns.find((c) => role.acceptedTypes.includes(c.type) && !used.has(c.name));
+    if (!match) return false;
+    used.add(match.name);
+    return true;
+  });
 }
 
-/** Hardcoded fallback suggestions when registry is sparse. */
-export function defaultSuggestions(shape: DataShape): string[] {
-  const map: Record<DataShape, string[]> = {
-    single_numeric: ['histogram', 'kde', 'box', 'violin', 'ecdf'],
-    category_numeric: ['bar', 'box', 'violin', 'lollipop'],
-    time_numeric: ['line', 'area', 'step'],
-    time_series_numeric: ['line', 'stacked_area', 'streamgraph'],
-    two_numeric: ['scatter', 'regression', 'hexbin'],
-    three_numeric: ['bubble', 'scatter_3d'],
-    many_numeric: ['correlation_heatmap', 'pairplot', 'parallel_coordinates'],
-    matrix: ['heatmap', 'clustermap'],
-    hierarchy: ['treemap', 'sunburst', 'icicle'],
-    nodes_edges: ['network_graph', 'force_directed'],
-    source_target_value: ['sankey', 'chord', 'alluvial'],
-    geo_points: ['point_map', 'bubble_map', 'density_map'],
-    geo_polygons: ['choropleth'],
-    intervals: ['gantt', 'timeline', 'range_bar'],
-    ohlcv: ['candlestick', 'ohlc', 'price_volume'],
-    survival: ['kaplan_meier', 'cumulative_hazard'],
-    event_log: ['funnel', 'cohort_heatmap', 'retention_curve'],
-    generic: ['line', 'bar', 'scatter'],
-  };
-  return map[shape] ?? ['line', 'bar', 'scatter'];
+/**
+ * Relevance score of a chart for a detected shape + the dataset's columns.
+ * Returns 0 when the chart does not apply (wrong shape, or a required column
+ * cannot be filled — i.e. it could not actually render). Among applicable
+ * charts a more specialized one (fewer compatible shapes) scores higher.
+ */
+export function scoreChart(def: ChartDefinition, shape: DataShape, columns: ColumnMeta[]): number {
+  if (!def.compatibleShapes.includes(shape)) return 0;
+  if (!isFillable(def, columns)) return 0;
+  return 1 + 1 / def.compatibleShapes.length;
+}
+
+/**
+ * Charts ranked by relevance for the detected shape + columns, best first.
+ * Drives the "Suggested for your data" surface in the chart picker.
+ */
+export function suggestCharts(shape: DataShape, columns: ColumnMeta[]): ChartDefinition[] {
+  return chartRegistry
+    .all()
+    .map((def) => ({ def, score: scoreChart(def, shape, columns) }))
+    .filter((x) => x.score > 0)
+    .sort((a, b) => b.score - a.score || a.def.name.localeCompare(b.def.name))
+    .map((x) => x.def);
 }

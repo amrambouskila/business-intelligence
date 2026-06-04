@@ -3,6 +3,7 @@ import { parseCSVFile } from './parsers/csv-parser';
 import { parseJSON } from './parsers/json-parser';
 import { analyzeColumns } from './shape-detector';
 import { detectShape } from './shape-detector';
+import { normalizeParsedRows } from './normalize-values';
 
 /**
  * Load a user-uploaded file into a DataSet.
@@ -27,6 +28,8 @@ export async function loadFile(file: File): Promise<DataSet> {
   } else {
     throw new Error(`Unsupported file type: .${ext}`);
   }
+
+  rows = normalizeParsedRows(rows, columnNames);
 
   const columns = analyzeColumns(rows, columnNames);
   const shape = detectShape(columns);

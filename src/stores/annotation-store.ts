@@ -1,7 +1,9 @@
 import { create } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
 
 export interface Annotation {
   id: string;
+  datasetId: string;
   dataPointIndex: number;
   text: string;
   createdAt: Date;
@@ -11,24 +13,35 @@ interface AnnotationState {
   annotations: Annotation[];
   addAnnotation: (a: Omit<Annotation, 'id' | 'createdAt'>) => void;
   removeAnnotation: (id: string) => void;
-  clearAnnotations: () => void;
+  clearAnnotations: (datasetId?: string) => void;
 }
 
 let annCounter = 0;
 
-export const useAnnotationStore = create<AnnotationState>((set) => ({
+export const useAnnotationStore = create<AnnotationState>()(
+  immer((set) => ({
   annotations: [],
 
   addAnnotation: (a) =>
-    set((s) => ({
-      annotations: [
-        ...s.annotations,
-        { ...a, id: `ann-${++annCounter}`, createdAt: new Date() },
-      ],
-    })),
+    set((s) => {
+      s.annotations.push({ ...a, id: `ann-${++annCounter}`, createdAt: new Date() });
+    }),
 
   removeAnnotation: (id) =>
-    set((s) => ({ annotations: s.annotations.filter((a) => a.id !== id) })),
+    set((s) => {
+      const index = s.annotations.findIndex((a) => a.id === id);
+      if (index >= 0) {
+        s.annotations.splice(index, 1);
+      }
+    }),
 
-  clearAnnotations: () => set({ annotations: [] }),
-}));
+  clearAnnotations: (datasetId) =>
+    set((s) => {
+      if (datasetId == null) {
+        s.annotations = [];
+      } else {
+        s.annotations = s.annotations.filter((annotation) => annotation.datasetId !== datasetId);
+      }
+    }),
+})),
+);

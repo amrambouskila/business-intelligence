@@ -4,6 +4,7 @@ import { chartRegistry } from '@/charts/registry';
 import type { ChartConfig, ThemeTokens } from '@/charts/types';
 import type { DataView } from '@/types/data';
 import { EChartsBaseRenderer } from '@/charts/renderers/echarts-renderer';
+import { EmptyChartState } from '@/charts/renderers/EmptyChartState';
 import type { EChartsOption } from 'echarts';
 
 function theme(): ThemeTokens {
@@ -95,6 +96,66 @@ describe('histogram buildOption', () => {
       rowCount: 4,
     };
     const opt = renderer.buildOption(dv, cfg(3), theme()) as EChartsOption;
+    const series = opt.series as Array<{ data: number[] }>;
+    expect(series[0].data.reduce((a, b) => a + b, 0)).toBe(3);
+  });
+
+  it('places each value into the correct bin', () => {
+    const def = chartRegistry.get('histogram')!;
+    const renderer = def.createRenderer() as EChartsBaseRenderer;
+    const opt = renderer.buildOption(view([1, 2, 2, 3, 3, 3, 4, 4, 5]), cfg(5), theme()) as EChartsOption;
+    const series = opt.series as Array<{ data: number[] }>;
+    expect(series[0].data).toEqual([1, 2, 3, 2, 1]);
+  });
+
+  it('omits the y-axis axisLine (matches pre-refactor styling)', () => {
+    const def = chartRegistry.get('histogram')!;
+    const opt = (def.createRenderer() as EChartsBaseRenderer).buildOption(view([1, 2, 3]), cfg(), theme()) as EChartsOption;
+    expect((opt.yAxis as Record<string, unknown>).axisLine).toBeUndefined();
+  });
+});
+
+describe('histogram empty-data guard', () => {
+  const renderer = () => chartRegistry.get('histogram')!.createRenderer() as EChartsBaseRenderer;
+
+  it('renders a themed empty state when the column has no numeric values', () => {
+    const dv: DataView = {
+      sourceId: 'x', rows: [], filters: [],
+      columnArrays: { v: ['a', 'b'] },
+      columns: [{ name: 'v', type: 'category', nullable: false, uniqueCount: 2, nullCount: 0 }],
+      rowCount: 2,
+    };
+    const el = renderer().render(dv, cfg(), theme());
+    expect(el.type).toBe(EmptyChartState);
+    expect((el.props as { message: string }).message).toBe('No numeric values to chart');
+  });
+
+  it('renders the chart (not the empty state) when numeric values are present', () => {
+    const el = renderer().render(view([1, 2, 3]), cfg(), theme());
+    expect(el.type).not.toBe(EmptyChartState);
+  });
+
+  it('treats an all-non-finite (NaN) column as empty', () => {
+    const dv: DataView = {
+      sourceId: 'x', rows: [], filters: [],
+      columnArrays: { v: [NaN, NaN] },
+      columns: [{ name: 'v', type: 'float', nullable: false, uniqueCount: 1, nullCount: 0 }],
+      rowCount: 2,
+    };
+    const el = renderer().render(dv, cfg(), theme());
+    expect(el.type).toBe(EmptyChartState);
+  });
+
+  it('excludes non-finite values (Infinity) so bin edges stay finite', () => {
+    const dv: DataView = {
+      sourceId: 'x', rows: [], filters: [],
+      columnArrays: { v: [1, 2, 3, Infinity] },
+      columns: [{ name: 'v', type: 'float', nullable: false, uniqueCount: 4, nullCount: 0 }],
+      rowCount: 4,
+    };
+    const opt = renderer().buildOption(dv, cfg(3), theme()) as EChartsOption;
+    const labels = (opt.xAxis as { data: string[] }).data;
+    expect(labels.every((l) => !l.includes('Infinity') && !l.includes('NaN'))).toBe(true);
     const series = opt.series as Array<{ data: number[] }>;
     expect(series[0].data.reduce((a, b) => a + b, 0)).toBe(3);
   });

@@ -17,15 +17,13 @@ const lazyFamilies = [
   () => import('./three-d'),
 ];
 
-// Trigger lazy loads after initial render
-let loaded = false;
+// Loads every remaining family exactly once. Callers await this before reading
+// the registry so the chart catalog is complete and deterministic on first
+// paint — never a timing-dependent partial list. (App.tsx awaits this.)
+let loadPromise: Promise<void> | null = null;
 export function ensureAllFamiliesLoaded(): Promise<void> {
-  if (loaded) return Promise.resolve();
-  loaded = true;
-  return Promise.all(lazyFamilies.map((fn) => fn())).then(() => {});
-}
-
-// Auto-load lazily in the background after a short delay
-if (typeof window !== 'undefined') {
-  setTimeout(() => ensureAllFamiliesLoaded(), 500);
+  if (!loadPromise) {
+    loadPromise = Promise.all(lazyFamilies.map((fn) => fn())).then(() => {});
+  }
+  return loadPromise;
 }

@@ -51,5 +51,34 @@ describe('scatter buildOption', () => {
     const opt = (def.createRenderer() as EChartsBaseRenderer).buildOption(dv, cfg, theme()) as EChartsOption;
     const series = opt.series as Array<{ data: Array<[number, number]> }>;
     expect(series[0].data).toEqual([[1, 4], [2, 5], [3, 6]]);
+    expect((opt.yAxis as Record<string, unknown>).axisLine).toBeUndefined();
+  });
+
+  const xyView = (): DataView => ({
+    sourceId: 'x', rows: [], filters: [],
+    columnArrays: { x: [1, 2, 3], y: [4, 5, 6] },
+    columns: [
+      { name: 'x', type: 'integer', nullable: false, uniqueCount: 3, nullCount: 0 },
+      { name: 'y', type: 'integer', nullable: false, uniqueCount: 3, nullCount: 0 },
+    ],
+    rowCount: 3,
+  });
+  type ScatterSeries = { symbolSize: number; itemStyle: { opacity: number; color: string } };
+
+  it('defaults point size to 6 and opacity to 0.7, and colors from the palette', () => {
+    const cfg: ChartConfig = { chartType: 'scatter', columns: { x: 'x', y: 'y' }, options: {} };
+    const opt = (chartRegistry.get('scatter')!.createRenderer() as EChartsBaseRenderer).buildOption(xyView(), cfg, theme()) as EChartsOption;
+    const s = (opt.series as ScatterSeries[])[0];
+    expect(s.symbolSize).toBe(6);
+    expect(s.itemStyle.opacity).toBe(0.7);
+    expect(s.itemStyle.color).toBe('#f00');
+  });
+
+  it('reflects the pointSize and opacity options', () => {
+    const cfg: ChartConfig = { chartType: 'scatter', columns: { x: 'x', y: 'y' }, options: { pointSize: 12, opacity: 0.3 } };
+    const opt = (chartRegistry.get('scatter')!.createRenderer() as EChartsBaseRenderer).buildOption(xyView(), cfg, theme()) as EChartsOption;
+    const s = (opt.series as ScatterSeries[])[0];
+    expect(s.symbolSize).toBe(12);
+    expect(s.itemStyle.opacity).toBe(0.3);
   });
 });

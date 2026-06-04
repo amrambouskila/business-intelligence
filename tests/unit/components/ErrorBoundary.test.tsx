@@ -34,6 +34,7 @@ describe('ErrorBoundary', () => {
     );
     expect(screen.getByText(/Something went wrong/)).toBeInTheDocument();
     expect(screen.getByText('kaboom')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Try Again/ })).toHaveStyle({ color: 'var(--bg-primary)' });
   });
 
   it('uses a custom fallback message when provided', () => {

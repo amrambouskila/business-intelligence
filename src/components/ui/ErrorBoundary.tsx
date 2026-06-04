@@ -42,7 +42,7 @@ export class ErrorBoundary extends Component<Props, State> {
           <button
             onClick={() => this.setState({ hasError: false, error: null })}
             className="px-3 py-1.5 rounded text-xs font-medium mt-2"
-            style={{ background: 'var(--accent)', color: '#fff' }}
+            style={{ background: 'var(--accent)', color: 'var(--bg-primary)' }}
           >
             Try Again
           </button>

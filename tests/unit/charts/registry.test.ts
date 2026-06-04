@@ -46,10 +46,8 @@ describe('chartRegistry', () => {
   });
 
   it('returns empty arrays for unknown family / shape queries', () => {
-    expect(chartRegistry.getByFamily('network-flow')).toBeInstanceOf(Array);
-    expect(chartRegistry.suggestForShape('survival')).toEqual(
-      chartRegistry.suggestForShape('survival'),
-    );
+    expect(chartRegistry.getByFamily('network-flow')).toEqual([]);
+    expect(chartRegistry.suggestForShape('survival')).toEqual([]);
   });
 
   it('all() includes every registered chart', () => {

@@ -47,7 +47,13 @@ function matchFilter(value: unknown, f: Filter): boolean {
       const [lo, hi] = f.value as [number, number];
       return (value as number) >= lo && (value as number) <= hi;
     }
-    case 'regex': return new RegExp(f.value as string).test(String(value));
+    case 'regex': {
+      try {
+        return new RegExp(f.value as string).test(String(value));
+      } catch {
+        return false;
+      }
+    }
     default: return true;
   }
 }

@@ -58,6 +58,12 @@ describe('useChartStore', () => {
     expect(second.chartType).toBe('b-renamed');
   });
 
+  it('ignores patches for missing layer indexes', () => {
+    useChartStore.getState().addLayer('a');
+    useChartStore.getState().updateLayer(5, { chartType: 'missing' });
+    expect(useChartStore.getState().layers[0].chartType).toBe('a');
+  });
+
   it('clears all layers', () => {
     useChartStore.getState().addLayer('a');
     useChartStore.getState().addLayer('b');

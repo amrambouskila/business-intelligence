@@ -18,6 +18,11 @@ describe('useUIStore', () => {
     expect(useUIStore.getState().theme).toBe('dark');
   });
 
+  it('sets the theme explicitly', () => {
+    useUIStore.getState().setTheme('light');
+    expect(useUIStore.getState().theme).toBe('light');
+  });
+
   it('switches the sidebar tab', () => {
     useUIStore.getState().setSidebarTab('charts');
     expect(useUIStore.getState().sidebarTab).toBe('charts');
@@ -28,6 +33,8 @@ describe('useUIStore', () => {
   it('opens and closes modals', () => {
     useUIStore.getState().openModal('export');
     expect(useUIStore.getState().modal).toBe('export');
+    useUIStore.getState().openModal('command');
+    expect(useUIStore.getState().modal).toBe('command');
     useUIStore.getState().closeModal();
     expect(useUIStore.getState().modal).toBe('none');
   });

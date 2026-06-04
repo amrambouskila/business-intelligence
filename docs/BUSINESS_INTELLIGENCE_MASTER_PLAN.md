@@ -1,6 +1,6 @@
 # Business Intelligence — Master Plan
 
-**Status:** First draft (2026-04-14). Authoritative source for goals, phases, architecture decisions, and gate criteria. Re-read at the start of any non-trivial task. If a request conflicts with this document, stop and flag it before proceeding.
+**Status:** First draft (2026-04-14); current implementation status updated 2026-06-04. Authoritative source for goals, phases, architecture decisions, and gate criteria. Re-read at the start of any non-trivial task. If a request conflicts with this document, stop and flag it before proceeding.
 
 **Related documents:**
 - [CLAUDE.md](../CLAUDE.md) — project-level AI guidelines, tech stack, patterns
@@ -49,7 +49,7 @@ graph TD
     Renderer -->|ECharts| E[EChartsBaseRenderer]
     Renderer -->|deck.gl| D[DeckGLBaseRenderer]
     Renderer -->|regl| R[ReglRenderer]
-    Renderer -->|Canvas2D| C[Canvas2DRenderer]
+    Renderer -->|Canvas2D| C[Canvas2DBaseRenderer]
     E --> Canvas[ChartArea mount]
     D --> Canvas
     R --> Canvas
@@ -90,12 +90,13 @@ graph LR
 - `DataSet` — loaded dataset with rows, columns, and `ColumnMeta[]`
 - `ColumnMeta` — per-column type/stats/distribution
 - `DataShape` — enum of detected shapes (see CHARTS.md for full list)
-- `ChartDefinition` — metadata + `createRenderer()` factory
-- `ChartRenderer` — `render(data, config, theme) → ReactElement`
+- `ChartDefinition` — metadata + `createRenderer()` factory; carries an optional declarative `options?: ChartOptionSpec[]` (added M1, 2026-06-03 — additive/backward-compatible, minor bump) that `ChartOptionsPanel` renders generically
+- `ChartOptionSpec` (`src/charts/option-spec.ts`) — one tunable option control `{ key, label, control: 'number'|'toggle'|'select'|'color', default, … }`; `resolveOptions` applies defaults as the single source of truth
+- `ChartRenderer` — `render(data, config, theme) → ReactElement`; Canvas2D support is implemented through `Canvas2DBaseRenderer` + `Canvas2DChart` (M5 slice 1, 2026-06-04), and deck.gl support now includes Map/Orbit/Orthographic view selection plus data-driven initial view state hooks in `DeckGLBaseRenderer`/`DeckGLChart` (M5 slice 2, 2026-06-04). Both are additive renderer-infrastructure extensions that do not change this interface.
 - `ChartConfig` — per-layer column assignments + options
 - `Filter` — predicate applied pre-render
 
-Changing any of these is a **major semver bump**. Flag before making the change.
+Changing any of these in a **breaking** way is a major semver bump. Flag before making the change. Additive, backward-compatible extensions (e.g. the optional `options` field above) are a minor bump and must be documented here and in `docs/versions.md`.
 
 ---
 
@@ -137,6 +138,8 @@ Deliverables:
 ### Phase 2 — Chart Coverage
 
 **Scope:** Implement the remaining 190 chart types across 13 families. Zero new architecture — every chart is a file in `charts/families/<family>/<chart>.ts` registered via side-effect import.
+
+**Current status (2026-06-04):** locally complete at **193/193** registered charts. Every registered chart has unit coverage and a Gate-3 Playwright visual-gate mapping/baseline path; final formal closeout still requires committing/pushing and confirming the GitHub Actions pipeline green on `main`.
 
 Sub-phases (rough ordering, not strict):
 1. **Core families** (distribution, categorical, time-series, relationships) — ~80 charts. ECharts-heavy. Highest user value.
@@ -231,8 +234,8 @@ A chart type is done when:
 ## 6. Open questions
 
 - **Parquet parser choice** — `parquet-wasm` vs `hyparquet` vs Arrow JS? Decide at Phase 2 end / Phase 4 start.
-- **Geo basemaps** — MapLibre vs pure deck.gl tile layers? Decide when starting the Geographic family.
-- **3D interaction UX** — orbit controls only, or gizmos for slicing/clipping volumes? Decide when starting the 3D family.
+- **Geo basemaps** — all current geographic charts render pure deck.gl layers without a basemap; decide MapLibre vs pure deck.gl tile layers before adding richer real-world polygon/tile data sources.
+- **3D interaction UX** — current 3D charts use deck.gl OrbitView controls only; decide on gizmos/slicing/clipping only if future richer 3D analysis requires them.
 - **Chart spec serialization format** — internal JSON shape for save/load of chart configs. Design before Phase 3 export work.
 - **Backend vs pure client forever** — reassess the Phase 4 trigger once we see real dataset sizes in practice.
 

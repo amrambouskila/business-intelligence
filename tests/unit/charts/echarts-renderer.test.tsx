@@ -1,11 +1,20 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import type { EChartsOption } from 'echarts';
 
 vi.mock('echarts-for-react', () => {
-  const Mock = (props: { option: EChartsOption }) => (
-    <div data-testid="mock-echarts" data-bg={String(props.option.backgroundColor ?? '')} />
-  );
+  const Mock = (props: { option: EChartsOption }) => {
+    const ts = props.option.textStyle as { color?: string; fontFamily?: string } | undefined;
+    return (
+      <div
+        data-testid="mock-echarts"
+        data-bg={String(props.option.backgroundColor ?? '')}
+        data-color={String(ts?.color ?? '')}
+        data-font={String(ts?.fontFamily ?? '')}
+        data-animation={String(props.option.animation ?? '')}
+      />
+    );
+  };
   return { default: Mock };
 });
 
@@ -28,8 +37,8 @@ function makeTheme(): ThemeTokens {
   };
 }
 
-function makeDataView(): DataView {
-  return { sourceId: 's', rows: [], columnArrays: {}, columns: [], rowCount: 0, filters: [] };
+function makeDataView(rowCount = 1): DataView {
+  return { sourceId: 's', rows: [], columnArrays: {}, columns: [], rowCount, filters: [] };
 }
 
 function makeConfig(): ChartConfig {
@@ -51,12 +60,40 @@ class WithTextStyle extends EChartsBaseRenderer {
 describe('EChartsBaseRenderer', () => {
   it('applies transparent background and renders the mock ECharts component', () => {
     const el = new StubRenderer().render(makeDataView(), makeConfig(), makeTheme());
-    const { getByTestId } = render(<>{el}</>);
-    expect(getByTestId('mock-echarts').dataset.bg).toBe('transparent');
+    render(<>{el}</>);
+    expect(screen.getByTestId('mock-echarts').dataset.bg).toBe('transparent');
   });
 
-  it('preserves an existing textStyle object while adding color/fontFamily', () => {
+  it('merges theme color and fontFamily into an existing textStyle object', () => {
     const el = new WithTextStyle().render(makeDataView(), makeConfig(), makeTheme());
     render(<>{el}</>);
+    const node = screen.getByTestId('mock-echarts');
+    // theme.foreground overwrites the chart's own textStyle.color; fontFamily is added
+    expect(node.dataset.color).toBe('#fff');
+    expect(node.dataset.font).toBe('Arial');
+  });
+
+  it('renders a themed empty state instead of a chart when the data has no rows', () => {
+    const el = new StubRenderer().render(makeDataView(0), makeConfig(), makeTheme());
+    render(<>{el}</>);
+    expect(screen.getByText('No data to display')).toBeInTheDocument();
+    expect(screen.queryByTestId('mock-echarts')).toBeNull();
+  });
+
+  it('leaves ECharts animation untouched when the e2e flag is unset', () => {
+    const el = new StubRenderer().render(makeDataView(), makeConfig(), makeTheme());
+    render(<>{el}</>);
+    expect(screen.getByTestId('mock-echarts').dataset.animation).toBe('');
+  });
+
+  it('disables ECharts animation when window.__E2E__ is set (deterministic screenshots)', () => {
+    window.__E2E__ = true;
+    try {
+      const el = new StubRenderer().render(makeDataView(), makeConfig(), makeTheme());
+      render(<>{el}</>);
+      expect(screen.getByTestId('mock-echarts').dataset.animation).toBe('false');
+    } finally {
+      delete window.__E2E__;
+    }
   });
 });

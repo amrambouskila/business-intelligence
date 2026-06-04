@@ -1,16 +1,19 @@
-import { useMemo } from 'react';
-import { BarChart3 } from 'lucide-react';
+import { useMemo, useRef } from 'react';
+import { BarChart3, Download, FileCode } from 'lucide-react';
 import { chartRegistry } from '@/charts/registry';
 import { useChartStore } from '@/stores/chart-store';
 import { useActiveDataset } from '@/stores/dataset-store';
 import { useFilterStore } from '@/stores/filter-store';
 import { useTheme } from '@/theme/theme-context';
 import { applyFilters } from '@/data/transforms';
-import type { ChartConfig } from '@/charts/types';
+import { exportFileName } from '@/data/export';
+import { downloadChartPNG, downloadChartSVG } from '@/charts/export-image';
+import type { ChartConfig, ColumnRole } from '@/charts/types';
 import { ColumnPicker } from './ColumnPicker';
 import { ChartCanvas } from './ChartCanvas';
 
 export function ChartArea() {
+  const chartRenderRef = useRef<HTMLDivElement>(null);
   const dataset = useActiveDataset();
   const layers = useChartStore((s) => s.layers);
   const activeIdx = useChartStore((s) => s.activeLayerIndex);
@@ -69,11 +72,24 @@ export function ChartArea() {
     columns: { ...activeLayer.columns },
     options: activeLayer.options,
   };
+  const optionalColumns = def.optionalColumns ?? [];
 
+  // Auto-fill each unset required role: prefer a column named like the role,
+  // else the first type-compatible column, and never reuse a column already
+  // assigned to another role (consume-on-assign).
+  const used = new Set(Object.values(config.columns));
+  const unfilled: ColumnRole[] = [];
   for (const req of def.requiredColumns) {
-    if (!config.columns[req.role]) {
-      const match = dataset.columns.find((c) => req.acceptedTypes.includes(c.type));
-      if (match) config.columns[req.role] = match.name;
+    if (config.columns[req.role]) continue;
+    const candidates = dataset.columns.filter(
+      (c) => req.acceptedTypes.includes(c.type) && !used.has(c.name),
+    );
+    const match = candidates.find((c) => c.name.toLowerCase() === req.role.toLowerCase()) ?? candidates[0];
+    if (match) {
+      config.columns[req.role] = match.name;
+      used.add(match.name);
+    } else {
+      unfilled.push(req);
     }
   }
 
@@ -88,7 +104,7 @@ export function ChartArea() {
           <ColumnPicker
             key={req.role}
             label={req.label}
-            value={config.columns[req.role] /* v8 ignore next */ ?? ''}
+            value={config.columns[req.role] ?? ''}
             columns={dataset.columns
               .filter((c) => req.acceptedTypes.includes(c.type))
               .map((c) => c.name)}
@@ -100,10 +116,66 @@ export function ChartArea() {
             }}
           />
         ))}
+        {optionalColumns.map((opt) => (
+          <ColumnPicker
+            key={opt.role}
+            label={opt.label}
+            value={config.columns[opt.role] ?? ''}
+            columns={dataset.columns
+              .filter((c) => opt.acceptedTypes.includes(c.type))
+              .map((c) => c.name)}
+            onChange={(col) => {
+              const idx = useChartStore.getState().activeLayerIndex;
+              const columns = { ...config.columns };
+              if (col) columns[opt.role] = col;
+              else delete columns[opt.role];
+              useChartStore.getState().updateLayer(idx, { columns });
+            }}
+          />
+        ))}
+        <button
+          type="button"
+          onClick={() => downloadChartPNG(
+            chartRenderRef.current,
+            exportFileName(dataset.name, `${config.chartType}-chart`, 'png'),
+          )}
+          className="ml-auto flex h-6 w-6 items-center justify-center rounded"
+          style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}
+          title="Export chart PNG"
+          aria-label="Export chart PNG"
+        >
+          <Download size={13} />
+        </button>
+        <button
+          type="button"
+          onClick={() => downloadChartSVG(
+            chartRenderRef.current,
+            exportFileName(dataset.name, `${config.chartType}-chart`, 'svg'),
+          )}
+          className="flex h-6 w-6 items-center justify-center rounded"
+          style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}
+          title="Export chart SVG"
+          aria-label="Export chart SVG"
+        >
+          <FileCode size={13} />
+        </button>
       </div>
 
-      <div key={config.chartType} className="absolute inset-0 top-9">
-        <ChartCanvas chartType={config.chartType} data={dataView} config={config} theme={theme} />
+      <div
+        ref={chartRenderRef}
+        key={config.chartType}
+        data-testid="chart-render"
+        data-chart-active={config.chartType}
+        data-chart-unfilled={unfilled.length > 0 ? 'true' : 'false'}
+        className="absolute inset-0 top-9"
+      >
+        {unfilled.length > 0 ? (
+          <div className="w-full h-full flex items-center justify-center text-sm" style={{ color: 'var(--text-muted)' }}>
+            No compatible column for: {unfilled.map((r) => r.label).join(', ')}
+          </div>
+        ) : (
+          <ChartCanvas chartType={config.chartType} data={dataView} config={config} theme={theme} />
+        )}
       </div>
     </div>
   );

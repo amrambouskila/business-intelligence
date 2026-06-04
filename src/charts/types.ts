@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
 import type { DataView, DataShape, ColumnType } from '@/types/data';
+import type { ChartOptionSpec } from './option-spec';
 
 /** The 13 chart families. */
 export type ChartFamily =
@@ -53,6 +54,8 @@ export interface ChartDefinition {
   compatibleShapes: DataShape[];
   requiredColumns: ColumnRole[];
   optionalColumns?: ColumnRole[];
+  /** Declarative per-chart option controls; rendered generically by ChartOptionsPanel. */
+  options?: ChartOptionSpec[];
   maxRecommendedPoints?: number;
   createRenderer: () => ChartRenderer;
 }

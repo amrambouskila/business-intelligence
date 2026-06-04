@@ -76,6 +76,27 @@ jobs:
           path: dist/
           retention-days: 7
 
+  e2e:
+    name: Visual Regression (Playwright)
+    runs-on: ubuntu-latest
+    needs: [typecheck, test]
+    # Pinned Playwright image (browsers preinstalled) — must match @playwright/test
+    # so screenshot baselines committed under tests/e2e/__screenshots__ render identically.
+    container:
+      image: mcr.microsoft.com/playwright:v1.60.0-noble
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test:e2e
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
   docker:
     name: Docker Build
     runs-on: ubuntu-latest

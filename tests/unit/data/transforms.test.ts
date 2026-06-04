@@ -108,6 +108,12 @@ describe('applyFilters', () => {
     expect(view.rowCount).toBe(0);
   });
 
+  it('treats invalid regex filters as no matches instead of throwing', () => {
+    const ds = makeDataSet();
+    const view = applyFilters(ds, [filter({ column: 'name', op: 'regex', value: '[' })]);
+    expect(view.rowCount).toBe(0);
+  });
+
   it('defaults to true for an unknown operator', () => {
     const ds = makeDataSet();
     const view = applyFilters(ds, [

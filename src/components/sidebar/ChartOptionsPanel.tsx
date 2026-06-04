@@ -1,7 +1,22 @@
 import { chartRegistry } from '@/charts/registry';
 import { useChartStore } from '@/stores/chart-store';
+import { resolveOptions } from '@/charts/resolve-options';
+import type { ChartOptionSpec } from '@/charts/option-spec';
+import { NumberOption } from './controls/NumberOption';
+import { ToggleOption } from './controls/ToggleOption';
+import { SelectOption } from './controls/SelectOption';
+import { ColorOption } from './controls/ColorOption';
 
-/** Per-chart configuration panel. Renders controls based on the active chart type. */
+// Default slider domain for a 'number' option whose spec omits explicit bounds.
+const DEFAULT_NUMBER_MIN = 0;
+const DEFAULT_NUMBER_MAX = 100;
+const DEFAULT_NUMBER_STEP = 1;
+
+/**
+ * Per-chart configuration panel. Renders controls declaratively from the active
+ * chart's `options` schema — no per-chart-type branches, so a new chart's
+ * controls appear automatically by declaring `options` in its ChartDefinition.
+ */
 export function ChartOptionsPanel() {
   const layers = useChartStore((s) => s.layers);
   const activeIdx = useChartStore((s) => s.activeLayerIndex);
@@ -19,12 +34,11 @@ export function ChartOptionsPanel() {
   const def = chartRegistry.get(layer.chartType);
   if (!def) return null;
 
-  const options = layer.options;
+  const specs = def.options ?? [];
+  const values = resolveOptions(specs, layer.options);
 
   function setOption(key: string, value: unknown) {
-    updateLayer(activeIdx, {
-      options: { ...options, [key]: value },
-    });
+    updateLayer(activeIdx, { options: { ...layer!.options, [key]: value } });
   }
 
   return (
@@ -32,99 +46,62 @@ export function ChartOptionsPanel() {
       <h4 className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
         {def.name} Options
       </h4>
-
-      {/* Histogram options */}
-      {layer.chartType === 'histogram' && (
-        <NumberOption
-          label="Bins"
-          value={(options['bins'] as number) ?? 30}
-          min={5}
-          max={200}
-          step={5}
-          onChange={(v) => setOption('bins', v)}
-        />
+      {specs.length === 0 ? (
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+          No options for this chart
+        </p>
+      ) : (
+        specs.map((spec) => renderControl(spec, values[spec.key], setOption))
       )}
-
-      {/* Line chart options */}
-      {layer.chartType === 'line' && (
-        <ToggleOption
-          label="Smooth"
-          value={(options['smooth'] as boolean) ?? false}
-          onChange={(v) => setOption('smooth', v)}
-        />
-      )}
-
-      {/* Scatter plot options */}
-      {layer.chartType === 'scatter' && (
-        <NumberOption
-          label="Point Size"
-          value={(options['pointSize'] as number) ?? 6}
-          min={1}
-          max={20}
-          step={1}
-          onChange={(v) => setOption('pointSize', v)}
-        />
-      )}
-
-      {/* Common options for all charts */}
-      <div className="border-t pt-2 mt-1" style={{ borderColor: 'var(--border)' }}>
-        <h4 className="text-xs font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>
-          General
-        </h4>
-        <NumberOption
-          label="Opacity"
-          value={(options['opacity'] as number) ?? 1.0}
-          min={0.1}
-          max={1.0}
-          step={0.1}
-          onChange={(v) => setOption('opacity', v)}
-        />
-      </div>
     </div>
   );
 }
 
-function NumberOption({
-  label, value, min, max, step, onChange,
-}: {
-  label: string; value: number; min: number; max: number; step: number;
-  onChange: (v: number) => void;
-}) {
-  return (
-    <label className="flex items-center justify-between text-xs">
-      <span style={{ color: 'var(--text-secondary)' }}>{label}</span>
-      <div className="flex items-center gap-2">
-        <input
-          type="range"
-          min={min}
-          max={max}
-          step={step}
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-          className="w-20 accent-blue-500"
+function renderControl(
+  spec: ChartOptionSpec,
+  value: number | boolean | string,
+  setOption: (key: string, value: unknown) => void,
+) {
+  switch (spec.control) {
+    case 'number':
+      return (
+        <NumberOption
+          key={spec.key}
+          label={spec.label}
+          value={value as number}
+          min={spec.min ?? DEFAULT_NUMBER_MIN}
+          max={spec.max ?? DEFAULT_NUMBER_MAX}
+          step={spec.step ?? DEFAULT_NUMBER_STEP}
+          onChange={(v) => setOption(spec.key, v)}
         />
-        <span className="w-8 text-right" style={{ color: 'var(--text-muted)' }}>
-          {value}
-        </span>
-      </div>
-    </label>
-  );
-}
-
-function ToggleOption({
-  label, value, onChange,
-}: {
-  label: string; value: boolean; onChange: (v: boolean) => void;
-}) {
-  return (
-    <label className="flex items-center justify-between text-xs cursor-pointer">
-      <span style={{ color: 'var(--text-secondary)' }}>{label}</span>
-      <input
-        type="checkbox"
-        checked={value}
-        onChange={(e) => onChange(e.target.checked)}
-        className="accent-blue-500"
-      />
-    </label>
-  );
+      );
+    case 'toggle':
+      return (
+        <ToggleOption
+          key={spec.key}
+          label={spec.label}
+          value={value as boolean}
+          onChange={(v) => setOption(spec.key, v)}
+        />
+      );
+    case 'select':
+      return (
+        <SelectOption
+          key={spec.key}
+          label={spec.label}
+          value={value as string}
+          choices={spec.choices ?? []}
+          onChange={(v) => setOption(spec.key, v)}
+        />
+      );
+    case 'color':
+      return (
+        <ColorOption
+          key={spec.key}
+          label={spec.label}
+          value={value as string}
+          onChange={(v) => setOption(spec.key, v)}
+        />
+      );
+  }
 }

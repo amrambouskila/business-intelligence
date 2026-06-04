@@ -12,6 +12,12 @@ coverage/
 .vitest-cache/
 junit*.xml
 
+# Playwright (the __screenshots__ baselines ARE committed; these artifacts are not)
+playwright-report/
+test-results/
+blob-report/
+.playwright/
+
 # Environment files
 .env
 .env.*

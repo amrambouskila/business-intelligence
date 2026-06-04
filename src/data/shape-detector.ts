@@ -1,5 +1,14 @@
 import type { ColumnMeta, ColumnType, DataShape, NumericStats } from '@/types/data';
 
+/** Type-inference + shape-detection thresholds (no magic numbers in the logic below). */
+const SAMPLE_SIZE = 100;
+const DATE_NAME_CONFIDENCE = 0.8;
+const STRING_DATE_SAMPLE = 20;
+const STRING_DATE_MIN_MATCHES = 15;
+const CATEGORY_UNIQUE_RATIO = 0.3;
+const CATEGORY_MAX_UNIQUE = 20;
+const MANY_NUMERIC_MIN = 5;
+
 /** Analyze raw rows and produce column metadata. */
 export function analyzeColumns(
   rows: Record<string, unknown>[],
@@ -37,6 +46,7 @@ export function analyzeColumns(
 
     if (type === 'datetime' || type === 'date') {
       const dates = nonNull.map((v) => new Date(v as string | number)).filter((d) => !isNaN(d.getTime()));
+      /* v8 ignore next -- inferType only returns date-like types after at least one parseable value exists. */
       if (dates.length > 0) {
         dates.sort((a, b) => a.getTime() - b.getTime());
         meta.dateRange = { min: dates[0], max: dates[dates.length - 1] };
@@ -50,7 +60,7 @@ export function analyzeColumns(
 function inferType(name: string, values: unknown[]): ColumnType {
   if (values.length === 0) return 'unknown';
 
-  const sample = values.slice(0, 100);
+  const sample = values.slice(0, SAMPLE_SIZE);
   const isNumericSample =
     sample.every((v) => typeof v === 'number' && !isNaN(v as number));
 
@@ -71,27 +81,29 @@ function inferType(name: string, values: unknown[]): ColumnType {
     return allInts ? 'integer' : 'float';
   }
 
-  // Check datetime by name heuristic + value parsing
-  const dtNames = ['date', 'time', 'timestamp', 'datetime', 'created', 'updated', 'at'];
+  // Check datetime by name heuristic + value parsing. (No bare 'at' — it matched
+  // unrelated columns like category/latitude/status and forced them to datetime.)
+  const dtNames = ['date', 'time', 'timestamp', 'datetime', 'created', 'updated'];
   const nameLower = name.toLowerCase();
   if (dtNames.some((n) => nameLower.includes(n))) {
     const parsed = sample.map((v) => new Date(v as string));
-    if (parsed.filter((d) => !isNaN(d.getTime())).length > sample.length * 0.8) {
+    if (parsed.filter((d) => !isNaN(d.getTime())).length > sample.length * DATE_NAME_CONFIDENCE) {
       return 'datetime';
     }
   }
 
   // Check if string values parse as dates
   if (sample.every((v) => typeof v === 'string')) {
-    const parsed = sample.slice(0, 20).map((v) => new Date(v as string));
-    if (parsed.filter((d) => !isNaN(d.getTime())).length > 15) {
+    const parsed = sample.slice(0, STRING_DATE_SAMPLE).map((v) => new Date(v as string));
+    if (parsed.filter((d) => !isNaN(d.getTime())).length > STRING_DATE_MIN_MATCHES) {
       return 'datetime';
     }
   }
 
   // Categorical vs text: low unique ratio = category
-  const uniqueRatio = new Set(sample.map(String)).size / sample.length;
-  if (uniqueRatio < 0.3 || new Set(sample.map(String)).size <= 20) {
+  const uniqueCount = new Set(sample.map(String)).size;
+  const uniqueRatio = uniqueCount / sample.length;
+  if (uniqueRatio < CATEGORY_UNIQUE_RATIO || uniqueCount <= CATEGORY_MAX_UNIQUE) {
     return 'category';
   }
 
@@ -129,6 +141,12 @@ export function detectShape(columns: ColumnMeta[]): DataShape {
     return 'ohlcv';
   }
 
+  // Matrix / pivot: explicit row + col + value (named, like OHLCV) so integer
+  // index columns named row/col don't mis-fire.
+  if (['row', 'col', 'value'].every((n) => names.has(n))) {
+    return 'matrix';
+  }
+
   // Geo
   if (geoCols.length >= 2) return 'geo_points';
 
@@ -150,17 +168,19 @@ export function detectShape(columns: ColumnMeta[]): DataShape {
   const hasEnd = columns.some((c) => /^(end|finish|end_date)$/i.test(c.name));
   if (hasStart && hasEnd) return 'intervals';
 
-  // Time series variants
+  // Time series variants (numCols >= 1 already guaranteed by the outer guard)
   if (dtCols.length >= 1 && numCols.length >= 1) {
-    if (catCols.length >= 1 && numCols.length >= 1) return 'time_series_numeric';
+    if (catCols.length >= 1) return 'time_series_numeric';
     return 'time_numeric';
   }
 
-  // Pure numeric shapes
-  if (numCols.length >= 5) return 'many_numeric';
+  // Many numeric columns -> multivariate (correlation / pair plot); categories don't change this
+  if (numCols.length >= MANY_NUMERIC_MIN) return 'many_numeric';
+  // A category plus one or more (but few) numerics -> categorical comparison (bar / box / grouped)
+  if (catCols.length >= 1 && numCols.length >= 1) return 'category_numeric';
+  // Pure numeric (no categories)
   if (numCols.length === 3 && catCols.length === 0) return 'three_numeric';
   if (numCols.length === 2 && catCols.length === 0) return 'two_numeric';
-  if (numCols.length === 1 && catCols.length >= 1) return 'category_numeric';
   if (numCols.length === 1) return 'single_numeric';
 
   return 'generic';

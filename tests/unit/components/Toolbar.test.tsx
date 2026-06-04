@@ -17,6 +17,11 @@ describe('Toolbar', () => {
     expect(screen.getByRole('button', { name: /Switch to light mode/ })).toBeInTheDocument();
   });
 
+  it('uses theme tokens for the upload button foreground', () => {
+    render(<Toolbar />);
+    expect(screen.getByRole('button', { name: /Upload/ })).toHaveStyle({ color: 'var(--bg-primary)' });
+  });
+
   it('clicking the Upload button triggers the hidden file input', async () => {
     const user = userEvent.setup();
     render(<Toolbar />);
@@ -32,6 +37,13 @@ describe('Toolbar', () => {
     render(<Toolbar />);
     await user.click(screen.getByRole('button', { name: /Switch to light mode/ }));
     expect(useUIStore.getState().theme).toBe('light');
+  });
+
+  it('opens the command palette from the toolbar action', async () => {
+    const user = userEvent.setup();
+    render(<Toolbar />);
+    await user.click(screen.getByRole('button', { name: /Commands/ }));
+    expect(useUIStore.getState().modal).toBe('command');
   });
 
   it('opens and closes the samples dropdown', async () => {

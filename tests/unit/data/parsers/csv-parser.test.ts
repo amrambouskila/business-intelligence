@@ -11,6 +11,12 @@ describe('parseCSV', () => {
     expect(result.rows[0]).toEqual({ a: 1, b: 2.5, c: 'hello' });
   });
 
+  it('normalizes formatted numerics while preserving quoted leading-zero codes', () => {
+    const text = 'amount,rate,zip\n"$1,200",15%,"00123"\n';
+    const result = parseCSV(text);
+    expect(result.rows[0]).toEqual({ amount: 1200, rate: 0.15, zip: '00123' });
+  });
+
   it('skips empty lines', () => {
     const text = 'a,b\n1,2\n\n3,4\n';
     const result = parseCSV(text);
