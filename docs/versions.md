@@ -2,6 +2,14 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 — Phase 2 CI closeout
+
+No chart-count change: **193/193** registered charts.
+
+- Pushed the hardened visual-regression closeout to `main` at `125061d5`.
+- Confirmed GitHub Actions run #5 green across lint, typecheck, test+coverage, build, Docker build, and the 193-chart Playwright visual-regression gate.
+- Updated the master plan, execution roadmap, and live status so Phase 2 is no longer described as only locally complete.
+
 ### 2026-06-04 — Visual gate CI hardening
 
 No chart-count change: **193/193** registered charts.

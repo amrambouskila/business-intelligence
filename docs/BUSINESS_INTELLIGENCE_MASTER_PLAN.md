@@ -139,7 +139,7 @@ Deliverables:
 
 **Scope:** Implement the remaining 190 chart types across 13 families. Zero new architecture — every chart is a file in `charts/families/<family>/<chart>.ts` registered via side-effect import.
 
-**Current status (2026-06-04):** locally complete at **193/193** registered charts. Every registered chart has unit coverage and a Gate-3 Playwright visual-gate mapping/baseline path; final formal closeout still requires committing/pushing and confirming the GitHub Actions pipeline green on `main`.
+**Current status (2026-06-04):** complete at **193/193** registered charts. Every registered chart has unit coverage and a Gate-3 Playwright visual-gate mapping/baseline path; the formal Phase 2 closeout is proven by GitHub Actions run #5 on `main` (`125061d5`), with lint, typecheck, test+coverage, build, Docker build, and visual regression all green.
 
 Sub-phases (rough ordering, not strict):
 1. **Core families** (distribution, categorical, time-series, relationships) — ~80 charts. ECharts-heavy. Highest user value.

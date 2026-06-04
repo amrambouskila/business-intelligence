@@ -3,7 +3,7 @@
 **Created:** 2026-06-03 · **Source:** comprehensive multi-agent codebase audit (11 agents: 7-dimension recon + empirical verification + synthesis + adversarial critique).
 **Companion to:** [`BUSINESS_INTELLIGENCE_MASTER_PLAN.md`](BUSINESS_INTELLIGENCE_MASTER_PLAN.md) (the *vision*). This doc is the *operational sequence* that gets there.
 
-**Current status (2026-06-04):** M0–M5 chart-coverage work is locally complete at **193/193** registered charts. The remaining Phase-2 closeout item is committing/pushing and confirming the GitHub Actions pipeline green on `main`; older audit findings below are retained as historical rationale unless a later section explicitly marks them resolved.
+**Current status (2026-06-04):** M0–M5 chart-coverage work is complete at **193/193** registered charts. Phase 2 is formally closed out on `main` at `125061d5`: GitHub Actions run #5 passed lint, typecheck, test+coverage, build, Docker build, and the 193-chart Playwright visual-regression gate. Older audit findings below are retained as historical rationale unless a later section explicitly marks them resolved.
 
 > The master plan describes the destination. This roadmap is the ordered, audit-driven path — what is actually true on disk today, what "working app" concretely means, and the milestones (M0–M5) that reach it without accumulating rework.
 
