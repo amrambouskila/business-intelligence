@@ -14,7 +14,7 @@ async function openChart(page: Page, sample: string, chartType: string): Promise
   });
   await page.goto('/');
   // The sidebar (and its "Charts" tab) only mounts after the lazy chart families load.
-  await page.getByRole('button', { name: 'Charts' }).waitFor();
+  await page.getByRole('button', { name: 'Charts', exact: true }).waitFor();
 
   await page.getByRole('button', { name: 'Samples' }).click();
   await page.locator(`[data-sample="${sample}"]`).click();

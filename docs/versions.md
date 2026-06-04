@@ -2,6 +2,15 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 — deck.gl switch-stress visual coverage
+
+No chart-count change: **193/193** registered charts.
+
+- Added a real-browser Playwright stress spec that repeatedly switches through deck.gl geographic MapView charts and 3D OrbitView charts, including dataset changes.
+- The stress spec fails on page errors, unfilled chart role state, or missing canvases, covering the previously deferred repeated chart-change WebGL cleanup path.
+- Hardened the visual suite against slow first renders with a 60s per-test timeout, 15s assertion timeout, and exact Charts-tab readiness locator.
+- Verification: targeted pinned-Docker Playwright stress test green (**1 test**); full pinned-Docker Playwright gate green (**194/194 tests**, including 193 chart renders plus the deck.gl switch-stress test).
+
 ### 2026-06-04 — Phase 2 CI closeout
 
 No chart-count change: **193/193** registered charts.
@@ -15,7 +24,7 @@ No chart-count change: **193/193** registered charts.
 No chart-count change: **193/193** registered charts.
 
 - Hardened the Playwright visual-regression harness by making worker count explicit and conservative: CI and Docker wrappers now default to `E2E_WORKERS=1`, with local override support.
-- Increased Playwright expectation timeout to 10s so slow first screenshots do not rely on retry behavior.
+- Increased Playwright expectation timeout to 15s so slow first screenshots do not rely on retry behavior.
 - Regenerated the pinned Docker `flow_map` baseline after the stable CI-sized render root measured 1056px wide instead of the older 1024px capture.
 - Verification: focused e2e drift/backend-doc tests green (**3 tests**); targeted pinned-Docker `flow_map` and `loess_smoother_plot` checks green; full pinned-Docker Playwright check passed **193/193** charts with `E2E_WORKERS=1`; `npx tsc --noEmit` green.
 
