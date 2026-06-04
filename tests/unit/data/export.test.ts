@@ -53,7 +53,7 @@ describe('data export helpers', () => {
     expect(dataViewToCSV({ ...view(), rows: [], rowCount: 0 })).toBe('name,value,note,when');
   });
 
-  it('builds a stable chart spec payload with active layer and filters', () => {
+  it('builds a stable chart spec payload with active layer, layer stack, and filters', () => {
     const layer: LayerConfig = {
       id: 'layer-1',
       chartType: 'bar',
@@ -61,6 +61,14 @@ describe('data export helpers', () => {
       options: { stacked: false },
       axis: 'y1',
       visible: true,
+    };
+    const hiddenLayer: LayerConfig = {
+      id: 'layer-2',
+      chartType: 'line',
+      columns: { date: 'name', value: 'value' },
+      options: { smooth: true },
+      axis: 'y2',
+      visible: false,
     };
     const filters: Filter[] = [{ id: 'filter-1', column: 'value', op: 'gt', value: 10, active: true }];
     const annotations = [{
@@ -71,13 +79,40 @@ describe('data export helpers', () => {
       createdAt: new Date('2024-02-01T00:00:00Z'),
     }];
     const exportedAnnotations = [{ ...annotations[0], createdAt: '2024-02-01T00:00:00.000Z' }];
-    const spec = buildChartSpecExport(dataset(), layer, filters, annotations, new Date('2024-02-03T04:05:06Z'));
+    const spec = buildChartSpecExport(
+      dataset(),
+      layer,
+      filters,
+      annotations,
+      new Date('2024-02-03T04:05:06Z'),
+      [layer, hiddenLayer],
+      0,
+    );
 
     expect(spec).toMatchObject({
       version: 1,
       exportedAt: '2024-02-03T04:05:06.000Z',
       dataset: { id: 'ds1', name: 'Sales Data.csv', rowCount: 3, shape: 'category_numeric' },
       activeLayer: { chartType: 'bar', columns: { category: 'name', value: 'value' }, options: { stacked: false } },
+      activeLayerIndex: 0,
+      layers: [
+        {
+          id: 'layer-1',
+          chartType: 'bar',
+          columns: { category: 'name', value: 'value' },
+          options: { stacked: false },
+          axis: 'y1',
+          visible: true,
+        },
+        {
+          id: 'layer-2',
+          chartType: 'line',
+          columns: { date: 'name', value: 'value' },
+          options: { smooth: true },
+          axis: 'y2',
+          visible: false,
+        },
+      ],
       filters,
       annotations: exportedAnnotations,
     });
@@ -85,7 +120,43 @@ describe('data export helpers', () => {
   });
 
   it('supports chart specs without an active layer', () => {
-    expect(buildChartSpecExport(dataset(), undefined, []).activeLayer).toBeNull();
+    expect(buildChartSpecExport(dataset(), undefined, [])).toMatchObject({
+      activeLayer: null,
+      activeLayerIndex: null,
+      layers: [],
+    });
+  });
+
+  it('defaults the layer stack to the active layer for legacy callers', () => {
+    const layer: LayerConfig = {
+      id: 'layer-1',
+      chartType: 'bar',
+      columns: { category: 'name', value: 'value' },
+      options: {},
+      axis: 'y1',
+      visible: true,
+    };
+    expect(buildChartSpecExport(dataset(), layer, [])).toMatchObject({
+      activeLayer: { chartType: 'bar' },
+      activeLayerIndex: 0,
+      layers: [{ id: 'layer-1', chartType: 'bar' }],
+    });
+  });
+
+  it('drops invalid active layer indexes from chart specs', () => {
+    const layer: LayerConfig = {
+      id: 'layer-1',
+      chartType: 'bar',
+      columns: { category: 'name', value: 'value' },
+      options: {},
+      axis: 'y1',
+      visible: true,
+    };
+    expect(buildChartSpecExport(dataset(), undefined, [], [], new Date('2024-01-01T00:00:00Z'), [layer], 4)).toMatchObject({
+      activeLayer: null,
+      activeLayerIndex: null,
+      layers: [{ id: 'layer-1', chartType: 'bar' }],
+    });
   });
 
   it('generates safe export filenames', () => {

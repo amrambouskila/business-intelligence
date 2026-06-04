@@ -95,7 +95,7 @@ export function DataTab() {
   function handleExportSpec() {
     downloadTextFile(
       exportFileName(activeDataset.name, 'chart-spec', 'json'),
-      chartSpecToJSON(buildChartSpecExport(activeDataset, activeLayer, filters, activeAnnotations)),
+      chartSpecToJSON(buildChartSpecExport(activeDataset, activeLayer, filters, activeAnnotations, undefined, layers, activeLayerIndex)),
       'application/json;charset=utf-8',
     );
   }

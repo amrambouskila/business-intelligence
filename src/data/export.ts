@@ -13,6 +13,8 @@ export interface ChartSpecExport {
     columns: DataSet['columns'];
   };
   activeLayer: Pick<LayerConfig, 'chartType' | 'columns' | 'options' | 'axis' | 'visible'> | null;
+  activeLayerIndex: number | null;
+  layers: Array<Pick<LayerConfig, 'id' | 'chartType' | 'columns' | 'options' | 'axis' | 'visible'>>;
   filters: Filter[];
   annotations: Array<Omit<Annotation, 'createdAt'> & { createdAt: string }>;
 }
@@ -32,7 +34,15 @@ export function buildChartSpecExport(
   filters: Filter[],
   annotations: Annotation[] = [],
   exportedAt = new Date(),
+  layers: LayerConfig[] = activeLayer ? [activeLayer] : [],
+  activeLayerIndex: number | null = activeLayer ? 0 : null,
 ): ChartSpecExport {
+  const exportedLayers = layers.map(serializeLayer);
+  const validActiveLayerIndex =
+    activeLayerIndex !== null && activeLayerIndex >= 0 && activeLayerIndex < exportedLayers.length
+      ? activeLayerIndex
+      : null;
+
   return {
     version: 1,
     exportedAt: exportedAt.toISOString(),
@@ -43,20 +53,35 @@ export function buildChartSpecExport(
       shape: dataset.shape,
       columns: dataset.columns,
     },
-    activeLayer: activeLayer
-      ? {
-          chartType: activeLayer.chartType,
-          columns: activeLayer.columns,
-          options: activeLayer.options,
-          axis: activeLayer.axis,
-          visible: activeLayer.visible,
-        }
-      : null,
+    activeLayer: activeLayer ? serializeActiveLayer(activeLayer) : null,
+    activeLayerIndex: validActiveLayerIndex,
+    layers: exportedLayers,
     filters,
     annotations: annotations.map((annotation) => ({
       ...annotation,
       createdAt: annotation.createdAt.toISOString(),
     })),
+  };
+}
+
+function serializeActiveLayer(
+  layer: LayerConfig,
+): Pick<LayerConfig, 'chartType' | 'columns' | 'options' | 'axis' | 'visible'> {
+  return {
+    chartType: layer.chartType,
+    columns: layer.columns,
+    options: layer.options,
+    axis: layer.axis,
+    visible: layer.visible,
+  };
+}
+
+function serializeLayer(
+  layer: LayerConfig,
+): Pick<LayerConfig, 'id' | 'chartType' | 'columns' | 'options' | 'axis' | 'visible'> {
+  return {
+    id: layer.id,
+    ...serializeActiveLayer(layer),
   };
 }
 

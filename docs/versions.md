@@ -2,6 +2,14 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 - Chart-spec layer stack export
+
+No chart-count change: **193/193** registered charts.
+
+- Chart-spec JSON export now includes the complete layer stack plus `activeLayerIndex`, so composed charts can export a restorable spec instead of only the active layer.
+- The legacy `activeLayer` field remains in the payload for compatibility with existing consumers.
+- Verification: focused export/Sidebar tests green (**24 tests**); full suite green (**1507 Vitest tests / 100% coverage**); `npx tsc --noEmit`, `npm run lint`, and `npm run build` green.
+
 ### 2026-06-04 — Composed PNG export
 
 No chart-count change: **193/193** registered charts.

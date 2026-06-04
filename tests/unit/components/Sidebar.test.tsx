@@ -262,6 +262,7 @@ describe('Sidebar', () => {
     useChartStore.setState({
       layers: [
         { id: 'l1', chartType: 'bar', columns: { category: 'x', value: 'value' }, axis: 'y1', options: { stacked: false }, visible: true },
+        { id: 'l2', chartType: 'line', columns: { date: 'x', value: 'value' }, axis: 'y2', options: { smooth: true }, visible: false },
       ],
       activeLayerIndex: 0,
     });
@@ -289,6 +290,25 @@ describe('Sidebar', () => {
     expect(JSON.parse(specContent)).toMatchObject({
       dataset: { id: 'ds1', name: 'export.csv', rowCount: 2 },
       activeLayer: { chartType: 'bar', columns: { category: 'x', value: 'value' }, options: { stacked: false } },
+      activeLayerIndex: 0,
+      layers: [
+        {
+          id: 'l1',
+          chartType: 'bar',
+          columns: { category: 'x', value: 'value' },
+          axis: 'y1',
+          options: { stacked: false },
+          visible: true,
+        },
+        {
+          id: 'l2',
+          chartType: 'line',
+          columns: { date: 'x', value: 'value' },
+          axis: 'y2',
+          options: { smooth: true },
+          visible: false,
+        },
+      ],
       filters: [{ id: 'filter-1', column: 'x', op: 'eq', value: 'A', active: true }],
       annotations: [{ id: 'ann-1', datasetId: 'ds1', dataPointIndex: 0, text: 'Important', createdAt: '2024-01-01T00:00:00.000Z' }],
     });
