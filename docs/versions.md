@@ -2,6 +2,14 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 - Generated artifact tracking audit
+
+No chart-count change: **193/193** registered charts.
+
+- Verified `node_modules/` and `dist/` are no longer tracked (`git ls-files node_modules` and `git ls-files dist` both return 0), with both paths ignored in `.gitignore`.
+- Updated the local-dev caveat so it no longer describes a committed macOS-ARM dependency tree as current state; fresh clones still require `npm ci` on the target OS.
+- Verification: repository tracking audit clean; docs-only change, no runtime test required.
+
 ### 2026-06-04 - Layer axis assignment controls
 
 No chart-count change: **193/193** registered charts.
