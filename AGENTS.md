@@ -176,7 +176,11 @@ business-intelligence/
     │   ├── theme-context.ts             # ThemeContext + useTheme hook
     │   └── theme-provider.tsx           # ThemeProvider component only
     ├── lib/
-    │   └── color.ts                     # formatBytes + formatNumber
+    │   ├── categoricalColor.ts          # Theme palette indexing helper
+    │   ├── downloadDataUrlFile.ts       # Browser data-URL download helper
+    │   ├── downloadTextFile.ts          # Browser text download helper
+    │   ├── formatBytes.ts               # File-size formatter
+    │   └── formatNumber.ts              # Numeric display formatter
     └── types/
         ├── data.ts                      # DataSet, DataView, ColumnMeta, ColumnType, DataShape, Filter
         └── common.ts                    # DeepPartial utility

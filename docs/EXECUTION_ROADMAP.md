@@ -110,9 +110,9 @@ Severity-ranked, evidence-grounded. Full per-dimension reports were produced by 
 
 ### 4.7 Tech-debt / standards (MEDIUM/LOW)
 - **debt1 — resolved in M4 slice 6:** all 5 stores now import Zustand's `immer` middleware and use draft-based updates; the dataset store enables Map/Set support for its `Map<string, DataSet>`.
-- **debt2 — Hard-coded colors** outside tokens (`#fff` in ErrorBoundary/Sidebar/Toolbar; `accent-blue-500` in ChartOptionsPanel).
+- **debt2 — resolved locally:** the earlier `#fff` UI literals and `accent-blue-500` control styling are gone; current source literals are confined to theme token/CSS definitions, chart theme values, and tests that intentionally construct theme fixtures.
 - **debt3 — resolved locally:** `Sidebar.tsx` is now only the tab host; `DataTab.tsx` owns dataset/filter/annotation/export controls and `LayersTab.tsx` owns layer activation/removal.
-- **debt4 — `lib/color.ts` misnamed** (only `formatBytes`/`formatNumber`; no color logic) — rename `lib/format.ts`; the real color-scale utilities don't exist yet.
+- **debt4 — resolved locally:** the former `lib/color.ts` split is complete; formatting helpers now live in `formatBytes.ts` and `formatNumber.ts`, and palette indexing lives in `categoricalColor.ts`.
 - **debt5 — Hygiene is genuinely clean** otherwise: no `any`/`@ts-ignore`/`TODO`, strict mode, typed contracts.
 
 ---
@@ -177,7 +177,7 @@ Scope (one concept per file throughout):
 - **Declarative options schema:** new `ChartOptionSpec` type + `options?: ChartOptionSpec[]` on `ChartDefinition` (additive contract change → minor bump + master-plan note). Rewrite `ChartOptionsPanel` to render generically; extract `NumberOption`/`ToggleOption` to own files; add `SelectOption`/`ColorOption`; single-source default resolver (`resolve-options.ts`). *(fixes A1)*
 - **Shared ECharts helpers** (`src/charts/echarts/`): `buildCartesianAxes`, `buildTooltip`, `buildGrid`, `themedColorAt`, `buildBaseOption`. *(fixes A2)*
 - **Empty-data / unassigned-column guard** in `EChartsBaseRenderer.render` → themed `EmptyChartState`; surface "no compatible column for role X" in `ChartArea`/`ColumnPicker`. *(fixes the NaN axis + silent-blank issue)*
-- **Color-scale utilities** (`interpolateSequential`/`interpolateDiverging`/`categoricalColor` via d3-interpolate/d3-scale-chromatic from `ThemeTokens`); rename `lib/color.ts` → `lib/format.ts`. *(fixes debt4; prerequisite for heatmaps)*
+- **Color-scale utilities** (`categoricalColor` from `ThemeTokens` plus chart-local sequential/diverging usage where needed) and the formatter split are shipped. The broader `interpolateSequential`/`interpolateDiverging` helpers were intentionally removed during review until a consumer needs them.
 - **Name-aware, consume-on-assign auto-assign** (single-cardinality, **no contract change**) in `ChartArea` — match role `open`→column named `open` before type fallback; never map two roles to the same column. *(fixes A4's correctness half; full variadic change stays in M5)*
 - **Parametrized per-chart contract test harness** iterating `chartRegistry.all()` + registry self-validation (every chart's backend has a live base class; `def.family` matches its folder — catches the `3d`/`three-d` drift). *(fixes T1 structurally)*
 - **Refactor histogram/line/scatter** onto the schema + helpers + guard (proves the abstractions on 3 real cases; **fixes the dead scatter/line controls**). Tighten histogram tests to exact bin counts *(T3)*.

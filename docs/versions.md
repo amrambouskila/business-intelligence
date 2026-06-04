@@ -2,6 +2,14 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 — Documentation debt closeout
+
+No chart-count change: **193/193** registered charts.
+
+- Updated the project guide's `src/lib` tree so it reflects the current formatter/download/palette helper files instead of the removed `lib/color.ts`.
+- Marked the roadmap's hard-coded UI color and `lib/color.ts` debts as resolved based on current source: UI color literals are gone, `formatBytes.ts`/`formatNumber.ts` are split, and `categoricalColor.ts` owns palette indexing.
+- Verification: source audit found no remaining `#fff`, `text-white`, `bg-white`, or `accent-blue-500` literals in `src/components`, `src/charts`, `src/lib`, `src/stores`, `src/data`, or `src/app`; the only app-source `#ffffff` match is in `src/theme/tokens.ts`.
+
 ### 2026-06-04 — Sidebar structure cleanup
 
 No chart-count change: **193/193** registered charts.
