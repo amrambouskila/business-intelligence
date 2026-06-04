@@ -1,5 +1,10 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { loadFile } from '@/data/loader';
+import { parseExcelFile } from '@/data/parsers/excel-parser';
+
+vi.mock('@/data/parsers/excel-parser', () => ({
+  parseExcelFile: vi.fn(),
+}));
 
 function makeFile(parts: BlobPart[], name: string, type = ''): File {
   const file = new File(parts, name, { type });
@@ -73,6 +78,36 @@ describe('loadFile', () => {
     const ds = await loadFile(file);
     expect(ds.rowCount).toBe(3);
     expect(ds.columns[0].name).toBe('n');
+  });
+
+  it('routes Excel workbooks through the spreadsheet parser', async () => {
+    vi.mocked(parseExcelFile).mockResolvedValue({
+      columnNames: ['date', 'value'],
+      rows: [
+        { date: '2026-01-01', value: 10 },
+        { date: '2026-01-02', value: 12 },
+      ],
+    });
+    const file = new File(['xlsx bytes are owned by the parser test'], 'workbook.xlsx');
+
+    const ds = await loadFile(file);
+    expect(parseExcelFile).toHaveBeenCalledWith(file);
+    expect(ds.name).toBe('workbook.xlsx');
+    expect(ds.rowCount).toBe(2);
+    expect(ds.shape).toBe('time_numeric');
+    expect(ds.columnArrays.value).toEqual([10, 12]);
+  });
+
+  it('accepts macro-enabled Excel workbook extensions through the same parser', async () => {
+    vi.mocked(parseExcelFile).mockResolvedValue({
+      columnNames: ['category', 'value'],
+      rows: [{ category: 'A', value: 2 }, { category: 'B', value: 3 }],
+    });
+    const file = new File(['xlsm bytes are owned by the parser test'], 'workbook.xlsm');
+
+    const ds = await loadFile(file);
+    expect(parseExcelFile).toHaveBeenCalledWith(file);
+    expect(ds.shape).toBe('category_numeric');
   });
 
   it('throws on an unsupported extension', async () => {

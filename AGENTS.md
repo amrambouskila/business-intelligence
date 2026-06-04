@@ -152,6 +152,7 @@ business-intelligence/
     │   ├── sample-data.ts               # Stock + numeric sample generators
     │   └── parsers/
     │       ├── csv-parser.ts            # parseCSV, parseCSVFile
+    │       ├── excel-parser.ts          # parseExcelFile (.xlsx/.xlsm)
     │       └── json-parser.ts           # parseJSON
     ├── stores/                          # Zustand stores: dataset, chart, ui, filter, annotation
     ├── components/
@@ -201,7 +202,7 @@ business-intelligence/
 
 ### Data Pipeline
 ```
-File Upload → PapaParse (CSV) / JSON.parse → rows + columns
+File Upload → PapaParse (CSV/TSV) / read-excel-file (XLSX/XLSM) / JSON.parse → rows + columns
   → analyzeColumns() → ColumnMeta[] with type/stats
   → detectShape() → DataShape (ohlcv, geo_points, hierarchy, etc.)
   → applyFilters() → DataView

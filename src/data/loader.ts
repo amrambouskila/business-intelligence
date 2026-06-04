@@ -1,5 +1,6 @@
 import type { DataSet } from '@/types/data';
 import { parseCSVFile } from './parsers/csv-parser';
+import { parseExcelFile } from './parsers/excel-parser';
 import { parseJSON } from './parsers/json-parser';
 import { analyzeColumns } from './shape-detector';
 import { detectShape } from './shape-detector';
@@ -18,6 +19,10 @@ export async function loadFile(file: File): Promise<DataSet> {
 
   if (ext === 'csv' || ext === 'tsv') {
     const result = await parseCSVFile(file);
+    rows = result.rows;
+    columnNames = result.columnNames;
+  } else if (ext === 'xlsx' || ext === 'xlsm') {
+    const result = await parseExcelFile(file);
     rows = result.rows;
     columnNames = result.columnNames;
   } else if (ext === 'json') {

@@ -87,7 +87,7 @@ graph LR
 
 ### Data contracts (sacred — see global CLAUDE.md §7)
 
-- `DataSet` — loaded dataset with rows, columns, and `ColumnMeta[]`
+- `DataSet` — loaded dataset with rows, columns, and `ColumnMeta[]`; loaders currently cover CSV/TSV, JSON, and Excel `.xlsx`/`.xlsm`.
 - `ColumnMeta` — per-column type/stats/distribution
 - `DataShape` — enum of detected shapes (see CHARTS.md for full list)
 - `ChartDefinition` — metadata + `createRenderer()` factory; carries an optional declarative `options?: ChartOptionSpec[]` (added M1, 2026-06-03 — additive/backward-compatible, minor bump) that `ChartOptionsPanel` renders generically
@@ -233,7 +233,7 @@ A chart type is done when:
 
 ## 6. Open questions
 
-- **Parquet parser choice** — `parquet-wasm` vs `hyparquet` vs Arrow JS? Decide at Phase 2 end / Phase 4 start.
+- **Parquet parser choice** — `parquet-wasm` vs `hyparquet` vs Arrow JS? Decide at Phase 2 end / Phase 4 start. Excel `.xlsx`/`.xlsm` import is already implemented; legacy binary `.xls` remains out of scope until explicitly chosen.
 - **Geo basemaps** — all current geographic charts render pure deck.gl layers without a basemap; decide MapLibre vs pure deck.gl tile layers before adding richer real-world polygon/tile data sources.
 - **3D interaction UX** — current 3D charts use deck.gl OrbitView controls only; decide on gizmos/slicing/clipping only if future richer 3D analysis requires them.
 - **Chart spec serialization format** — internal JSON shape for save/load of chart configs. Design before Phase 3 export work.

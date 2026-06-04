@@ -2,6 +2,15 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 — Excel workbook import
+
+No chart-count change: **193/193** registered charts.
+
+- Added Excel `.xlsx`/`.xlsm` import via `read-excel-file`, routing workbooks into the same `DataSet` pipeline as CSV/TSV and JSON.
+- The parser uses the first non-empty row as headers, skips blank data rows, fills missing trailing cells with `null`, generates stable names for blank header cells, and converts Date cells to ISO strings before the existing import-normalization pass.
+- Added real generated-XLSX parser coverage plus loader routing coverage for `.xlsx` and `.xlsm`.
+- Verification: focused Excel parser/loader tests green (**14 tests**); full suite green (**1487 Vitest tests / 100% coverage**); `npx tsc --noEmit`, `npm run lint`, `npm run build`, and `npm audit` green.
+
 ### 2026-06-04 — First regl catalog chart: image_raster_plot
 
 No chart-count change: **193/193** registered charts.

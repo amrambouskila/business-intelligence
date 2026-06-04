@@ -43,26 +43,28 @@ const canvas2dStub = {
   isPointInPath: () => false,
 };
 
-const originalGetContext = HTMLCanvasElement.prototype.getContext;
-HTMLCanvasElement.prototype.getContext = function (
-  this: HTMLCanvasElement,
-  contextId: string,
-  ...args: unknown[]
-) {
-  if (contextId === '2d') {
-    return { canvas: this, ...canvas2dStub } as unknown as RenderingContext;
-  }
-  if (contextId === 'webgl' || contextId === 'webgl2' || contextId === 'experimental-webgl') {
-    return null;
-  }
-  return (
-    originalGetContext as unknown as (
-      this: HTMLCanvasElement,
-      id: string,
-      ...rest: unknown[]
-    ) => RenderingContext | null
-  )?.call(this, contextId, ...args) ?? null;
-} as typeof HTMLCanvasElement.prototype.getContext;
+if (typeof HTMLCanvasElement !== 'undefined') {
+  const originalGetContext = HTMLCanvasElement.prototype.getContext;
+  HTMLCanvasElement.prototype.getContext = function (
+    this: HTMLCanvasElement,
+    contextId: string,
+    ...args: unknown[]
+  ) {
+    if (contextId === '2d') {
+      return { canvas: this, ...canvas2dStub } as unknown as RenderingContext;
+    }
+    if (contextId === 'webgl' || contextId === 'webgl2' || contextId === 'experimental-webgl') {
+      return null;
+    }
+    return (
+      originalGetContext as unknown as (
+        this: HTMLCanvasElement,
+        id: string,
+        ...rest: unknown[]
+      ) => RenderingContext | null
+    )?.call(this, contextId, ...args) ?? null;
+  } as typeof HTMLCanvasElement.prototype.getContext;
+}
 
 afterEach(() => {
   cleanup();
