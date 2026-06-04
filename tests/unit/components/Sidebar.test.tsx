@@ -160,6 +160,30 @@ describe('Sidebar', () => {
     expect(useFilterStore.getState().filters).toHaveLength(0);
   });
 
+  it('shows the filtered row count in the Data tab', () => {
+    useDatasetStore.setState({
+      datasets: new Map([[
+        'ds1',
+        dataset('ds1', 'filter-count.csv', [
+          { x: 'A', value: 10 },
+          { x: 'B', value: 20 },
+        ]),
+      ]]),
+      activeDatasetId: 'ds1',
+      isLoading: false,
+      loadProgress: 100,
+    });
+    render(<Sidebar />);
+    expect(screen.getByText('Showing 2 of 2 rows')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Filter column'), { target: { value: 'x' } });
+    fireEvent.change(screen.getByLabelText('Filter operator'), { target: { value: 'eq' } });
+    fireEvent.change(screen.getByLabelText('Filter value'), { target: { value: 'A' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
+
+    expect(screen.getByText('Showing 1 of 2 rows')).toBeInTheDocument();
+  });
+
   it('keeps non-numeric values when a numeric filter operator receives text', () => {
     useDatasetStore.setState({
       datasets: new Map([['ds1', dataset('ds1', 'filterable.csv', [{ x: 'A', value: 10 }])]]),

@@ -104,6 +104,7 @@ function DataTab() {
   const canAddFilter = selectedFilterColumn.length > 0 && filterValue.trim().length > 0;
   const activeLayer = layers[activeLayerIndex];
   const activeAnnotations = annotations.filter((annotation) => annotation.datasetId === activeDataset.id);
+  const filteredView = applyFilters(activeDataset, filters);
   const parsedAnnotationIndex = Number(annotationIndex);
   const canAddAnnotation =
     Number.isInteger(parsedAnnotationIndex) &&
@@ -134,10 +135,9 @@ function DataTab() {
   }
 
   function handleExportCSV() {
-    const view = applyFilters(activeDataset, filters);
     downloadTextFile(
       exportFileName(activeDataset.name, 'filtered', 'csv'),
-      dataViewToCSV(view),
+      dataViewToCSV(filteredView),
       'text/csv;charset=utf-8',
     );
   }
@@ -310,6 +310,9 @@ function DataTab() {
         <h4 className="text-xs font-semibold mb-1" style={{ color: 'var(--text-secondary)' }}>
           Filters
         </h4>
+        <p className="mb-1 text-[10px]" style={{ color: 'var(--text-muted)' }}>
+          Showing {formatNumber(filteredView.rowCount, 0)} of {formatNumber(activeDataset.rowCount, 0)} rows
+        </p>
         <div className="flex flex-col gap-1">
           <select
             aria-label="Filter column"

@@ -2,6 +2,14 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 — Filter row-count feedback
+
+No chart-count change: **193/193** registered charts.
+
+- The Data tab now shows `Showing N of M rows` above the filter controls so users can see the immediate impact of active filters.
+- CSV export now reuses the same filtered `DataView` computed for the UI row-count summary, keeping filter feedback and export behavior aligned.
+- Verification: focused Sidebar tests green (**16 tests**); full suite green (**1494 Vitest tests / 100% coverage**); `npx tsc --noEmit`, `npm run lint`, and `npm run build` green.
+
 ### 2026-06-04 — Responsive workspace polish
 
 No chart-count change: **193/193** registered charts.
