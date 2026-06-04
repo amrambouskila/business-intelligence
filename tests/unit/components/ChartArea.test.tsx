@@ -178,6 +178,19 @@ describe('ChartArea', () => {
     expect(screen.getByTestId('stub-chart')).toBeInTheDocument();
   });
 
+  it('does not render the active chart when the layer is hidden', () => {
+    useDatasetStore.getState().addDataset(makeDS());
+    useChartStore.setState({
+      layers: [{ id: 'l1', chartType: stub.type, columns: {}, axis: 'y1', options: {}, visible: false }],
+      activeLayerIndex: 0,
+    });
+    render(<ChartArea />);
+    expect(screen.getByText('Area Stub')).toBeInTheDocument();
+    expect(screen.getByText('Active layer is hidden')).toBeInTheDocument();
+    expect(screen.getByTestId('chart-render')).toHaveAttribute('data-chart-hidden', 'true');
+    expect(screen.queryByTestId('stub-chart')).toBeNull();
+  });
+
   it('wires the ColumnPicker onChange up to chartStore.updateLayer', async () => {
     const { fireEvent } = await import('@testing-library/react');
     useDatasetStore.getState().addDataset(makeDS());

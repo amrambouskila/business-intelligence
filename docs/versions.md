@@ -2,6 +2,15 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 — Layer visibility wiring
+
+No chart-count change: **193/193** registered charts.
+
+- Added hide/show controls to the Layers tab, backed by the existing `LayerConfig.visible` state.
+- `ChartArea` now respects hidden active layers by unmounting the chart renderer and showing a hidden-layer state.
+- Full multi-layer compositing and `axis: y1/y2` behavior remain future Phase 3 work.
+- Verification: focused Sidebar/ChartArea tests green (**31 tests**); full suite green (**1497 Vitest tests / 100% coverage**); `npx tsc --noEmit`, `npm run lint`, and `npm run build` green.
+
 ### 2026-06-04 — Documentation debt closeout
 
 No chart-count change: **193/193** registered charts.

@@ -177,10 +177,15 @@ export function ChartArea() {
         key={config.chartType}
         data-testid="chart-render"
         data-chart-active={config.chartType}
+        data-chart-hidden={activeLayer.visible ? 'false' : 'true'}
         data-chart-unfilled={unfilled.length > 0 ? 'true' : 'false'}
         className="absolute inset-0 top-9 min-h-0"
       >
-        {unfilled.length > 0 ? (
+        {!activeLayer.visible ? (
+          <div className="w-full h-full flex items-center justify-center text-sm" style={{ color: 'var(--text-muted)' }}>
+            Active layer is hidden
+          </div>
+        ) : unfilled.length > 0 ? (
           <div className="w-full h-full flex items-center justify-center text-sm" style={{ color: 'var(--text-muted)' }}>
             No compatible column for: {unfilled.map((r) => r.label).join(', ')}
           </div>

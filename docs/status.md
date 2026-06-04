@@ -83,6 +83,8 @@ Historical M5 3D slice 6 verification: focused 3D/registry/sample/e2e-coverage t
 
 Empirically verified for Phase 2 catalog completion: focused QQ/confusion-matrix/registry/e2e-coverage/suggestion tests clean (**49 tests**), full suite green (**1463 Vitest tests / 100% coverage**), `npm run typecheck`, `npx tsc --noEmit`, `npm run lint`, `npm run build`, and `npm audit` all green. Chart status is **193/193** with every family at target. The pinned Docker Playwright update pass wrote the `confusion-matrix-chart` baseline and passed **193/193** charts with `--workers=4`; the follow-up Docker check passed **193/193** charts with `--workers=4`.
 
+- **Post-completion layer visibility wiring (shipped locally):** the Layers tab now exposes each layer's existing `visible` state with hide/show controls, and `ChartArea` respects hidden active layers by unmounting the chart renderer and showing a hidden-layer state. Full multi-layer compositing and `axis: y1/y2` shared-axis behavior remain future Phase 3 work.
+
 ## What's Built
 
 - **Chart Registry**: `ChartRegistry` singleton with register/get/getByFamily/suggestForShape/all/families/count, duplicate-register throws

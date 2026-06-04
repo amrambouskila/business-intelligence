@@ -338,6 +338,22 @@ describe('Sidebar', () => {
     expect(useChartStore.getState().activeLayerIndex).toBe(1);
   });
 
+  it('Layers tab - toggles layer visibility', async () => {
+    useChartStore.setState({
+      layers: [
+        { id: 'l1', chartType: 'histogram', columns: {}, axis: 'y1', options: {}, visible: true },
+      ],
+      activeLayerIndex: 0,
+    });
+    const user = userEvent.setup();
+    render(<Sidebar />);
+    await user.click(screen.getByRole('button', { name: 'Layers' }));
+    await user.click(screen.getByRole('button', { name: 'Hide histogram' }));
+    expect(useChartStore.getState().layers[0].visible).toBe(false);
+    await user.click(screen.getByRole('button', { name: 'Show histogram' }));
+    expect(useChartStore.getState().layers[0].visible).toBe(true);
+  });
+
   it('Style tab renders the options panel', async () => {
     const user = userEvent.setup();
     render(<Sidebar />);

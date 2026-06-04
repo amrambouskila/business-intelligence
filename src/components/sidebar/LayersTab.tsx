@@ -1,9 +1,11 @@
+import { Eye, EyeOff } from 'lucide-react';
 import { useChartStore } from '@/stores/chart-store';
 
 export function LayersTab() {
   const layers = useChartStore((s) => s.layers);
   const activeLayerIndex = useChartStore((s) => s.activeLayerIndex);
   const setActiveLayer = useChartStore((s) => s.setActiveLayer);
+  const updateLayer = useChartStore((s) => s.updateLayer);
   const removeLayer = useChartStore((s) => s.removeLayer);
 
   if (layers.length === 0) {
@@ -23,9 +25,20 @@ export function LayersTab() {
           style={{
             background: activeLayerIndex === i ? 'var(--accent)' : 'var(--bg-tertiary)',
             color: activeLayerIndex === i ? 'var(--bg-primary)' : 'var(--text-primary)',
+            opacity: layer.visible ? 1 : 0.6,
           }}
         >
-          <button type="button" onClick={() => setActiveLayer(i)} className="truncate text-left">
+          <button
+            type="button"
+            onClick={() => updateLayer(i, { visible: !layer.visible })}
+            className="mr-1 flex h-5 w-5 shrink-0 items-center justify-center rounded"
+            style={{ color: activeLayerIndex === i ? 'var(--bg-primary)' : 'var(--text-secondary)' }}
+            title={layer.visible ? `Hide ${layer.chartType}` : `Show ${layer.chartType}`}
+            aria-label={layer.visible ? `Hide ${layer.chartType}` : `Show ${layer.chartType}`}
+          >
+            {layer.visible ? <Eye size={12} /> : <EyeOff size={12} />}
+          </button>
+          <button type="button" onClick={() => setActiveLayer(i)} className="min-w-0 flex-1 truncate text-left">
             {layer.chartType}
           </button>
           <button
