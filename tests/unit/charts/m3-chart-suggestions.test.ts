@@ -5,7 +5,7 @@ import type { ColumnMeta, ColumnType, DataShape } from '@/types/data';
 
 beforeAll(async () => {
   await ensureAllFamiliesLoaded();
-});
+}, 60_000);
 
 function col(name: string, type: ColumnType): ColumnMeta {
   return { name, type, nullable: false, uniqueCount: 3, nullCount: 0 };

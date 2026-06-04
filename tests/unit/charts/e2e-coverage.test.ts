@@ -8,7 +8,7 @@ import { CHART_SAMPLE } from '../../e2e/chart-samples';
 // entry, and no entry may point at a non-existent sample or chart type.
 beforeAll(async () => {
   await ensureAllFamiliesLoaded();
-});
+}, 60_000);
 
 describe('e2e visual-gate coverage', () => {
   it('maps every registered chart to a sample dataset', () => {

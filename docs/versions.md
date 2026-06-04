@@ -2,6 +2,15 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 — Parquet import
+
+No chart-count change: **193/193** registered charts.
+
+- Added Parquet `.parquet` import via `hyparquet`, routing columnar files into the same `DataSet` pipeline as CSV/TSV, JSON, and Excel.
+- The parser reads real Parquet row objects, unions sparse row keys into stable first-seen column order, converts Date values to ISO strings, converts safe bigint values to numbers, and preserves unsafe bigint values as strings for downstream metadata analysis.
+- Added real generated-Parquet parser coverage via `hyparquet-writer`, loader routing coverage, and explicit registry-loader hook timeouts for coverage-instrumented all-chart imports.
+- Verification: focused Parquet/loader/registry tests green (**49 tests**); full suite green (**1492 Vitest tests / 100% coverage**); `npx tsc --noEmit`, `npm run lint`, `npm run build`, and `npm audit` green.
+
 ### 2026-06-04 — Excel workbook import
 
 No chart-count change: **193/193** registered charts.

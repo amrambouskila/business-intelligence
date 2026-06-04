@@ -22,7 +22,7 @@ const VALID_SHAPES: ReadonlySet<DataShape> = new Set<DataShape>([
 
 beforeAll(async () => {
   await ensureAllFamiliesLoaded();
-});
+}, 60_000);
 
 describe('chart registry contract', () => {
   it('registers at least the implemented charts', () => {

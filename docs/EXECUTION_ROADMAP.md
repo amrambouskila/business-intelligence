@@ -41,7 +41,7 @@ graph LR
         V6[Filter / annotate / export]
     end
     subgraph Reality["REALITY (on disk)"]
-        R1[CSV/TSV + JSON + XLSX/XLSM;<br/>Parquet pending]
+        R1[CSV/TSV + JSON + XLSX/XLSM + Parquet;<br/>legacy XLS pending]
         R2[detectShape works;<br/>4 shapes unreachable]
         R3[suggester = DEAD CODE;<br/>flat unranked list]
         R4[3 charts; 10/13<br/>families empty]
@@ -95,7 +95,7 @@ Severity-ranked, evidence-grounded. Full per-dimension reports were produced by 
 - **P1 — `inferType` previously trusted PapaParse coercion** → thousands separators (`"1,234"`), currency (`"$5"`), localized decimals (`"1.234,50"`), and date-like CSV fields could silently become `category`/`text`, so shape detection collapsed common datasets to `generic`. **M4 slices 3 and 8 now normalize common formatted numerics, locale-style numeric punctuation, and clear date-like column values before analysis**; ambiguous localized dates are intentionally preserved.
 - **P2 — 4 dead `DataShape` variants** — `matrix`, `geo_polygons`, `survival`, `event_log` can never be emitted by `detectShape`, yet families target them.
 - **P3 — `category_numeric` requires exactly 1 numeric column** (`shape-detector.ts:163`); `category + 2 numerics` (grouped-bar data) falls through to `generic`.
-- **P4 — partially resolved:** CSV/TSV, JSON, and Excel `.xlsx`/`.xlsm` parsers are implemented. Parquet remains pending and tied to the Phase 4 scale decision; legacy binary `.xls` is still unsupported.
+- **P4 — frontend formats resolved:** CSV/TSV, JSON, Excel `.xlsx`/`.xlsm`, and Parquet `.parquet` parsers are implemented. Legacy binary `.xls` is still unsupported, and Phase 4 still owns backend-assisted Parquet/DuckDB scale for files that exceed browser memory.
 - **P5 — Magic-number thresholds** throughout `shape-detector.ts` (unnamed), and the date name-heuristic matches the bare substring `'at'` (so `category`, `latitude`, `status` hit the datetime path).
 
 ### 4.5 UI/UX gaps (HIGH/MEDIUM)
@@ -228,7 +228,7 @@ Scope:
 - **Variadic/typed-group `ColumnRole`** — add cardinality `'single'|'multiple'`; change `ChartConfig.columns` to `Record<string, string | string[]>` (**sacred contract change → master-plan update + minor bump; flag before doing**). Enables pairplot/parallel-coords/radar and correct OHLCV/source-target-value auto-assign. *(fixes A4 fully)*
 - **Dual-table node+edge data model** for network graph / force-directed / arc / dependency / adjacency.
 - **Stats/compute layer** (`src/data/stats/`): KDE, quantiles, normal-quantile, regression, correlation/PCA, KM-survival, ACF/PACF — reference-validated. (Gates ~30 "hard" charts across distribution/relationships/statistical.)
-- **Excel + Parquet parsers** — Excel `.xlsx`/`.xlsm` is implemented through `read-excel-file`; Parquet remains future Phase 4 scale work. *(continues P4)*
+- **Excel + Parquet parsers** — Excel `.xlsx`/`.xlsm` is implemented through `read-excel-file`; client-side Parquet `.parquet` import is implemented through `hyparquet`. Backend-assisted Parquet scale remains Phase 4 work. *(continues P4)*
 - CI assertion: no chart references a backend without a live base class; re-scope `CHARTS.md` to annotate each chart's backend.
 - Then mass-produce: geographic, 3D, finance custom-geometry (renko/kagi/P&F), multivariate, and the remaining ECharts families (hierarchical, network-flow, statistical, finance OHLC, specialized).
 
@@ -268,7 +268,7 @@ Exit criteria: `regl` has a working base class + wrapper; `canvas2d` and `regl` 
 | Specialized | 18 | ECharts + faceting infra | 11 / 7 | L |
 | 3D | 6 | **deck.gl Orbit** (complete) | 6 / 0 | L |
 
-~130–140 of 193 are reachable through ECharts (native or D3-compute→ECharts) once M1's infra lands. **Historical hard-blockers are mostly resolved for Phase 2 chart count**: geographic and 3D are implemented through deck.gl, Canvas2D has a live catalog chart, regl has a live base plus `image_raster_plot`, and Excel workbook import is implemented. Remaining richer future variants are blocked mainly on variadic roles, dual-table graph data, regl shader-file conventions/broader migrations, and Parquet/backend scale work.
+~130–140 of 193 are reachable through ECharts (native or D3-compute→ECharts) once M1's infra lands. **Historical hard-blockers are mostly resolved for Phase 2 chart count**: geographic and 3D are implemented through deck.gl, Canvas2D has a live catalog chart, regl has a live base plus `image_raster_plot`, and Excel/Parquet import is implemented. Remaining richer future variants are blocked mainly on variadic roles, dual-table graph data, regl shader-file conventions/broader migrations, and backend-assisted large-dataset scale work.
 
 ---
 

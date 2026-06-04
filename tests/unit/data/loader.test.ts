@@ -1,9 +1,13 @@
 import { describe, it, expect, vi } from 'vitest';
 import { loadFile } from '@/data/loader';
 import { parseExcelFile } from '@/data/parsers/excel-parser';
+import { parseParquetFile } from '@/data/parsers/parquet-parser';
 
 vi.mock('@/data/parsers/excel-parser', () => ({
   parseExcelFile: vi.fn(),
+}));
+vi.mock('@/data/parsers/parquet-parser', () => ({
+  parseParquetFile: vi.fn(),
 }));
 
 function makeFile(parts: BlobPart[], name: string, type = ''): File {
@@ -108,6 +112,19 @@ describe('loadFile', () => {
     const ds = await loadFile(file);
     expect(parseExcelFile).toHaveBeenCalledWith(file);
     expect(ds.shape).toBe('category_numeric');
+  });
+
+  it('routes Parquet files through the parquet parser', async () => {
+    vi.mocked(parseParquetFile).mockResolvedValue({
+      columnNames: ['x', 'y'],
+      rows: [{ x: 2, y: 3 }, { x: 4, y: 5 }],
+    });
+    const file = new File(['parquet bytes are owned by the parser test'], 'points.parquet');
+
+    const ds = await loadFile(file);
+    expect(parseParquetFile).toHaveBeenCalledWith(file);
+    expect(ds.shape).toBe('two_numeric');
+    expect(ds.columnArrays.x).toEqual([2, 4]);
   });
 
   it('throws on an unsupported extension', async () => {

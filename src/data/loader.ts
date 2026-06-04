@@ -2,6 +2,7 @@ import type { DataSet } from '@/types/data';
 import { parseCSVFile } from './parsers/csv-parser';
 import { parseExcelFile } from './parsers/excel-parser';
 import { parseJSON } from './parsers/json-parser';
+import { parseParquetFile } from './parsers/parquet-parser';
 import { analyzeColumns } from './shape-detector';
 import { detectShape } from './shape-detector';
 import { normalizeParsedRows } from './normalize-values';
@@ -28,6 +29,10 @@ export async function loadFile(file: File): Promise<DataSet> {
   } else if (ext === 'json') {
     const text = await file.text();
     const result = parseJSON(text);
+    rows = result.rows;
+    columnNames = result.columnNames;
+  } else if (ext === 'parquet') {
+    const result = await parseParquetFile(file);
     rows = result.rows;
     columnNames = result.columnNames;
   } else {
