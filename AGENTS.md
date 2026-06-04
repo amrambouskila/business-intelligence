@@ -162,7 +162,9 @@ business-intelligence/
     │   │   ├── ColumnPicker.tsx         # Column <select> in the header
     │   │   └── ChartCanvas.tsx          # Renderer dispatch with per-chartType memo
     │   ├── sidebar/
-    │   │   ├── Sidebar.tsx              # Tab host (also contains DataTab, LayersTab, StyleTab)
+    │   │   ├── Sidebar.tsx              # Tab host
+    │   │   ├── DataTab.tsx              # Dataset metadata, preview, filters, annotations, data/spec export
+    │   │   ├── LayersTab.tsx            # Layer activation/removal list
     │   │   ├── ChartPicker.tsx          # Family browser + chart type list
     │   │   └── ChartOptionsPanel.tsx    # Per-chart-type option controls
     │   ├── toolbar/

@@ -111,7 +111,7 @@ Severity-ranked, evidence-grounded. Full per-dimension reports were produced by 
 ### 4.7 Tech-debt / standards (MEDIUM/LOW)
 - **debt1 — resolved in M4 slice 6:** all 5 stores now import Zustand's `immer` middleware and use draft-based updates; the dataset store enables Map/Set support for its `Map<string, DataSet>`.
 - **debt2 — Hard-coded colors** outside tokens (`#fff` in ErrorBoundary/Sidebar/Toolbar; `accent-blue-500` in ChartOptionsPanel).
-- **debt3 — `Sidebar.tsx` is a god file** (Sidebar + DataTab + LayersTab + StyleTab) — violates one-concept-per-file.
+- **debt3 — resolved locally:** `Sidebar.tsx` is now only the tab host; `DataTab.tsx` owns dataset/filter/annotation/export controls and `LayersTab.tsx` owns layer activation/removal.
 - **debt4 — `lib/color.ts` misnamed** (only `formatBytes`/`formatNumber`; no color logic) — rename `lib/format.ts`; the real color-scale utilities don't exist yet.
 - **debt5 — Hygiene is genuinely clean** otherwise: no `any`/`@ts-ignore`/`TODO`, strict mode, typed contracts.
 

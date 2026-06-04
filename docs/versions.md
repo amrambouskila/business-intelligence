@@ -2,6 +2,14 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 — Sidebar structure cleanup
+
+No chart-count change: **193/193** registered charts.
+
+- Split the sidebar tab implementations by concept: `Sidebar.tsx` is now only the tab host, `DataTab.tsx` owns dataset/filter/annotation/export controls, and `LayersTab.tsx` owns layer activation/removal.
+- Kept the public `Sidebar` import stable and preserved existing UI behavior through the existing component coverage.
+- Verification: focused Sidebar tests green (**16 tests**); full suite green (**1495 Vitest tests / 100% coverage**); `npx tsc --noEmit`, `npm run lint`, `npm run build`, and `npm audit` green.
+
 ### 2026-06-04 — deck.gl switch-stress visual coverage
 
 No chart-count change: **193/193** registered charts.
