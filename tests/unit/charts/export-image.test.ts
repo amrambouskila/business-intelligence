@@ -34,6 +34,72 @@ describe('chart image export helpers', () => {
     expect(chartRootToPNGDataUrl(rootWithCanvas(canvas))).toBe('data:image/png;base64,chart');
   });
 
+  it('composites multiple exportable canvases into one PNG data URL', () => {
+    const root = document.createElement('div');
+    const first = document.createElement('canvas');
+    const second = document.createElement('canvas');
+    first.width = 20;
+    first.height = 10;
+    second.width = 30;
+    second.height = 12;
+    root.append(first, second);
+    vi.spyOn(root, 'getBoundingClientRect').mockReturnValue({ left: 10, top: 20, width: 40, height: 30 } as DOMRect);
+    vi.spyOn(first, 'getBoundingClientRect').mockReturnValue({ left: 10, top: 20, width: 20, height: 10 } as DOMRect);
+    vi.spyOn(second, 'getBoundingClientRect').mockReturnValue({ left: 15, top: 25, width: 30, height: 12 } as DOMRect);
+    const drawImage = vi.fn();
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+      drawImage,
+    } as unknown as CanvasRenderingContext2D);
+    vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockReturnValue('data:image/png;base64,composite');
+
+    expect(chartRootToPNGDataUrl(root)).toBe('data:image/png;base64,composite');
+    expect(drawImage).toHaveBeenNthCalledWith(1, first, 0, 0);
+    expect(drawImage).toHaveBeenNthCalledWith(2, second, 5, 5);
+  });
+
+  it('composites canvases without a root element at zero offset', () => {
+    const root = document.createDocumentFragment();
+    const first = document.createElement('canvas');
+    const second = document.createElement('canvas');
+    first.width = 2;
+    first.height = 3;
+    second.width = 4;
+    second.height = 5;
+    root.append(first, second);
+    const drawImage = vi.fn();
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+      drawImage,
+    } as unknown as CanvasRenderingContext2D);
+    vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockReturnValue('data:image/png;base64,fragment');
+
+    expect(chartRootToPNGDataUrl(root)).toBe('data:image/png;base64,fragment');
+    expect(drawImage).toHaveBeenNthCalledWith(1, first, 0, 0);
+    expect(drawImage).toHaveBeenNthCalledWith(2, second, 0, 0);
+  });
+
+  it('clamps negative canvas offsets when compositing', () => {
+    const root = document.createElement('div');
+    const canvas = document.createElement('canvas');
+    const overlay = document.createElement('canvas');
+    canvas.width = 10;
+    canvas.height = 10;
+    overlay.width = 10;
+    overlay.height = 10;
+    root.append(canvas, overlay);
+    vi.spyOn(root, 'getBoundingClientRect').mockReturnValue({ left: 20, top: 20, width: 10, height: 10 } as DOMRect);
+    vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue({ left: 15, top: 15, width: 10, height: 10 } as DOMRect);
+    vi.spyOn(overlay, 'getBoundingClientRect').mockReturnValue({ left: 25, top: 26, width: 10, height: 10 } as DOMRect);
+    const drawImage = vi.fn();
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+      drawImage,
+    } as unknown as CanvasRenderingContext2D);
+    vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockReturnValue('data:image/png;base64,clamped');
+
+    expect(chartRootToPNGDataUrl(root)).toBe('data:image/png;base64,clamped');
+    expect(drawImage).toHaveBeenNthCalledWith(1, canvas, 0, 0);
+    expect(drawImage).toHaveBeenNthCalledWith(2, overlay, 5, 6);
+  });
+
   it('returns null when there is no exportable PNG canvas', () => {
     expect(chartRootToPNGDataUrl(null)).toBeNull();
     expect(chartRootToPNGDataUrl(document.createElement('div'))).toBeNull();
@@ -48,6 +114,37 @@ describe('chart image export helpers', () => {
     jpegCanvas.height = 1;
     vi.spyOn(jpegCanvas, 'toDataURL').mockReturnValue('data:image/jpeg;base64,chart');
     expect(chartRootToPNGDataUrl(rootWithCanvas(jpegCanvas))).toBeNull();
+  });
+
+  it('returns null when multiple canvases cannot create a composite context', () => {
+    const root = document.createElement('div');
+    const first = document.createElement('canvas');
+    const second = document.createElement('canvas');
+    first.width = 1;
+    first.height = 1;
+    second.width = 1;
+    second.height = 1;
+    root.append(first, second);
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
+
+    expect(chartRootToPNGDataUrl(root)).toBeNull();
+  });
+
+  it('returns null when a composite canvas serializes to a non-PNG URL', () => {
+    const root = document.createElement('div');
+    const first = document.createElement('canvas');
+    const second = document.createElement('canvas');
+    first.width = 1;
+    first.height = 1;
+    second.width = 1;
+    second.height = 1;
+    root.append(first, second);
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+      drawImage: vi.fn(),
+    } as unknown as CanvasRenderingContext2D);
+    vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockReturnValue('data:image/jpeg;base64,composite');
+
+    expect(chartRootToPNGDataUrl(root)).toBeNull();
   });
 
   it('returns null when canvas serialization throws', () => {

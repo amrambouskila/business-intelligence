@@ -2,6 +2,15 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 — Composed PNG export
+
+No chart-count change: **193/193** registered charts.
+
+- Chart PNG export now composites multiple exportable canvases in DOM order so visible chart-layer overlays export as one image instead of only the first canvas.
+- Single-canvas exports keep the existing direct serialization path; compositing fails closed when a canvas context or PNG data URL is unavailable.
+- SVG export remains first-SVG-node serialization.
+- Verification: focused export-image tests green (**12 tests**); full suite green (**1505 Vitest tests / 100% coverage**); `npx tsc --noEmit`, `npm run lint`, and `npm run build` green.
+
 ### 2026-06-04 — Basic layer compositing
 
 No chart-count change: **193/193** registered charts.

@@ -85,6 +85,7 @@ Empirically verified for Phase 2 catalog completion: focused QQ/confusion-matrix
 
 - **Post-completion layer visibility wiring (shipped locally):** the Layers tab now exposes each layer's existing `visible` state with hide/show controls, and `ChartArea` respects hidden active layers by unmounting the chart renderer and showing a hidden-layer state. Full multi-layer compositing and `axis: y1/y2` shared-axis behavior remain future Phase 3 work.
 - **Post-completion basic layer compositing (shipped locally):** `ChartArea` now mounts every visible, fillable layer into the same chart render root so users can compose multiple chart layers without switching away from the active layer controls. Each layer still owns its own renderer/canvas; shared-axis option merging and `axis: y1/y2` semantics remain future Phase 3 work.
+- **Post-completion composed PNG export (shipped locally):** chart PNG export now composites multiple canvas-backed layers in DOM order instead of serializing only the first canvas. Single-canvas exports keep the direct fast path; SVG export still serializes the first SVG node.
 
 ## What's Built
 
