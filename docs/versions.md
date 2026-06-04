@@ -2,6 +2,15 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 — Basic layer compositing
+
+No chart-count change: **193/193** registered charts.
+
+- `ChartArea` now mounts every visible, fillable layer into the same chart render root, enabling basic layer composition while keeping active-layer column controls scoped to the selected layer.
+- Hidden layers and layers with unfilled required roles are excluded from the composed render surface.
+- Each renderer still owns its own mounted subtree/canvas; shared-axis option merging and `axis: y1/y2` behavior remain future Phase 3 work.
+- Verification: focused Sidebar/ChartArea tests green (**34 tests**); full suite green (**1500 Vitest tests / 100% coverage**); `npx tsc --noEmit`, `npm run lint`, and `npm run build` green.
+
 ### 2026-06-04 — Layer visibility wiring
 
 No chart-count change: **193/193** registered charts.

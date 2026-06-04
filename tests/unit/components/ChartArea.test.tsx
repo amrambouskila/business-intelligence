@@ -178,6 +178,55 @@ describe('ChartArea', () => {
     expect(screen.getByTestId('stub-chart')).toBeInTheDocument();
   });
 
+  it('renders every visible fillable layer in the chart area', () => {
+    if (!chartRegistry.get(rowCountStub.type)) chartRegistry.register(rowCountStub);
+    useDatasetStore.getState().addDataset(makeDS());
+    useChartStore.setState({
+      layers: [
+        { id: 'l1', chartType: stub.type, columns: {}, axis: 'y1', options: {}, visible: true },
+        { id: 'l2', chartType: rowCountStub.type, columns: {}, axis: 'y1', options: {}, visible: true },
+      ],
+      activeLayerIndex: 0,
+    });
+    render(<ChartArea />);
+    expect(screen.getByTestId('chart-render')).toHaveAttribute('data-chart-layer-count', '2');
+    expect(screen.getAllByTestId('chart-layer')).toHaveLength(2);
+    expect(screen.getByTestId('stub-chart')).toBeInTheDocument();
+    expect(screen.getByTestId('row-count').textContent).toBe('3');
+  });
+
+  it('excludes hidden inactive layers from the composed chart area', () => {
+    if (!chartRegistry.get(rowCountStub.type)) chartRegistry.register(rowCountStub);
+    useDatasetStore.getState().addDataset(makeDS());
+    useChartStore.setState({
+      layers: [
+        { id: 'l1', chartType: stub.type, columns: {}, axis: 'y1', options: {}, visible: true },
+        { id: 'l2', chartType: rowCountStub.type, columns: {}, axis: 'y1', options: {}, visible: false },
+      ],
+      activeLayerIndex: 0,
+    });
+    render(<ChartArea />);
+    expect(screen.getByTestId('chart-render')).toHaveAttribute('data-chart-layer-count', '1');
+    expect(screen.getAllByTestId('chart-layer')).toHaveLength(1);
+    expect(screen.getByTestId('stub-chart')).toBeInTheDocument();
+    expect(screen.queryByTestId('row-count')).toBeNull();
+  });
+
+  it('skips stale inactive layers with unknown chart types', () => {
+    useDatasetStore.getState().addDataset(makeDS());
+    useChartStore.setState({
+      layers: [
+        { id: 'l1', chartType: stub.type, columns: {}, axis: 'y1', options: {}, visible: true },
+        { id: 'stale', chartType: 'missing-chart', columns: {}, axis: 'y1', options: {}, visible: true },
+      ],
+      activeLayerIndex: 0,
+    });
+    render(<ChartArea />);
+    expect(screen.getByTestId('chart-render')).toHaveAttribute('data-chart-layer-count', '1');
+    expect(screen.getAllByTestId('chart-layer')).toHaveLength(1);
+    expect(screen.getByTestId('stub-chart')).toBeInTheDocument();
+  });
+
   it('does not render the active chart when the layer is hidden', () => {
     useDatasetStore.getState().addDataset(makeDS());
     useChartStore.setState({

@@ -99,7 +99,7 @@ Severity-ranked, evidence-grounded. Full per-dimension reports were produced by 
 - **P5 — Magic-number thresholds** throughout `shape-detector.ts` (unnamed), and the date name-heuristic matches the bare substring `'at'` (so `category`, `latitude`, `status` hit the datetime path).
 
 ### 4.5 UI/UX gaps (HIGH/MEDIUM)
-- **U1 — mostly resolved for navigation/visibility** — the Layers tab can activate layers and toggle each layer's `visible` state, and `ChartArea` respects hidden active layers. Full multi-layer compositing and `axis: y1/y2` shared-axis behavior remain future Phase 3 work.
+- **U1 — mostly resolved for navigation/basic compositing** — the Layers tab can activate layers and toggle each layer's `visible` state, and `ChartArea` mounts all visible, fillable layers into one render root for basic overlay composition. Shared-axis option merging and `axis: y1/y2` semantics remain future Phase 3 work.
 - **U2 — Filters/annotations/modals are state-only stubs** (zero UI entry points) — acceptable as Phase-3 deferral, but the 100% coverage is partly satisfied by these **user-unreachable** paths, inflating apparent completeness.
 - **U3 — No data-preview table, no dataset switcher** (store supports multiple datasets; UI overwrites). No "no compatible column for role X" feedback.
 

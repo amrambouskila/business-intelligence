@@ -9,6 +9,8 @@ import { applyFilters } from '@/data/transforms';
 import { exportFileName } from '@/data/export';
 import { downloadChartPNG, downloadChartSVG } from '@/charts/export-image';
 import type { ChartConfig, ColumnRole } from '@/charts/types';
+import type { LayerConfig } from '@/stores/chart-store';
+import type { DataSet } from '@/types/data';
 import { ColumnPicker } from './ColumnPicker';
 import { ChartCanvas } from './ChartCanvas';
 
@@ -21,6 +23,37 @@ const ROLE_NAME_ALIASES: Record<string, string[]> = {
 function matchesRoleName(columnName: string, role: string): boolean {
   const normalized = columnName.toLowerCase();
   return normalized === role.toLowerCase() || (ROLE_NAME_ALIASES[role] ?? []).includes(normalized);
+}
+
+interface LayerRenderState {
+  index: number;
+  layer: LayerConfig;
+  config: ChartConfig;
+  unfilled: ColumnRole[];
+}
+
+function buildLayerRenderState(layer: LayerConfig, index: number, columns: DataSet['columns']): LayerRenderState | null {
+  const def = chartRegistry.get(layer.chartType);
+  if (!def) return null;
+  const config: ChartConfig = {
+    chartType: layer.chartType,
+    columns: { ...layer.columns },
+    options: layer.options,
+  };
+  const used = new Set(Object.values(config.columns));
+  const unfilled: ColumnRole[] = [];
+  for (const req of def.requiredColumns) {
+    if (config.columns[req.role]) continue;
+    const candidates = columns.filter((c) => req.acceptedTypes.includes(c.type) && !used.has(c.name));
+    const match = candidates.find((c) => matchesRoleName(c.name, req.role)) ?? candidates[0];
+    if (match) {
+      config.columns[req.role] = match.name;
+      used.add(match.name);
+    } else {
+      unfilled.push(req);
+    }
+  }
+  return { index, layer, config, unfilled };
 }
 
 export function ChartArea() {
@@ -78,31 +111,19 @@ export function ChartArea() {
     );
   }
 
-  const config: ChartConfig = {
-    chartType: activeLayer.chartType,
-    columns: { ...activeLayer.columns },
-    options: activeLayer.options,
-  };
+  const activeState = buildLayerRenderState(activeLayer, activeIdx, dataset.columns)!;
+  const layerStates = [activeState, ...layers
+    .map((layer, index) => (index === activeIdx ? null : buildLayerRenderState(layer, index, dataset.columns)))
+    .filter((state): state is LayerRenderState => state !== null)];
+  const config = activeState.config;
   const optionalColumns = def.optionalColumns ?? [];
-
-  // Auto-fill each unset required role: prefer a column named like the role,
-  // else the first type-compatible column, and never reuse a column already
-  // assigned to another role (consume-on-assign).
-  const used = new Set(Object.values(config.columns));
-  const unfilled: ColumnRole[] = [];
-  for (const req of def.requiredColumns) {
-    if (config.columns[req.role]) continue;
-    const candidates = dataset.columns.filter(
-      (c) => req.acceptedTypes.includes(c.type) && !used.has(c.name),
-    );
-    const match = candidates.find((c) => matchesRoleName(c.name, req.role)) ?? candidates[0];
-    if (match) {
-      config.columns[req.role] = match.name;
-      used.add(match.name);
-    } else {
-      unfilled.push(req);
-    }
-  }
+  const unfilled = activeState.unfilled;
+  const visibleLayerStates = layerStates.filter((state) => state.layer.visible && state.unfilled.length === 0);
+  const chartMessage = !activeLayer.visible
+    ? 'Active layer is hidden'
+    : unfilled.length > 0
+      ? `No compatible column for: ${unfilled.map((r) => r.label).join(', ')}`
+      : null;
 
   return (
     <div className="flex-1 min-h-0 relative" style={{ background: 'var(--bg-primary)' }}>
@@ -179,18 +200,25 @@ export function ChartArea() {
         data-chart-active={config.chartType}
         data-chart-hidden={activeLayer.visible ? 'false' : 'true'}
         data-chart-unfilled={unfilled.length > 0 ? 'true' : 'false'}
+        data-chart-layer-count={visibleLayerStates.length}
         className="absolute inset-0 top-9 min-h-0"
       >
-        {!activeLayer.visible ? (
+        {visibleLayerStates.length === 0 && chartMessage ? (
           <div className="w-full h-full flex items-center justify-center text-sm" style={{ color: 'var(--text-muted)' }}>
-            Active layer is hidden
-          </div>
-        ) : unfilled.length > 0 ? (
-          <div className="w-full h-full flex items-center justify-center text-sm" style={{ color: 'var(--text-muted)' }}>
-            No compatible column for: {unfilled.map((r) => r.label).join(', ')}
+            {chartMessage}
           </div>
         ) : (
-          <ChartCanvas chartType={config.chartType} data={dataView} config={config} theme={theme} />
+          visibleLayerStates.map((state) => (
+            <div
+              key={state.layer.id}
+              data-testid="chart-layer"
+              data-layer-index={state.index}
+              data-layer-active={state.index === activeIdx ? 'true' : 'false'}
+              className="absolute inset-0"
+            >
+              <ChartCanvas chartType={state.config.chartType} data={dataView} config={state.config} theme={theme} />
+            </div>
+          ))
         )}
       </div>
     </div>
