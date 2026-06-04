@@ -92,7 +92,7 @@ graph LR
 - `DataShape` — enum of detected shapes (see CHARTS.md for full list)
 - `ChartDefinition` — metadata + `createRenderer()` factory; carries an optional declarative `options?: ChartOptionSpec[]` (added M1, 2026-06-03 — additive/backward-compatible, minor bump) that `ChartOptionsPanel` renders generically
 - `ChartOptionSpec` (`src/charts/option-spec.ts`) — one tunable option control `{ key, label, control: 'number'|'toggle'|'select'|'color', default, … }`; `resolveOptions` applies defaults as the single source of truth
-- `ChartRenderer` — `render(data, config, theme) → ReactElement`; Canvas2D support is implemented through `Canvas2DBaseRenderer` + `Canvas2DChart` (M5 slice 1, 2026-06-04), and deck.gl support now includes Map/Orbit/Orthographic view selection plus data-driven initial view state hooks in `DeckGLBaseRenderer`/`DeckGLChart` (M5 slice 2, 2026-06-04). Both are additive renderer-infrastructure extensions that do not change this interface.
+- `ChartRenderer` — `render(data, config, theme) → ReactElement`; Canvas2D support is implemented through `Canvas2DBaseRenderer` + `Canvas2DChart` (M5 slice 1, 2026-06-04), deck.gl support includes Map/Orbit/Orthographic view selection plus data-driven initial view state hooks in `DeckGLBaseRenderer`/`DeckGLChart` (M5 slice 2, 2026-06-04), and regl support is implemented through `ReglBaseRenderer` + `ReglChart` (post-completion renderer-infrastructure polish, 2026-06-04). These are additive renderer-infrastructure extensions that do not change this interface.
 - `ChartConfig` — per-layer column assignments + options
 - `Filter` — predicate applied pre-render
 

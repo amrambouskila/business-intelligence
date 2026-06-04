@@ -2,6 +2,15 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 — Regl renderer base backend
+
+No chart-count change: **193/193** registered charts.
+
+- Added `ReglBaseRenderer` and `ReglChart`, making `regl` a live renderer backend instead of a reserved type string.
+- `ReglChart` owns a dedicated canvas, creates the WebGL context/regl instance, applies device-pixel-ratio backing-store sizing, redraws on resize, skips drawing when WebGL is unavailable, and destroys both chart-specific resources and the regl instance on unmount.
+- Updated the registry contract harness so future `regl` charts must extend `ReglBaseRenderer`; first regl catalog chart and shader-file conventions remain future M5 follow-on work.
+- Verification: focused regl renderer/registry-contract tests green (**10 tests**); full suite green (**1477 Vitest tests / 100% coverage**); `npx tsc --noEmit`, `npm run typecheck`, `npm run lint`, `npm run build`, and `npm audit` green.
+
 ### 2026-06-04 — Shape detector semantic-shape closeout
 
 No chart-count change: **193/193** registered charts.

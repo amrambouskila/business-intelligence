@@ -9,6 +9,7 @@ import { FAMILY_META } from '@/charts/types';
 import { EChartsBaseRenderer } from '@/charts/renderers/echarts-renderer';
 import { DeckGLBaseRenderer } from '@/charts/renderers/deckgl-renderer';
 import { Canvas2DBaseRenderer } from '@/charts/renderers/canvas2d-renderer';
+import { ReglBaseRenderer } from '@/charts/renderers/regl-renderer';
 import { ensureAllFamiliesLoaded } from '@/charts/families';
 import type { DataShape } from '@/types/data';
 
@@ -26,11 +27,6 @@ beforeAll(async () => {
 describe('chart registry contract', () => {
   it('registers at least the implemented charts', () => {
     expect(chartRegistry.count).toBeGreaterThanOrEqual(3);
-  });
-
-  it('no registered chart references a backend without a live base class', () => {
-    const vaporware = chartRegistry.all().filter((d) => d.renderer === 'regl');
-    expect(vaporware.map((d) => d.type)).toEqual([]);
   });
 
   // One it() body (not it.each) so the loop runs in the execution phase AFTER
@@ -61,6 +57,8 @@ describe('chart registry contract', () => {
         expect(renderer, def.type).toBeInstanceOf(DeckGLBaseRenderer);
       } else if (def.renderer === 'canvas2d') {
         expect(renderer, def.type).toBeInstanceOf(Canvas2DBaseRenderer);
+      } else if (def.renderer === 'regl') {
+        expect(renderer, def.type).toBeInstanceOf(ReglBaseRenderer);
       }
       for (const spec of def.options ?? []) {
         expect(spec.key.length, def.type).toBeGreaterThan(0);

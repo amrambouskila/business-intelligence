@@ -45,7 +45,7 @@ graph LR
         R2[detectShape works;<br/>4 shapes unreachable]
         R3[suggester = DEAD CODE;<br/>flat unranked list]
         R4[3 charts; 10/13<br/>families empty]
-        R5[3 of 4 backends exist;<br/>regl = vaporware]
+        R5[4 of 4 renderer bases exist;<br/>regl chart slice pending]
         R6[filters + data/spec export UI;<br/>row annotations shipped]
     end
     V1 -.->|partial| R1
@@ -87,7 +87,7 @@ Severity-ranked, evidence-grounded. Full per-dimension reports were produced by 
 ### 4.3 Architecture won't scale as-is without fixes (HIGH)
 - **A1 — No options schema.** `ChartOptionsPanel.tsx:37-67` is a hardcoded `chartType ===` if-ladder → becomes a 193-branch god-component; breaks the "self-contained chart file" model. Worse, **scatter/line option controls are dead** (renderers hardcode `symbolSize:6`, `opacity:0.7`, `smooth:false`); only histogram's `bins` is read.
 - **A2 — No shared ECharts scaffolding.** `EChartsBaseRenderer` only sets `backgroundColor`+`textStyle`; axes/grid/tooltip/theme styling (~25 lines) is **copy-pasted verbatim** across all 3 chart files → ~3,000 lines of drift-prone duplication at scale.
-- **A3 — 1 of 4 backends is still vaporware.** `Canvas2DBaseRenderer` + `Canvas2DChart` landed in M5 slice 1. `ReglRenderer` is still missing, so `regl` remains a type string only.
+- **A3 — resolved for renderer bases.** `Canvas2DBaseRenderer` + `Canvas2DChart` landed in M5 slice 1, and `ReglBaseRenderer` + `ReglChart` landed in post-completion renderer-infrastructure polish. First real Canvas2D/regl catalog charts remain optional follow-on work.
 - **A4 — `ColumnRole`/`ChartConfig.columns` can't express variadic roles** (`Record<string,string>` = one column per role) → pairplot/parallel-coords/correlation-heatmap/radar unbuildable; and the auto-assign (`ChartArea.tsx:73-78`) grabs the **first** type-matching column per role with no consume-tracking → OHLCV/source-target-value/id-parent-value map the **same** column to every role.
 - **A5 — resolved in M5 slices 2–6:** `DeckGLBaseRenderer` now exposes Map/Orbit/Orthographic view selection and data-driven initial view-state hooks; all fourteen geographic charts prove the MapView path and all six 3D charts prove the OrbitView path with real deck.gl layers.
 
@@ -224,7 +224,7 @@ Exit criteria: users see parsed rows and can trust the import; a 2nd file no lon
 
 Scope:
 - **deck.gl vertical slice (own gated sub-milestone):** **view abstraction (Map/Orbit/Orthographic), data-driven `getInitialViewState` from data bounds, all fourteen geographic charts, and all six 3D charts shipped in M5 slices 2–6**; follow-on work is real-GL-context cleanup verification across N switches. *(C3 already re-examined as a false positive in M0)* *(fixes A5)*
-- **`ReglBaseRenderer` + React mount wrapper** + `.vert`/`.frag` conventions. **Canvas2DBaseRenderer + Canvas2DChart shipped in M5 slice 1** with canvas ownership, DPR scaling, resize redraw, and cleanup. *(continues A3)*
+- **`ReglBaseRenderer` + React mount wrapper shipped** with canvas ownership, WebGL context/regl instance creation, DPR scaling, resize redraw, missing-context safety, empty-state handling, and cleanup. **Canvas2DBaseRenderer + Canvas2DChart shipped in M5 slice 1** with canvas ownership, DPR scaling, resize redraw, and cleanup. Follow-on regl work is first catalog chart + `.vert`/`.frag` conventions. *(continues A3)*
 - **Variadic/typed-group `ColumnRole`** — add cardinality `'single'|'multiple'`; change `ChartConfig.columns` to `Record<string, string | string[]>` (**sacred contract change → master-plan update + minor bump; flag before doing**). Enables pairplot/parallel-coords/radar and correct OHLCV/source-target-value auto-assign. *(fixes A4 fully)*
 - **Dual-table node+edge data model** for network graph / force-directed / arc / dependency / adjacency.
 - **Stats/compute layer** (`src/data/stats/`): KDE, quantiles, normal-quantile, regression, correlation/PCA, KM-survival, ACF/PACF — reference-validated. (Gates ~30 "hard" charts across distribution/relationships/statistical.)
@@ -232,7 +232,7 @@ Scope:
 - CI assertion: no chart references a backend without a live base class; re-scope `CHARTS.md` to annotate each chart's backend.
 - Then mass-produce: geographic, 3D, finance custom-geometry (renko/kagi/P&F), multivariate, and the remaining ECharts families (hierarchical, network-flow, statistical, finance OHLC, specialized).
 
-Exit criteria: `regl` has a working base class + wrapper, `canvas2d` has ≥1 real chart on its shipped base, every non-ECharts backend is CI-enforced by the contract harness; deck.gl renders in Map plus non-Mercator views; `ColumnRole` supports `'multiple'`; OHLCV/network/matrix auto-assign distinct columns; `CHARTS.md` annotates backends; progress toward 193/193; full CI green; 100% coverage.
+Exit criteria: `regl` has a working base class + wrapper; `canvas2d` and `regl` each have ≥1 real chart on their shipped bases; every non-ECharts backend is CI-enforced by the contract harness; deck.gl renders in Map plus non-Mercator views; `ColumnRole` supports `'multiple'`; OHLCV/network/matrix auto-assign distinct columns; `CHARTS.md` annotates backends; progress toward 193/193; full CI green; 100% coverage.
 
 ---
 
@@ -268,7 +268,7 @@ Exit criteria: `regl` has a working base class + wrapper, `canvas2d` has ≥1 re
 | Specialized | 18 | ECharts + faceting infra | 11 / 7 | L |
 | 3D | 6 | **deck.gl Orbit** (complete) | 6 / 0 | L |
 
-~130–140 of 193 are reachable through ECharts (native or D3-compute→ECharts) once M1's infra lands. **~29–34 remain hard-blocked** until later M5 work: deeper geo+3D (deck.gl implementations beyond the shipped MapView slice), ~8–10 multivariate (variadic roles), ~5 network (dual-table edges), ~1 volume (regl).
+~130–140 of 193 are reachable through ECharts (native or D3-compute→ECharts) once M1's infra lands. **Historical hard-blockers are mostly resolved for Phase 2 chart count**: geographic and 3D are implemented through deck.gl, and regl now has a live base. Remaining richer future variants are blocked mainly on variadic roles, dual-table graph data, first Canvas2D/regl catalog migrations, and backend/file-format scale work.
 
 ---
 
@@ -283,7 +283,7 @@ Exit criteria: `regl` has a working base class + wrapper, `canvas2d` has ≥1 re
 
 ## 8. Documentation corrections needed (not yet applied — propose before editing contract docs)
 
-- **`CLAUDE.md §0` + master plan §3** — "architecture is frozen; Phase 2 is purely additive" is **false** for the remaining backend/contract-bound charts (regl still missing, only the first deck.gl vertical slice has shipped, no variadic roles). Re-scope to mark backend-blocked charts and add a renderer-infrastructure sub-phase.
+- **Resolved for shipped renderer bases:** earlier "architecture frozen / purely additive" concerns are historical for Phase 2 chart coverage; deck.gl geographic/3D, Canvas2D, and regl bases now exist. Variadic roles and richer graph/file-format scale work remain future contract/infrastructure items.
 - **Resolved in M4 slice 6:** "Zustand + Immer" now matches the implementation; all 5 stores use Zustand's `immer` middleware.
 - **`CHARTS.md`** — annotate each chart with its renderer backend so the buildable-now vs blocked split is explicit.
 - **`docs/status.md`** — stop implying the analyze loop is closed; filters/annotations/modals are state-only with no UI.
