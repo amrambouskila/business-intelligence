@@ -2,6 +2,14 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 — Upload format affordance polish
+
+No chart-count change: **193/193** registered charts.
+
+- Updated the hidden toolbar file input to accept every frontend-supported import format: `.csv`, `.tsv`, `.json`, `.xlsx`, `.xlsm`, and `.parquet`.
+- Added toolbar coverage so future parser additions cannot be hidden from the upload file picker by accident.
+- Verification: focused toolbar tests green (**15 tests**); full suite green (**1493 Vitest tests / 100% coverage**); `npx tsc --noEmit`, `npm run lint`, and `npm run build` green.
+
 ### 2026-06-04 — Vendor bundle split
 
 No chart-count change: **193/193** registered charts.

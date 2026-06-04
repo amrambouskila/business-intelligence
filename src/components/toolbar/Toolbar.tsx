@@ -67,7 +67,7 @@ export function Toolbar() {
         <input
           ref={fileRef}
           type="file"
-          accept=".csv,.tsv,.json"
+          accept=".csv,.tsv,.json,.xlsx,.xlsm,.parquet"
           className="hidden"
           onChange={handleFile}
         />

@@ -32,6 +32,12 @@ describe('Toolbar', () => {
     spy.mockRestore();
   });
 
+  it('accepts every supported import format from the upload control', () => {
+    render(<Toolbar />);
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    expect(input.accept).toBe('.csv,.tsv,.json,.xlsx,.xlsm,.parquet');
+  });
+
   it('toggles the theme when the theme button is clicked', async () => {
     const user = userEvent.setup();
     render(<Toolbar />);
