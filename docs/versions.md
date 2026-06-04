@@ -2,6 +2,14 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-04 — Chart backend catalog annotation
+
+No chart-count change: **193/193** registered charts.
+
+- Added a `CHARTS.md` renderer backend catalog for every registry type ID, documenting which charts render through ECharts, deck.gl, regl, and Canvas2D.
+- Added a registry-driven drift guard that compares `CHARTS.md` against `ChartDefinition.renderer` for all loaded chart families and fails on missing, duplicated, stale, or incorrect backend annotations.
+- Verification: focused charts-doc/registry tests green (**3 tests**); full suite green (**1495 Vitest tests / 100% coverage**); `npx tsc --noEmit`, `npm run lint`, and `npm run build` green.
+
 ### 2026-06-04 — Windows launcher verification
 
 No chart-count change: **193/193** registered charts.

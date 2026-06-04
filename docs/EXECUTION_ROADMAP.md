@@ -229,10 +229,10 @@ Scope:
 - **Dual-table node+edge data model** for network graph / force-directed / arc / dependency / adjacency.
 - **Stats/compute layer** (`src/data/stats/`): KDE, quantiles, normal-quantile, regression, correlation/PCA, KM-survival, ACF/PACF — reference-validated. (Gates ~30 "hard" charts across distribution/relationships/statistical.)
 - **Excel + Parquet parsers** — Excel `.xlsx`/`.xlsm` is implemented through `read-excel-file`; client-side Parquet `.parquet` import is implemented through `hyparquet`. Backend-assisted Parquet scale remains Phase 4 work. *(continues P4)*
-- CI assertion: no chart references a backend without a live base class; re-scope `CHARTS.md` to annotate each chart's backend.
+- CI assertion: no chart references a backend without a live base class; `CHARTS.md` now has a machine-checked renderer backend catalog for all 193 registered charts.
 - Then mass-produce: geographic, 3D, finance custom-geometry (renko/kagi/P&F), multivariate, and the remaining ECharts families (hierarchical, network-flow, statistical, finance OHLC, specialized).
 
-Exit criteria: `regl` has a working base class + wrapper; `canvas2d` and `regl` each have ≥1 real chart on their shipped bases; every non-ECharts backend is CI-enforced by the contract harness; deck.gl renders in Map plus non-Mercator views; `ColumnRole` supports `'multiple'`; OHLCV/network/matrix auto-assign distinct columns; `CHARTS.md` annotates backends; progress toward 193/193; full CI green; 100% coverage. Canvas2D's first real chart is shipped via `gauge`; regl's first real chart is shipped via `image_raster_plot`.
+Exit criteria: `regl` has a working base class + wrapper; `canvas2d` and `regl` each have ≥1 real chart on their shipped bases; every non-ECharts backend is CI-enforced by the contract harness; deck.gl renders in Map plus non-Mercator views; `ColumnRole` supports `'multiple'`; OHLCV/network/matrix auto-assign distinct columns; `CHARTS.md` backend annotations are machine-checked; progress toward 193/193; full CI green; 100% coverage. Canvas2D's first real chart is shipped via `gauge`; regl's first real chart is shipped via `image_raster_plot`.
 
 ---
 
@@ -285,7 +285,7 @@ Exit criteria: `regl` has a working base class + wrapper; `canvas2d` and `regl` 
 
 - **Resolved for shipped renderer bases:** earlier "architecture frozen / purely additive" concerns are historical for Phase 2 chart coverage; deck.gl geographic/3D, Canvas2D, and regl bases now exist. Variadic roles and richer graph/file-format scale work remain future contract/infrastructure items.
 - **Resolved in M4 slice 6:** "Zustand + Immer" now matches the implementation; all 5 stores use Zustand's `immer` middleware.
-- **`CHARTS.md`** — annotate each chart with its renderer backend so the buildable-now vs blocked split is explicit.
+- **Resolved locally:** `CHARTS.md` now annotates every registered chart type with its renderer backend, and `tests/unit/charts/charts-doc-backends.test.ts` guards the table against registry drift.
 - **`docs/status.md`** — stop implying the analyze loop is closed; filters/annotations/modals are state-only with no UI.
 
 ---

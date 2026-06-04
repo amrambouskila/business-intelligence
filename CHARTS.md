@@ -6,6 +6,30 @@ This document defines all chart types and data shapes the Business Intelligence 
 
 ## Chart Catalog
 
+## Renderer Backend Catalog
+
+The registry type IDs below are the implementation-facing chart keys. This table is checked by `tests/unit/charts/charts-doc-backends.test.ts` so every registered chart has exactly one documented renderer backend.
+
+| Family | Backend | Registry type IDs |
+|---|---|---|
+| 3D | `deckgl` | `three_d_bar_chart`, `three_d_contour`, `three_d_scatter`, `three_d_surface`, `three_d_volume_rendering`, `three_d_wireframe` |
+| Categorical Comparison | `echarts` | `bar`, `cleveland_dot`, `dumbbell`, `grouped_bar`, `horizontal_bar`, `lollipop`, `marimekko`, `mosaic_plot`, `pareto`, `percent_stacked_bar`, `pictogram`, `slope`, `spine_plot`, `stacked_bar`, `waffle` |
+| Composition | `echarts` | `composition_percent_stacked_area`, `composition_percent_stacked_bar`, `composition_stacked_area`, `composition_stacked_bar`, `composition_sunburst`, `composition_treemap`, `composition_waffle`, `donut`, `nested_donut`, `pie` |
+| Distribution | `echarts` | `beeswarm`, `box_plot`, `cumulative_distribution_plot`, `dot_plot`, `ecdf`, `frequency_polygon`, `histogram`, `joy_plot`, `kde`, `letter_value_plot`, `pp_plot`, `probability_plot`, `qq_plot`, `quantile_dot_plot`, `raincloud_plot`, `ridgeline_plot`, `rug_plot`, `sina_plot`, `stem_and_leaf`, `strip_plot`, `violin_plot` |
+| Finance | `echarts` | `candlestick`, `candlestick_heatmap_by_hour_day`, `drawdown`, `equity_curve`, `heikin_ashi`, `kagi`, `ohlc`, `order_book_depth_chart`, `point_and_figure`, `price_volume`, `renko`, `return_series_line`, `rolling_volatility_plot`, `volume`, `yield_curve` |
+| Geographic | `deckgl` | `bubble_map`, `cartogram`, `choropleth_map`, `density_map`, `filled_map`, `flow_map`, `geospatial_heatmap`, `hexbin_map`, `isochrone_contour_map`, `point_map`, `route_map`, `symbol_map`, `tile_grid_map`, `voronoi_map` |
+| Hierarchical | `echarts` | `circle_packing`, `dendrogram`, `icicle`, `partition_chart`, `radial_tree`, `sunburst`, `tree`, `treemap` |
+| Matrix / Grid | `echarts` | `annotated_heatmap`, `calendar_matrix`, `clustermap`, `confusion_matrix`, `correlation_matrix`, `distance_matrix_heatmap`, `heatmap`, `quilt_plot`, `tile_map` |
+| Matrix / Grid | `regl` | `image_raster_plot` |
+| Network / Flow | `echarts` | `adjacency_matrix`, `alluvial_diagram`, `arc_diagram`, `chord_diagram`, `dependency_graph`, `force_directed_graph`, `funnel`, `network_graph`, `sankey`, `waterfall_chart` |
+| Relationships | `echarts` | `andrews_curves`, `biplot`, `bubble`, `colored_scatter`, `contour_plot`, `correlation_heatmap`, `covariance_heatmap`, `faceted_scatter`, `filled_contour`, `hexbin_plot`, `joint_plot`, `loess_smoother_plot`, `pair_plot`, `parallel_coordinates`, `pca_scatter`, `polar_line`, `polar_scatter`, `radar`, `radviz`, `regression_plot`, `scatter`, `scatter_matrix`, `t_sne_plot`, `ternary`, `two_d_density_plot`, `umap_plot` |
+| Specialized | `canvas2d` | `gauge` |
+| Specialized | `echarts` | `bullet_chart`, `bump_chart`, `cohort_retention_heatmap`, `conversion_path_chart`, `faceted_dashboard_grid`, `funnel_area`, `kpi_card`, `population_pyramid`, `pyramid_chart`, `ranking_table_with_sparklines`, `retention_curve`, `sequence_diagram`, `small_multiples`, `table`, `topic_term_bubble`, `word_cloud` |
+| Statistical / Model Evaluation | `echarts` | `actual_vs_predicted`, `bland_altman`, `calibration_curve`, `confusion_matrix_chart`, `cumulative_hazard_plot`, `error_bar`, `feature_importance`, `forest_plot`, `gain_chart`, `ice_plot`, `lift_chart`, `mean_ci_band`, `partial_dependence_plot`, `pr_curve`, `residual_plot`, `roc_curve`, `shap_dependence_plot`, `shap_summary_beeswarm`, `survival_curve` |
+| Time Series | `echarts` | `area`, `autocorrelation_plot`, `calendar_heatmap`, `control_chart`, `event_timeline`, `fan_chart`, `forecast_cone`, `gantt_chart`, `horizon_chart`, `lag_plot`, `line`, `multi_line`, `partial_autocorrelation_plot`, `percent_stacked_area`, `range_bar`, `run_chart`, `seasonal_subseries_plot`, `sparkline`, `stacked_area`, `step`, `streamgraph`, `swimlane_timeline` |
+
+---
+
 ### Distribution
 
 | Chart | Minimum columns / structure | Best generated from |
