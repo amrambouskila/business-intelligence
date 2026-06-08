@@ -1,5 +1,7 @@
 # AGENTS.md — Project Guide for Business Intelligence
 
+<mandatory_workflow>
+
 > **MANDATORY WORKFLOW: READ THIS ENTIRE FILE BEFORE EVERY CHANGE.** Every time. No skimming, no assuming prior-session context carries over — it does not.
 >
 > **Why:** This project spans multiple sessions and months of development. Skipping the re-read produces decisions that contradict the architecture, duplicate existing patterns, break data contracts, or introduce tech debt that compounds.
@@ -13,7 +15,11 @@
 > 6. Read the source files you plan to modify — understand existing patterns first.
 > 7. Then implement, following the rules and contracts defined here.
 
+</mandatory_workflow>
+
 ---
+
+<critical_context>
 
 ## 0. Critical Context
 
@@ -32,7 +38,11 @@ The ultimate universal charting and data analysis platform — a single tool tha
 - Add interaction features (filters UI, annotations UI, export) — Phase 3.
 - Change renderer base classes or data contracts without a master-plan update.
 
+</critical_context>
+
 ---
+
+<project_identity>
 
 ## 1. Project Identity
 
@@ -44,7 +54,11 @@ The ultimate universal charting and data analysis platform — a single tool tha
 | Chart catalog | [`CHARTS.md`](CHARTS.md) — 193 types across 13 families |
 | Git remote | GitHub (public) — CI via GitHub Actions per global AGENTS.md §5 |
 
+</project_identity>
+
 ---
+
+<tech_stack>
 
 ## 2. Tech Stack
 
@@ -64,6 +78,10 @@ The ultimate universal charting and data analysis platform — a single tool tha
 - **Docker + nginx** — containerized production deployment
 - **GitHub Actions** — CI/CD
 
+</tech_stack>
+
+<stack_overrides>
+
 ## 3. Stack Overrides from Global AGENTS.md
 
 These diverge from global §5 and are deliberate. Do not "revert" them without a master-plan update.
@@ -76,7 +94,11 @@ These diverge from global §5 and are deliberate. Do not "revert" them without a
 
 All other global rules apply in full — no silent substitution.
 
+</stack_overrides>
+
 ---
+
+<project_structure>
 
 ## 4. Project Structure
 
@@ -186,7 +208,11 @@ business-intelligence/
         └── common.ts                    # DeepPartial utility
 ```
 
+</project_structure>
+
 ---
+
+<key_patterns>
 
 ## 5. Key Patterns
 
@@ -225,7 +251,11 @@ File Upload → PapaParse (CSV/TSV) / read-excel-file (XLSX/XLSM) / hyparquet (P
 
 Each store is in its own file (AGENTS.md §7 "one concept per file"). Selectors that derive across stores (`useActiveDataset`, `useActiveChartConfig`) live alongside their primary store.
 
+</key_patterns>
+
 ---
+
+<data_contracts>
 
 ## 6. Data Contracts (Sacred — see global §7)
 
@@ -240,7 +270,11 @@ Never change these without a master-plan update + major semver bump:
 - `Filter` — predicate applied pre-render
 - `ThemeTokens` — color + font scales
 
+</data_contracts>
+
 ---
+
+<common_tasks>
 
 ## 7. Common Tasks
 
@@ -264,7 +298,11 @@ Never change these without a master-plan update + major semver bump:
 3. Import in `src/charts/families/index.ts`.
 4. Add family metadata to `FAMILY_META` in `src/charts/types.ts`.
 
+</common_tasks>
+
 ---
+
+<commands>
 
 ## 8. Local Commands
 
@@ -285,7 +323,11 @@ npm run test:watch    # Vitest watch mode
 npm run test:coverage # Coverage report (text + cobertura + html in coverage/)
 ```
 
+</commands>
+
 ---
+
+<testing>
 
 ## 9. Testing Requirements
 
@@ -300,7 +342,11 @@ npm run test:coverage # Coverage report (text + cobertura + html in coverage/)
   - deck.gl and ECharts both need a canvas mock; WebGL contexts return `null` in jsdom (renderer tests that need live WebGL should mock `@deck.gl/react` or `echarts-for-react` at the module level — see `tests/unit/charts/deckgl-renderer.test.tsx`).
 - **Numerical comparisons:** for chart-computation tests (e.g., histogram bin counts), use exact assertions. For floating-point aggregates, use explicit tolerances.
 
+</testing>
+
 ---
+
+<ci_cd>
 
 ## 10. CI/CD
 
@@ -310,7 +356,11 @@ npm run test:coverage # Coverage report (text + cobertura + html in coverage/)
 - **Docker stage** only runs on `main` and `staging` branches.
 - **Release:** manual pipeline trigger bumps `package.json` version — do NOT edit the `version` field directly (per global §6).
 
+</ci_cd>
+
 ---
+
+<change_policy>
 
 ## 11. Change Policy
 
@@ -320,7 +370,11 @@ For every non-trivial change:
 3. **Tests** — new logic gets a test. Coverage must stay ≥ threshold.
 4. **AGENTS.md / master plan** — update if the change touches a contract, a rule, or a phase-level scope.
 
+</change_policy>
+
 ---
+
+<definition_of_done>
 
 ## 12. Phase 2 Completion Gate
 
@@ -334,7 +388,11 @@ Phase 2 is done when:
 7. Full CI pipeline green on `main`.
 8. `docs/status.md` and `docs/versions.md` updated.
 
+</definition_of_done>
+
 ---
+
+<self_audit>
 
 ## 13. Output & Completion Self-Audit
 
@@ -346,8 +404,14 @@ After every non-trivial task, run yourself through the global §15 checklist. Pr
 - **Side-effect-import check:** every new chart file is imported in its family's `index.ts`.
 - **Coverage check:** report what `npm run test:coverage` shows for files you touched.
 
+</self_audit>
+
 ---
+
+<closing_reminder>
 
 ## 14. Closing Reminder
 
 Read this file before the next change. The preceding 14 sections exist because each rule traces to a prior session where generic defaults caused drift. **Maximal clarity. Minimal tech debt. Optimal alignment.**
+
+</closing_reminder>

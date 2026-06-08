@@ -1,0 +1,2034 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>business-intelligence — Project Documentation</title>
+  <style>
+/* ============================================================================
+   doc.css — Shared design system for project documentation pages.
+   One source of truth for every project's PROJECT_DOCUMENTATION.html.
+   Inlined directly into this PROJECT_DOCUMENTATION.html (self-contained; no external stylesheet).
+   Do not fork per-project styles. Restyle here to restyle every project at once.
+   ============================================================================ */
+
+/* ---- Theme tokens ------------------------------------------------------- */
+:root {
+  --accent: #4f46e5;
+  --accent-soft: #eef2ff;
+  --accent-border: #c7d2fe;
+  --accent-text: #4338ca;
+
+  --bg: #ffffff;
+  --bg-alt: #f7f8fa;
+  --panel: #ffffff;
+  --panel-alt: #f3f4f6;
+  --border: #e5e7eb;
+  --border-strong: #d1d5db;
+  --text: #1f2937;
+  --text-soft: #374151;
+  --muted: #6b7280;
+
+  --code-bg: #f6f8fa;
+  --code-text: #1f2937;
+  --code-border: #e5e7eb;
+
+  --fileref-bg: #eef2ff;
+  --fileref-text: #3730a3;
+  --fileref-border: #c7d2fe;
+
+  --note-bg: #eff6ff;   --note-border: #3b82f6;   --note-text: #1e40af;
+  --tip-bg: #ecfdf5;    --tip-border: #10b981;    --tip-text: #065f46;
+  --warn-bg: #fffbeb;   --warn-border: #f59e0b;   --warn-text: #92400e;
+  --key-bg: #faf5ff;    --key-border: #a855f7;    --key-text: #6b21a8;
+  --danger-bg: #fef2f2; --danger-border: #ef4444; --danger-text: #991b1b;
+
+  --shadow: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.10);
+  --shadow-lg: 0 10px 30px rgba(16,24,40,.12);
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --header-h: 64px;
+
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --maxw: 980px;
+}
+
+:root[data-theme="dark"] {
+  --accent: #818cf8;
+  --accent-soft: #1e213a;
+  --accent-border: #3b3f6b;
+  --accent-text: #a5b4fc;
+
+  --bg: #0d1117;
+  --bg-alt: #0a0d12;
+  --panel: #161b22;
+  --panel-alt: #1c2230;
+  --border: #2d333b;
+  --border-strong: #3d444d;
+  --text: #e6edf3;
+  --text-soft: #c9d1d9;
+  --muted: #8b949e;
+
+  --code-bg: #161b22;
+  --code-text: #e6edf3;
+  --code-border: #30363d;
+
+  --fileref-bg: #1e213a;
+  --fileref-text: #c7d2fe;
+  --fileref-border: #3b3f6b;
+
+  --note-bg: #0d2138;   --note-border: #3b82f6;   --note-text: #93c5fd;
+  --tip-bg: #082a1e;    --tip-border: #10b981;    --tip-text: #6ee7b7;
+  --warn-bg: #2b2410;   --warn-border: #f59e0b;   --warn-text: #fcd34d;
+  --key-bg: #221033;    --key-border: #a855f7;    --key-text: #d8b4fe;
+  --danger-bg: #2c1212; --danger-border: #ef4444; --danger-text: #fca5a5;
+
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 1px 3px rgba(0,0,0,.4);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,.5);
+}
+
+/* ---- Base --------------------------------------------------------------- */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg-alt);
+  color: var(--text);
+  line-height: 1.65;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent-text); text-decoration: none; }
+a:hover { text-decoration: underline; }
+h1, h2, h3, h4 { line-height: 1.25; color: var(--text); }
+p { margin: 0 0 1rem; }
+hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+
+/* ---- Scroll progress bar ------------------------------------------------ */
+#scrollProgress {
+  position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+  background: linear-gradient(90deg, var(--accent), #ec4899);
+  z-index: 1000; transition: width .08s linear;
+}
+
+/* ---- Header ------------------------------------------------------------- */
+.doc-header {
+  position: sticky; top: 0; z-index: 900;
+  height: var(--header-h);
+  display: flex; align-items: center; gap: 1rem;
+  padding: 0 1.25rem;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: saturate(140%) blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+.doc-header .brand { display: flex; flex-direction: column; min-width: 0; }
+.doc-header .brand .kicker {
+  font-size: .68rem; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--muted); font-weight: 700;
+}
+.doc-header .brand .title {
+  font-size: 1.05rem; font-weight: 700; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; max-width: 46vw;
+}
+.doc-header .spacer { flex: 1 1 auto; }
+
+.doc-search {
+  position: relative; display: flex; align-items: center;
+}
+.doc-search input {
+  width: 230px; max-width: 36vw;
+  padding: .5rem .75rem .5rem 2rem;
+  border: 1px solid var(--border-strong); border-radius: 999px;
+  background: var(--panel); color: var(--text); font-size: .9rem;
+  outline: none; transition: border-color .15s, box-shadow .15s, width .2s;
+}
+.doc-search input:focus {
+  border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); width: 280px;
+}
+.doc-search::before {
+  content: ""; position: absolute; left: .65rem; width: 14px; height: 14px; opacity: .55;
+  background: currentColor;
+  -webkit-mask: var(--icon-search) center/contain no-repeat;
+          mask: var(--icon-search) center/contain no-repeat;
+  color: var(--muted);
+}
+.search-count {
+  position: absolute; right: .6rem; font-size: .72rem; color: var(--muted);
+  pointer-events: none;
+}
+
+.btn {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .42rem .7rem; font-size: .82rem; font-weight: 600;
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: var(--panel); color: var(--text-soft); cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s; white-space: nowrap;
+}
+.btn:hover { background: var(--panel-alt); border-color: var(--accent); color: var(--accent-text); }
+.btn .ico { width: 15px; height: 15px; background: currentColor;
+  -webkit-mask-size: contain; mask-size: contain;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: center; mask-position: center; }
+.btn-group { display: flex; gap: .4rem; }
+@media (max-width: 760px) { .btn .label { display: none; } .doc-header .title { max-width: 32vw; } }
+
+/* ---- Layout ------------------------------------------------------------- */
+.doc-layout {
+  display: grid; grid-template-columns: 290px minmax(0, 1fr);
+  align-items: start; gap: 0;
+  max-width: 1400px; margin: 0 auto;
+}
+.doc-toc {
+  position: sticky; top: var(--header-h);
+  height: calc(100vh - var(--header-h));
+  overflow-y: auto; padding: 1.25rem .75rem 3rem 1.25rem;
+  border-right: 1px solid var(--border);
+}
+.doc-toc .toc-title {
+  font-size: .7rem; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); font-weight: 700; margin: 0 0 .5rem .5rem;
+}
+.doc-toc ul { list-style: none; margin: 0; padding: 0; }
+.doc-toc li { margin: 0; }
+.doc-toc a {
+  display: block; padding: .32rem .5rem; border-radius: 6px;
+  color: var(--text-soft); font-size: .86rem; line-height: 1.4;
+  border-left: 2px solid transparent;
+}
+.doc-toc a:hover { background: var(--panel-alt); text-decoration: none; }
+.doc-toc a.sub { padding-left: 1.4rem; font-size: .8rem; color: var(--muted); }
+.doc-toc a.active {
+  color: var(--accent-text); background: var(--accent-soft);
+  border-left-color: var(--accent); font-weight: 600;
+}
+.doc-toc .toc-num {
+  display: inline-block; min-width: 1.4em; color: var(--muted);
+  font-variant-numeric: tabular-nums; font-weight: 600;
+}
+.doc-toc a.active .toc-num { color: var(--accent); }
+
+.doc-content { padding: 2rem 2.5rem 6rem; min-width: 0; }
+.doc-content-inner { max-width: var(--maxw); margin: 0 auto; }
+@media (max-width: 980px) {
+  .doc-layout { grid-template-columns: 1fr; }
+  .doc-toc { display: none; }
+  .doc-content { padding: 1.25rem 1rem 4rem; }
+}
+
+/* ---- Hero (page intro) -------------------------------------------------- */
+.doc-hero { margin-bottom: 1.75rem; }
+.doc-hero h1 { font-size: 2.1rem; margin: 0 0 .4rem; letter-spacing: -.02em; }
+.doc-hero .lede { font-size: 1.12rem; color: var(--text-soft); margin: 0 0 1rem; }
+.badge-row { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
+.badge {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .25rem .6rem; border-radius: 999px; font-size: .76rem; font-weight: 600;
+  background: var(--panel-alt); color: var(--text-soft); border: 1px solid var(--border);
+}
+.badge.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent-border); }
+.badge.green  { background: var(--tip-bg); color: var(--tip-text); border-color: var(--tip-border); }
+.badge.amber  { background: var(--warn-bg); color: var(--warn-text); border-color: var(--warn-border); }
+.badge.purple { background: var(--key-bg); color: var(--key-text); border-color: var(--key-border); }
+
+.meta-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: .75rem; margin: 1rem 0 0;
+}
+.meta-grid .meta-item {
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: .7rem .85rem;
+}
+.meta-grid .meta-k {
+  font-size: .68rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); font-weight: 700; margin-bottom: .15rem;
+}
+.meta-grid .meta-v { font-size: .92rem; font-weight: 600; color: var(--text); }
+
+/* ---- Sections (collapsible top level) ----------------------------------- */
+.doc-section { scroll-margin-top: calc(var(--header-h) + 12px); margin-bottom: 1.1rem; }
+.doc-section > details {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden;
+}
+.doc-section > details[open] { box-shadow: var(--shadow-lg); }
+.doc-section > details > summary {
+  list-style: none; cursor: pointer; user-select: none;
+  display: flex; align-items: center; gap: .75rem;
+  padding: 1rem 1.25rem; font-weight: 700;
+}
+.doc-section > details > summary::-webkit-details-marker { display: none; }
+.doc-section > details > summary:hover { background: var(--panel-alt); }
+.doc-section > details > summary h2 {
+  font-size: 1.2rem; margin: 0; font-weight: 700; flex: 1 1 auto;
+}
+.doc-section .sec-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 1.9rem; height: 1.9rem; border-radius: 8px;
+  background: var(--accent-soft); color: var(--accent-text);
+  font-size: .85rem; font-weight: 800; font-variant-numeric: tabular-nums;
+}
+.doc-section .chevron {
+  width: 18px; height: 18px; color: var(--muted); transition: transform .2s; flex: 0 0 auto;
+  background: currentColor;
+  -webkit-mask: var(--icon-chevron) center/contain no-repeat;
+          mask: var(--icon-chevron) center/contain no-repeat;
+}
+.doc-section > details[open] > summary .chevron { transform: rotate(90deg); }
+.sec-body { padding: .25rem 1.5rem 1.5rem; border-top: 1px solid var(--border); }
+.sec-body > :first-child { margin-top: 1rem; }
+
+/* sub-collapsibles inside a section (per-component drilldowns) */
+details.sub {
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg-alt); margin: .85rem 0; overflow: hidden;
+}
+details.sub > summary {
+  list-style: none; cursor: pointer; padding: .7rem 1rem; font-weight: 600;
+  display: flex; align-items: center; gap: .55rem; font-size: .96rem;
+}
+details.sub > summary::-webkit-details-marker { display: none; }
+details.sub > summary:hover { background: var(--panel-alt); }
+details.sub > summary::before {
+  content: ""; width: 14px; height: 14px; color: var(--muted); transition: transform .2s; flex: 0 0 auto;
+  background: currentColor;
+  -webkit-mask: var(--icon-chevron) center/contain no-repeat;
+          mask: var(--icon-chevron) center/contain no-repeat;
+}
+details.sub[open] > summary::before { transform: rotate(90deg); }
+details.sub > summary .sub-tag {
+  margin-left: auto; font-family: var(--mono); font-size: .72rem; font-weight: 600;
+  color: var(--muted); background: var(--panel-alt); border: 1px solid var(--border);
+  padding: .1rem .45rem; border-radius: 6px;
+}
+.sub-body { padding: .25rem 1rem 1rem; }
+.sub-body > :first-child { margin-top: .65rem; }
+
+/* ---- File references ---------------------------------------------------- */
+code.fileref {
+  font-family: var(--mono); font-size: .82em; font-weight: 600;
+  background: var(--fileref-bg); color: var(--fileref-text);
+  border: 1px solid var(--fileref-border); border-radius: 6px;
+  padding: .08em .45em .08em 1.5em; cursor: pointer; position: relative;
+  white-space: nowrap; transition: filter .12s;
+}
+code.fileref::before {
+  content: ""; position: absolute; left: .4em; top: 50%; transform: translateY(-50%);
+  width: .85em; height: .85em; background: currentColor; opacity: .8;
+  -webkit-mask: var(--icon-file) center/contain no-repeat;
+          mask: var(--icon-file) center/contain no-repeat;
+}
+code.fileref:hover { filter: brightness(.96); text-decoration: none; }
+:root[data-theme="dark"] code.fileref:hover { filter: brightness(1.15); }
+code.fileref.copied { background: var(--tip-bg); color: var(--tip-text); border-color: var(--tip-border); }
+code.fileref.dir::before { -webkit-mask: var(--icon-folder) center/contain no-repeat; mask: var(--icon-folder) center/contain no-repeat; }
+
+.filecard {
+  display: flex; align-items: baseline; gap: .65rem; flex-wrap: wrap;
+  padding: .55rem .7rem; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg-alt); margin: .4rem 0;
+}
+.filecard .filecard-desc { color: var(--text-soft); font-size: .92rem; }
+.filelist { display: flex; flex-direction: column; gap: .35rem; margin: .75rem 0; }
+
+/* ---- Inline code & code blocks ------------------------------------------ */
+:not(pre) > code {
+  font-family: var(--mono); font-size: .86em;
+  background: var(--panel-alt); border: 1px solid var(--border);
+  border-radius: 5px; padding: .08em .4em; color: var(--code-text);
+}
+figure.code {
+  margin: 1rem 0; border: 1px solid var(--code-border); border-radius: var(--radius-sm);
+  overflow: hidden; background: var(--code-bg);
+}
+figure.code figcaption {
+  display: flex; align-items: center; gap: .5rem;
+  padding: .5rem .85rem; font-family: var(--mono); font-size: .76rem; font-weight: 600;
+  color: var(--muted); background: var(--panel-alt); border-bottom: 1px solid var(--code-border);
+}
+figure.code figcaption .lang {
+  margin-left: auto; text-transform: uppercase; letter-spacing: .06em; font-size: .68rem;
+}
+figure.code pre { margin: 0; padding: .9rem 1rem; overflow-x: auto; }
+figure.code code { font-family: var(--mono); font-size: .82rem; line-height: 1.6; color: var(--code-text); background: none; border: none; padding: 0; }
+.code-copy {
+  position: absolute; top: .4rem; right: .4rem; opacity: 0; transition: opacity .15s;
+}
+figure.code { position: relative; }
+figure.code:hover .code-copy { opacity: 1; }
+
+/* ---- Callouts ----------------------------------------------------------- */
+.callout {
+  display: grid; grid-template-columns: auto 1fr; gap: .25rem .75rem;
+  padding: .85rem 1rem; border-radius: var(--radius-sm); margin: 1rem 0;
+  border: 1px solid; border-left-width: 4px;
+}
+.callout .callout-title { font-weight: 700; font-size: .9rem; grid-column: 2; }
+.callout .callout-body { grid-column: 2; }
+.callout .callout-body > :last-child { margin-bottom: 0; }
+.callout::before {
+  content: ""; grid-row: 1 / span 2; width: 18px; height: 18px; margin-top: .15rem;
+  background: currentColor;
+  -webkit-mask-size: contain; mask-size: contain;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+}
+.callout.note  { background: var(--note-bg); border-color: var(--note-border); color: var(--note-text); }
+.callout.tip   { background: var(--tip-bg);  border-color: var(--tip-border);  color: var(--tip-text); }
+.callout.warn  { background: var(--warn-bg); border-color: var(--warn-border); color: var(--warn-text); }
+.callout.key   { background: var(--key-bg);  border-color: var(--key-border);  color: var(--key-text); }
+.callout.danger{ background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger-text); }
+.callout.note::before  { -webkit-mask: var(--icon-info) center/contain no-repeat; mask: var(--icon-info) center/contain no-repeat; }
+.callout.tip::before   { -webkit-mask: var(--icon-bulb) center/contain no-repeat; mask: var(--icon-bulb) center/contain no-repeat; }
+.callout.warn::before  { -webkit-mask: var(--icon-warn) center/contain no-repeat; mask: var(--icon-warn) center/contain no-repeat; }
+.callout.key::before   { -webkit-mask: var(--icon-key) center/contain no-repeat; mask: var(--icon-key) center/contain no-repeat; }
+.callout.danger::before{ -webkit-mask: var(--icon-warn) center/contain no-repeat; mask: var(--icon-warn) center/contain no-repeat; }
+.callout .callout-body code { background: color-mix(in srgb, currentColor 12%, transparent); border-color: transparent; color: inherit; }
+
+/* ---- Tables ------------------------------------------------------------- */
+.table-wrap { overflow-x: auto; margin: 1rem 0; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+table.doc-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+table.doc-table th, table.doc-table td { padding: .6rem .8rem; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+table.doc-table thead th { background: var(--panel-alt); font-weight: 700; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); position: sticky; top: 0; }
+table.doc-table tbody tr:last-child td { border-bottom: none; }
+table.doc-table tbody tr:hover { background: var(--bg-alt); }
+table.doc-table code { white-space: nowrap; }
+
+/* ---- Definition lists --------------------------------------------------- */
+dl.doc-dl { margin: 1rem 0; display: grid; grid-template-columns: minmax(140px, 220px) 1fr; gap: .1rem 1rem; }
+dl.doc-dl dt { font-weight: 700; color: var(--text); padding: .4rem 0; border-top: 1px solid var(--border); }
+dl.doc-dl dd { margin: 0; padding: .4rem 0; color: var(--text-soft); border-top: 1px solid var(--border); }
+dl.doc-dl dt:first-of-type, dl.doc-dl dd:first-of-type { border-top: none; }
+@media (max-width: 620px) { dl.doc-dl { grid-template-columns: 1fr; } dl.doc-dl dd { padding-top: 0; border-top: none; } }
+
+/* ---- Tech-stack cards --------------------------------------------------- */
+.stack-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: .85rem; margin: 1rem 0; }
+.stack-card {
+  border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-alt);
+  padding: .85rem .95rem; display: flex; flex-direction: column; gap: .35rem;
+}
+.stack-card .stack-head { display: flex; align-items: baseline; gap: .5rem; }
+.stack-card .stack-name { font-weight: 700; font-size: 1rem; }
+.stack-card .stack-ver { font-family: var(--mono); font-size: .76rem; color: var(--accent-text); background: var(--accent-soft); border: 1px solid var(--accent-border); border-radius: 5px; padding: .05rem .4rem; }
+.stack-card .stack-why { font-size: .87rem; color: var(--text-soft); }
+.stack-card .stack-foot { margin-top: auto; }
+
+/* ---- Step list ---------------------------------------------------------- */
+ol.steps { counter-reset: step; list-style: none; padding: 0; margin: 1rem 0; }
+ol.steps > li {
+  position: relative; padding: .15rem 0 .9rem 2.4rem; margin: 0;
+  border-left: 2px solid var(--border); margin-left: .9rem;
+}
+ol.steps > li:last-child { border-left-color: transparent; }
+ol.steps > li::before {
+  counter-increment: step; content: counter(step);
+  position: absolute; left: -.95rem; top: 0;
+  width: 1.8rem; height: 1.8rem; border-radius: 50%;
+  background: var(--accent); color: #fff; font-weight: 700; font-size: .85rem;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ---- Pipeline / flow chips ---------------------------------------------- */
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; margin: 1rem 0; }
+.flow .node { padding: .35rem .7rem; border: 1px solid var(--accent-border); background: var(--accent-soft); color: var(--accent-text); border-radius: var(--radius-sm); font-weight: 600; font-size: .85rem; }
+.flow .arrow { color: var(--muted); font-weight: 700; }
+
+/* ---- Diagram (mermaid) -------------------------------------------------- */
+figure.diagram { margin: 1.25rem 0; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--panel); padding: 1rem; overflow-x: auto; text-align: center; }
+figure.diagram figcaption { margin-top: .6rem; font-size: .82rem; color: var(--muted); text-align: center; }
+figure.diagram .mermaid { display: flex; justify-content: center; }
+.mermaid-fallback { display: none; }
+figure.diagram.failed .mermaid { display: none; }
+figure.diagram.failed .mermaid-fallback { display: block; text-align: left; }
+
+/* ---- Misc --------------------------------------------------------------- */
+.tag-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: .5rem 0; }
+.tag { font-size: .76rem; padding: .15rem .5rem; border-radius: 999px; background: var(--panel-alt); border: 1px solid var(--border); color: var(--text-soft); font-family: var(--mono); }
+
+.lead-in { font-size: 1rem; color: var(--text-soft); border-left: 3px solid var(--accent); padding-left: .9rem; margin: 0 0 1.25rem; }
+
+ul.clean { list-style: none; padding-left: 0; }
+ul.clean > li { position: relative; padding-left: 1.4rem; margin: .35rem 0; }
+ul.clean > li::before { content: ""; position: absolute; left: .2rem; top: .55em; width: .4rem; height: .4rem; border-radius: 50%; background: var(--accent); }
+
+.content-section h3 { margin-top: 1.5rem; font-size: 1.05rem; }
+.sec-body h3 { margin-top: 1.6rem; font-size: 1.08rem; padding-bottom: .3rem; border-bottom: 1px solid var(--border); }
+.sec-body h4 { margin-top: 1.2rem; font-size: .96rem; }
+
+mark.hl { background: #fde68a; color: #78350f; border-radius: 3px; padding: 0 .1em; }
+:root[data-theme="dark"] mark.hl { background: #92400e; color: #fde68a; }
+
+.filtered-out { display: none !important; }
+
+/* ---- Back to top -------------------------------------------------------- */
+#backTop {
+  position: fixed; right: 1.25rem; bottom: 1.25rem; z-index: 800;
+  width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border-strong);
+  background: var(--panel); color: var(--text-soft); cursor: pointer; box-shadow: var(--shadow-lg);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transform: translateY(10px); pointer-events: none; transition: opacity .2s, transform .2s;
+}
+#backTop.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+#backTop:hover { color: var(--accent-text); border-color: var(--accent); }
+#backTop .ico { width: 20px; height: 20px; background: currentColor; -webkit-mask: var(--icon-up) center/contain no-repeat; mask: var(--icon-up) center/contain no-repeat; }
+
+/* ---- Footer ------------------------------------------------------------- */
+.doc-footer {
+  border-top: 1px solid var(--border); margin-top: 2rem; padding: 1.5rem 2.5rem;
+  color: var(--muted); font-size: .84rem; max-width: 1400px; margin-left: auto; margin-right: auto;
+}
+.doc-footer code { font-size: .8em; }
+
+/* ---- Icons (data-URI masks; monochrome, themeable via currentColor) ----- */
+:root {
+  --icon-search: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>');
+  --icon-chevron: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>');
+  --icon-file: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>');
+  --icon-folder: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>');
+  --icon-info: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>');
+  --icon-bulb: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M15.09 14c.18-.79.62-1.42 1.27-2A4.5 4.5 0 1 0 7.64 12c.65.58 1.09 1.21 1.27 2"/></svg>');
+  --icon-warn: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/></svg>');
+  --icon-key: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"/></svg>');
+  --icon-up: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>');
+  --icon-expand: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5M7 9l5-5 5 5"/></svg>');
+  --icon-collapse: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 20 5-5 5 5M7 4l5 5 5-5"/></svg>');
+  --icon-sun: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>');
+  --icon-moon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>');
+  --icon-print: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>');
+  --icon-copy: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>');
+}
+
+/* ---- Print -------------------------------------------------------------- */
+@media print {
+  .doc-header, .doc-toc, #backTop, #scrollProgress, .code-copy { display: none !important; }
+  .doc-layout { grid-template-columns: 1fr; }
+  .doc-content { padding: 0; }
+  .doc-section > details { box-shadow: none; border-color: #ccc; break-inside: avoid; }
+  body { background: #fff; }
+  a { color: inherit; }
+}
+
+/* ---- Index hub (DOCUMENTATION_INDEX.html) ------------------------------- */
+.index-wrap { max-width: 1180px; margin: 0 auto; padding: 2.5rem 2rem 5rem; }
+.index-hero { margin-bottom: 2rem; }
+.index-hero h1 { font-size: 2.3rem; margin: 0 0 .5rem; letter-spacing: -.02em; }
+.index-hero .lede { font-size: 1.15rem; color: var(--text-soft); margin: 0; max-width: 70ch; }
+.index-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 1.25rem; }
+.index-stats .stat { display: flex; flex-direction: column; }
+.index-stats .stat .num { font-size: 1.7rem; font-weight: 800; color: var(--accent-text); line-height: 1; }
+.index-stats .stat .lbl { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; margin-top: .3rem; }
+.index-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 1rem; margin: 1.75rem 0 0; }
+a.index-card { text-decoration: none; color: inherit; border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); padding: 1.15rem 1.25rem; display: flex; flex-direction: column; gap: .55rem; box-shadow: var(--shadow); transition: transform .12s, box-shadow .12s, border-color .12s; }
+a.index-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: var(--accent); text-decoration: none; }
+a.index-card .ic-title { font-size: 1.12rem; font-weight: 700; color: var(--text); font-family: var(--mono); }
+a.index-card .ic-desc { font-size: .9rem; color: var(--text-soft); line-height: 1.5; flex: 1 1 auto; }
+a.index-card .ic-badges { display: flex; flex-wrap: wrap; gap: .35rem; }
+a.index-card .ic-open { margin-top: .35rem; font-size: .8rem; font-weight: 700; color: var(--accent-text); display: inline-flex; align-items: center; gap: .3rem; }
+a.index-card .ic-open::after { content: "→"; transition: transform .12s; }
+a.index-card:hover .ic-open::after { transform: translateX(3px); }
+@media (max-width: 560px) { .index-wrap { padding: 1.5rem 1rem 3rem; } .index-grid { grid-template-columns: 1fr; } }
+
+  </style>
+</head>
+<body>
+  <div id="scrollProgress"></div>
+
+  <header class="doc-header">
+    <div class="brand">
+      <span class="kicker">Project Guide</span>
+      <span class="title">business-intelligence</span>
+    </div>
+    <div class="spacer"></div>
+    <div class="doc-search">
+      <input id="docSearch" type="search" placeholder="Search this guide…" aria-label="Search documentation">
+      <span class="search-count"></span>
+    </div>
+    <div class="btn-group">
+      <button class="btn" id="expandAll" title="Expand all sections"><span class="ico" style="-webkit-mask:var(--icon-expand) center/contain no-repeat;mask:var(--icon-expand) center/contain no-repeat"></span><span class="label">Expand</span></button>
+      <button class="btn" id="collapseAll" title="Collapse all sections"><span class="ico" style="-webkit-mask:var(--icon-collapse) center/contain no-repeat;mask:var(--icon-collapse) center/contain no-repeat"></span><span class="label">Collapse</span></button>
+      <button class="btn" id="themeToggle" title="Toggle light / dark"><span class="ico"></span></button>
+      <button class="btn" id="printBtn" title="Print / Save as PDF"><span class="ico" style="-webkit-mask:var(--icon-print) center/contain no-repeat;mask:var(--icon-print) center/contain no-repeat"></span></button>
+    </div>
+  </header>
+
+  <div class="doc-layout">
+    <nav class="doc-toc" id="docToc"><div class="toc-title">Contents</div></nav>
+
+    <main class="doc-content">
+      <div class="doc-content-inner">
+
+        <section class="doc-hero">
+          <h1>business-intelligence</h1>
+          <p class="lede">A frontend-only universal charting and data-analysis platform: drop in any tabular file, the app detects the data shape, suggests appropriate charts, and renders any of 193 chart types across 13 families with four pluggable WebGL/Canvas backends.</p>
+          <div class="badge-row">
+            <span class="badge accent">Frontend-only SPA</span>
+            <span class="badge green">Phase 2 · complete · 193/193 charts</span>
+            <span class="badge purple">React 19 · TS strict · Vite 8</span>
+            <span class="badge">ECharts 6 · deck.gl 9 · regl · Canvas2D</span>
+            <span class="badge">v0.2.0 (docs track v0.3.0)</span>
+          </div>
+          <div class="meta-grid">
+            <div class="meta-item"><div class="meta-k">Stack</div><div class="meta-v">React 19 · TypeScript strict · Vite 8</div></div>
+            <div class="meta-item"><div class="meta-k">Rendering</div><div class="meta-v">ECharts · deck.gl · regl · Canvas2D</div></div>
+            <div class="meta-item"><div class="meta-k">State</div><div class="meta-v">Zustand + Immer (5 stores)</div></div>
+            <div class="meta-item"><div class="meta-k">Tests</div><div class="meta-v">~1463 Vitest · 100% cov · 192 Playwright baselines</div></div>
+            <div class="meta-item"><div class="meta-k">Entry point</div><div class="meta-v">bi_service.sh / bi_service.bat</div></div>
+            <div class="meta-item"><div class="meta-k">Deploy</div><div class="meta-v">Docker multi-stage → nginx</div></div>
+          </div>
+        </section>
+
+        <section class="doc-section" id="overview">
+          <details open>
+            <summary><span class="sec-num">1</span><h2>Overview — what this is &amp; why</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">A single, reusable charting tool meant to be embedded by every future project instead of rebuilding a chart layer from scratch.</p>
+
+              <p><strong>business-intelligence</strong> is a pure client-side React application. You upload a CSV/TSV, JSON, Excel, or Parquet file (or pick a built-in sample). The app parses it into a typed <code>DataSet</code>, analyzes every column's type and statistics, detects the overall dataset <em>shape</em> (e.g. <code>single_numeric</code>, <code>ohlcv</code>, <code>hierarchy</code>, <code>geo_points</code>), and then ranks the charts that actually fit that data. You pick one, the app auto-assigns columns to chart roles, and renders it — in dark or light theme, with per-chart option controls, filters, annotations, layer compositing, and image/data export.</p>
+
+              <p>The motivation, stated in the master plan: every project the owner builds eventually needs charts, and reaching for a new library each time (Chart.js here, Plotly there, hand-rolled d3 elsewhere) means re-solving file upload, shape detection, chart selection, theming, and large-data performance over and over. This project centralizes that work once, with a deliberately WebGL-capable stack, so the cost is paid a single time.</p>
+
+              <p>The product's defining feature is the <strong>shape → ranked-suggestion flow</strong>: the user never has to know which chart to pick. The data tells the app what's possible, and the registry returns the compatible charts sorted by fit (most specialized first). The architecture is a <strong>chart registry</strong> populated by side-effect imports — every chart type is one self-contained file that calls <code>chartRegistry.register(...)</code>, so adding the 194th chart is purely additive and touches nothing else.</p>
+
+              <div class="callout key">
+                <div class="callout-title">Key concept</div>
+                <div class="callout-body">There is <strong>no backend</strong> in this phase. Everything runs in the browser: parsing, shape detection, suggestion, rendering, export. A FastAPI/Postgres/DuckDB backend is planned for Phase 4 only when datasets exceed browser memory. Do not introduce a server here.</div>
+              </div>
+
+              <div class="callout note">
+                <div class="callout-title">Current state</div>
+                <div class="callout-body"><strong>Phase 2 (Chart Coverage) is complete — all 193 catalog charts registered, unit-tested, and covered by a Playwright visual-regression gate.</strong> Phase 2 was formally closed on <code>main</code> at commit <code>125061d5</code> with GitHub Actions run #5 green across lint, typecheck, test+coverage, build, visual regression, and Docker build. Many Phase 3 interaction features (filters, annotations, export, command palette, layer compositing) have already landed early during the M4 slices. See <span class="fileref-inline"><code class="fileref" data-path="docs/status.md">docs/status.md</code></span> for the authoritative live state.</div>
+              </div>
+
+              <div class="callout warn">
+                <div class="callout-title">Version skew to know about</div>
+                <div class="callout-body">The source-of-truth version in <span class="fileref-inline"><code class="fileref" data-path="package.json">package.json</code></span> is <code>0.2.0</code>, while <span class="fileref-inline"><code class="fileref" data-path="docs/versions.md">docs/versions.md</code></span> documents work under the unreleased <code>v0.3.0</code> heading. The release pipeline (not a manual edit) bumps the <code>package.json</code> version on release — so the docs leading the manifest is expected per the project's versioning protocol.</div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="status">
+          <details>
+            <summary><span class="sec-num">2</span><h2>Status &amp; at-a-glance</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">Where the project stands today, family by family.</p>
+
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Aspect</th><th>State</th></tr></thead>
+                <tbody>
+                  <tr><td>Phase</td><td>Phase 2 (Chart Coverage) — <strong>complete</strong>; Phase 3 interaction features partly landed early</td></tr>
+                  <tr><td>Chart coverage</td><td><strong>193 / 193</strong> registered across 13 families</td></tr>
+                  <tr><td>Source-of-truth version</td><td><code>0.2.0</code> in <code>package.json</code>; docs track <code>v0.3.0</code></td></tr>
+                  <tr><td>Renderer backends live</td><td>ECharts, deck.gl, regl, Canvas2D — all 4 have a tested base class and at least one catalog chart</td></tr>
+                  <tr><td>Unit tests</td><td>~1463 Vitest tests · 100% statements/branches/functions/lines on <code>src/**</code></td></tr>
+                  <tr><td>Visual gate</td><td>Playwright renders all 193 charts in real Chromium; 192 screenshot baselines + 1 floor-only chart</td></tr>
+                  <tr><td>CI</td><td>GitHub Actions: lint → typecheck → test+coverage → build → visual → docker (main/staging)</td></tr>
+                  <tr><td>File formats</td><td>CSV, TSV, JSON, Excel <code>.xlsx</code>/<code>.xlsm</code>, Parquet <code>.parquet</code></td></tr>
+                </tbody>
+              </table></div>
+
+              <h3 class="anchor">Family completion</h3>
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Family</th><th>Count</th><th>Backend(s)</th></tr></thead>
+                <tbody>
+                  <tr><td>Distribution</td><td>21 / 21</td><td>ECharts</td></tr>
+                  <tr><td>Categorical</td><td>15 / 15</td><td>ECharts</td></tr>
+                  <tr><td>Time Series</td><td>22 / 22</td><td>ECharts</td></tr>
+                  <tr><td>Relationships</td><td>26 / 26</td><td>ECharts</td></tr>
+                  <tr><td>Matrix / Grid</td><td>10 / 10</td><td>ECharts + regl (<code>image_raster_plot</code>)</td></tr>
+                  <tr><td>Hierarchical</td><td>8 / 8</td><td>ECharts</td></tr>
+                  <tr><td>Network / Flow</td><td>10 / 10</td><td>ECharts</td></tr>
+                  <tr><td>Geographic</td><td>14 / 14</td><td>deck.gl</td></tr>
+                  <tr><td>Finance</td><td>15 / 15</td><td>ECharts</td></tr>
+                  <tr><td>Statistical</td><td>19 / 19</td><td>ECharts</td></tr>
+                  <tr><td>Composition</td><td>10 / 10</td><td>ECharts</td></tr>
+                  <tr><td>Specialized</td><td>17 / 17</td><td>ECharts + Canvas2D (<code>gauge</code>)</td></tr>
+                  <tr><td>3D</td><td>6 / 6</td><td>deck.gl OrbitView</td></tr>
+                </tbody>
+              </table></div>
+
+              <div class="callout note">
+                <div class="callout-title">Known gaps</div>
+                <div class="callout-body">Build still emits large ECharts/deck.gl vendor chunks above Vite's 500 kB warning (app entry itself is split to ~163 kB). Legacy binary <code>.xls</code> is not supported. Large Parquet files that exceed browser memory await the Phase 4 backend. Geographic charts render pure deck.gl layers with no real-world basemap.</div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="tech-stack">
+          <details>
+            <summary><span class="sec-num">3</span><h2>Tech stack</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">Every choice here is intentional and documented; some deliberately override the owner's global defaults.</p>
+
+              <div class="stack-grid">
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">React</span><span class="stack-ver">19.2</span></div>
+                  <div class="stack-why">UI framework, strict TypeScript. Function components + hooks only.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="package.json">package.json</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">TypeScript</span><span class="stack-ver">~6.0</span></div>
+                  <div class="stack-why">Strict mode on across app + test configs. No <code>any</code>, no <code>@ts-ignore</code>.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="tsconfig.app.json">tsconfig.app.json</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">Vite</span><span class="stack-ver">8.0</span></div>
+                  <div class="stack-why">Dev server (port 5176) + production build. Rolldown code-splitting groups for stable vendor chunks.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="vite.config.ts">vite.config.ts</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">Apache ECharts</span><span class="stack-ver">6.0</span></div>
+                  <div class="stack-why">Canvas/WebGL rendering for ~170 of the 193 chart types. Wrapped via <code>echarts-for-react</code>.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="src/charts/renderers/echarts-renderer.tsx">echarts-renderer.tsx</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">deck.gl</span><span class="stack-ver">9.3</span></div>
+                  <div class="stack-why">WebGL-native rendering for the 14 geographic and 6 3D charts (MapView + OrbitView).</div>
+                  <div class="stack-foot"><code class="fileref" data-path="src/charts/renderers/DeckGLChart.tsx">DeckGLChart.tsx</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">regl</span><span class="stack-ver">2.1</span></div>
+                  <div class="stack-why">Custom WebGL shaders. Live base renderer; <code>image_raster_plot</code> is the first regl catalog chart.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="src/charts/renderers/ReglChart.tsx">ReglChart.tsx</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">Zustand + Immer</span><span class="stack-ver">5.0 / 11.1</span></div>
+                  <div class="stack-why">Reactive state, one store per concern, draft-based updates via the immer middleware.</div>
+                  <div class="stack-foot"><code class="fileref dir" data-path="src/stores/">src/stores/</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">Tailwind CSS</span><span class="stack-ver">4.2</span></div>
+                  <div class="stack-why">Utility-first styling via the official Vite plugin; theme tokens through CSS custom properties.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="src/index.css">src/index.css</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">Radix UI</span><span class="stack-ver">1.x</span></div>
+                  <div class="stack-why">Accessible primitives — dialog, dropdown, select, switch, tabs, tooltip.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="package.json">package.json</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">PapaParse / read-excel-file / hyparquet</span><span class="stack-ver">5.5 / 9.0 / 1.26</span></div>
+                  <div class="stack-why">CSV/TSV, Excel workbook, and Parquet parsing respectively — all feeding one DataSet pipeline.</div>
+                  <div class="stack-foot"><code class="fileref dir" data-path="src/data/parsers/">src/data/parsers/</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">D3</span><span class="stack-ver">7.9</span></div>
+                  <div class="stack-why">Layout/computation helpers (force, hierarchy) feeding into WebGL/Canvas, not direct DOM rendering.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="package.json">package.json</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">Vitest + Testing Library</span><span class="stack-ver">4.1 / 16.3</span></div>
+                  <div class="stack-why">Unit/component tests in jsdom, v8 coverage with a 100% gate. Playwright 1.60 for visual e2e.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="vitest.config.ts">vitest.config.ts</code></div>
+                </div>
+              </div>
+
+              <h3 class="anchor">Deliberate overrides of the owner's global defaults</h3>
+              <p>The global CLAUDE.md sets defaults that this project intentionally diverges from. These are documented in <span class="fileref-inline"><code class="fileref" data-path="CLAUDE.md">CLAUDE.md</code></span> §3 so they are never silently "reverted":</p>
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Global default</th><th>This project</th><th>Why</th></tr></thead>
+                <tbody>
+                  <tr><td>Redux</td><td>Zustand + Immer</td><td>Minimal boilerplate fits a frontend-only reactive app; Redux thunks/middleware give no benefit without a backend.</td></tr>
+                  <tr><td>Chart.js as the 2D default</td><td>ECharts + deck.gl + regl + Canvas2D</td><td>The whole product is charting. Chart.js's ~15 types would bottleneck a 193-type catalog.</td></tr>
+                  <tr><td>pnpm</td><td>npm</td><td>Scaffolded with npm; lockfile, Dockerfile <code>npm ci</code>, CI, and launchers all assume it. Migration deferred to Phase 4.</td></tr>
+                </tbody>
+              </table></div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="architecture">
+          <details>
+            <summary><span class="sec-num">4</span><h2>Architecture</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">A linear data pipeline feeds a registry-driven rendering layer; Zustand stores hold all app state; React components are the glue.</p>
+
+              <p>There are four conceptual subsystems, each with a clear boundary:</p>
+              <div class="flow"><span class="node">Data pipeline</span><span class="arrow">→</span><span class="node">Chart registry</span><span class="arrow">→</span><span class="node">Renderer backend</span><span class="arrow">→</span><span class="node">Canvas mount</span></div>
+              <p>State (5 Zustand stores) and UI components wrap around this. The contracts that cross every boundary — <code>DataSet</code>, <code>DataView</code>, <code>ChartDefinition</code>, <code>ChartConfig</code>, <code>ThemeTokens</code> — are defined once in <span class="fileref-inline"><code class="fileref" data-path="src/types/data.ts">src/types/data.ts</code></span> and <span class="fileref-inline"><code class="fileref" data-path="src/charts/types.ts">src/charts/types.ts</code></span> and never duplicated locally.</p>
+
+              <figure class="diagram">
+                <div class="mermaid">
+graph TD
+    Upload[File Upload / Sample] --> Parser{Format?}
+    Parser -->|CSV/TSV| Papa[PapaParse]
+    Parser -->|JSON| JSONp[JSON.parse]
+    Parser -->|Excel| XLSX[read-excel-file]
+    Parser -->|Parquet| PQ[hyparquet]
+    Papa --> Norm[normalizeParsedRows]
+    JSONp --> Norm
+    XLSX --> Norm
+    PQ --> Norm
+    Norm --> Cols[analyzeColumns]
+    Cols --> Shape[detectShape]
+    Shape --> Suggest[suggestCharts ranked]
+    Suggest --> Picker[ChartPicker UI]
+    Picker --> Layer[LayerConfig in chart-store]
+    Layer --> Area[ChartArea auto-assign]
+    Area --> Filters[applyFilters to DataView]
+    Filters --> Canvas[ChartCanvas]
+    Canvas --> Reg{Renderer backend}
+    Reg -->|echarts| E[EChartsBaseRenderer]
+    Reg -->|deckgl| D[DeckGLBaseRenderer]
+    Reg -->|regl| R[ReglBaseRenderer]
+    Reg -->|canvas2d| C[Canvas2DBaseRenderer]
+                </div>
+                <div class="mermaid-fallback"><figure class="code"><figcaption>diagram source · mermaid</figcaption><pre><code>graph TD
+    Upload[File Upload / Sample] --&gt; Parser{Format?}
+    Parser --&gt;|CSV/TSV| Papa[PapaParse]
+    Parser --&gt;|JSON| JSONp[JSON.parse]
+    Parser --&gt;|Excel| XLSX[read-excel-file]
+    Parser --&gt;|Parquet| PQ[hyparquet]
+    Papa --&gt; Norm[normalizeParsedRows]
+    JSONp --&gt; Norm
+    XLSX --&gt; Norm
+    PQ --&gt; Norm
+    Norm --&gt; Cols[analyzeColumns]
+    Cols --&gt; Shape[detectShape]
+    Shape --&gt; Suggest[suggestCharts ranked]
+    Suggest --&gt; Picker[ChartPicker UI]
+    Picker --&gt; Layer[LayerConfig in chart-store]
+    Layer --&gt; Area[ChartArea auto-assign]
+    Area --&gt; Filters[applyFilters to DataView]
+    Filters --&gt; Canvas[ChartCanvas]
+    Canvas --&gt; Reg{Renderer backend}
+    Reg --&gt;|echarts| E[EChartsBaseRenderer]
+    Reg --&gt;|deckgl| D[DeckGLBaseRenderer]
+    Reg --&gt;|regl| R[ReglBaseRenderer]
+    Reg --&gt;|canvas2d| C[Canvas2DBaseRenderer]</code></pre></figure></div>
+                <figcaption>End-to-end data flow, from upload to a rendered chart.</figcaption>
+              </figure>
+
+              <h3 class="anchor">Module dependency graph</h3>
+              <figure class="diagram">
+                <div class="mermaid">
+graph LR
+    App[app/App.tsx] --> Fam[charts/families/index.ts]
+    App --> Stores[stores/*]
+    App --> Comp[components/*]
+    Fam --> Reg[charts/registry.ts]
+    Fam --> Rend[charts/renderers/*]
+    Rend --> Types[charts/types.ts]
+    Comp --> Loader[data/loader.ts]
+    Loader --> Parsers[data/parsers/*]
+    Loader --> Detect[data/shape-detector.ts]
+    Detect --> Suggest[data/chart-suggester.ts]
+    Suggest --> Reg
+    Stores --> Types
+                </div>
+                <div class="mermaid-fallback"><figure class="code"><figcaption>diagram source · mermaid</figcaption><pre><code>graph LR
+    App[app/App.tsx] --&gt; Fam[charts/families/index.ts]
+    App --&gt; Stores[stores/*]
+    App --&gt; Comp[components/*]
+    Fam --&gt; Reg[charts/registry.ts]
+    Fam --&gt; Rend[charts/renderers/*]
+    Rend --&gt; Types[charts/types.ts]
+    Comp --&gt; Loader[data/loader.ts]
+    Loader --&gt; Parsers[data/parsers/*]
+    Loader --&gt; Detect[data/shape-detector.ts]
+    Detect --&gt; Suggest[data/chart-suggester.ts]
+    Suggest --&gt; Reg
+    Stores --&gt; Types</code></pre></figure></div>
+                <figcaption>Static import dependencies between the major modules.</figcaption>
+              </figure>
+
+              <h3 class="anchor">Boot sequence</h3>
+              <p>The app entry is <span class="fileref-inline"><code class="fileref" data-path="src/main.tsx">src/main.tsx</code></span>, which mounts <span class="fileref-inline"><code class="fileref" data-path="src/app/App.tsx">src/app/App.tsx</code></span>. Chart registration is the critical timing concern: the three core families (distribution, time-series, relationships) register <em>eagerly</em> as a side effect of importing the families barrel, while the other ten families are <em>lazy-loaded</em>. <code>App.tsx</code> awaits <code>ensureAllFamiliesLoaded()</code> and shows a "Loading chart library…" state until all 193 are registered — so the registry-reading panels (picker, suggester) never see a partial catalog.</p>
+
+              <figure class="diagram">
+                <div class="mermaid">
+sequenceDiagram
+    participant M as main.tsx
+    participant A as App.tsx
+    participant F as families/index.ts
+    participant R as chartRegistry
+    M->>A: render App
+    A->>F: import (eager core families)
+    F->>R: register distribution/time-series/relationships
+    A->>F: ensureAllFamiliesLoaded()
+    F->>R: register remaining 10 families (lazy)
+    F-->>A: resolve once all 193 registered
+    A->>A: setFamiliesReady(true)
+    A->>A: mount Sidebar + ChartArea
+                </div>
+                <div class="mermaid-fallback"><figure class="code"><figcaption>diagram source · mermaid</figcaption><pre><code>sequenceDiagram
+    participant M as main.tsx
+    participant A as App.tsx
+    participant F as families/index.ts
+    participant R as chartRegistry
+    M-&gt;&gt;A: render App
+    A-&gt;&gt;F: import (eager core families)
+    F-&gt;&gt;R: register distribution/time-series/relationships
+    A-&gt;&gt;F: ensureAllFamiliesLoaded()
+    F-&gt;&gt;R: register remaining 10 families (lazy)
+    F--&gt;&gt;A: resolve once all 193 registered
+    A-&gt;&gt;A: setFamiliesReady(true)
+    A-&gt;&gt;A: mount Sidebar + ChartArea</code></pre></figure></div>
+                <figcaption>App boot — gating UI on a complete chart registry.</figcaption>
+              </figure>
+
+              <div class="callout key">
+                <div class="callout-title">Key concept — one canvas per renderer</div>
+                <div class="callout-body">Renderers never share a canvas. <span class="fileref-inline"><code class="fileref" data-path="src/components/chart-area/ChartArea.tsx">ChartArea.tsx</code></span> keys the render root on <code>chartType</code>, so switching charts unmounts the old renderer and fires cleanup. This is load-bearing for WebGL backends: deck.gl's <code>DeckGLChart</code> calls <code>deck.finalize()</code> on unmount, and regl/Canvas2D wrappers destroy their contexts — without this, switching charts leaks WebGL contexts, buffers, and textures.</div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="structure">
+          <details>
+            <summary><span class="sec-num">5</span><h2>Directory structure</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">Annotated map of the important paths. Heavy/generated dirs (<code>node_modules</code>, <code>dist</code>, <code>coverage</code>, <code>playwright-report</code>, <code>test-results</code>) are omitted.</p>
+
+              <h3 class="anchor">Root</h3>
+              <div class="filelist">
+                <div class="filecard"><code class="fileref" data-path="CLAUDE.md">CLAUDE.md</code><span class="filecard-desc">Project AI/dev guidelines: stack, overrides, patterns, contracts, change policy.</span></div>
+                <div class="filecard"><code class="fileref" data-path="AGENTS.md">AGENTS.md</code><span class="filecard-desc">Agent-facing variant of the project guidelines (Codex/other tools).</span></div>
+                <div class="filecard"><code class="fileref" data-path="README.md">README.md</code><span class="filecard-desc">Human-facing overview, architecture diagram, chart-family table.</span></div>
+                <div class="filecard"><code class="fileref" data-path="CHARTS.md">CHARTS.md</code><span class="filecard-desc">The chart catalog: 193 types, min columns per chart, renderer-backend table, shape-detection rules.</span></div>
+                <div class="filecard"><code class="fileref" data-path="package.json">package.json</code><span class="filecard-desc">Deps + npm scripts (dev, build, lint, typecheck, test, test:e2e).</span></div>
+                <div class="filecard"><code class="fileref" data-path="Dockerfile">Dockerfile</code><span class="filecard-desc">Multi-stage build: node:20-alpine build → nginx:alpine serve.</span></div>
+                <div class="filecard"><code class="fileref" data-path="nginx.conf">nginx.conf</code><span class="filecard-desc">SPA routing + asset caching for the production container.</span></div>
+                <div class="filecard"><code class="fileref" data-path="docker-compose.yml">docker-compose.yml</code><span class="filecard-desc">Single-service compose; host port from <code>${BI_PORT:-5176}</code>.</span></div>
+                <div class="filecard"><code class="fileref" data-path="bi_service.sh">bi_service.sh</code><span class="filecard-desc">Mac/Linux launcher with the [k]/[q]/[v]/[r] shutdown/restart loop.</span></div>
+                <div class="filecard"><code class="fileref" data-path="bi_service.bat">bi_service.bat</code><span class="filecard-desc">Windows launcher with the same loop (goto-based).</span></div>
+                <div class="filecard"><code class="fileref" data-path="run_e2e.sh">run_e2e.sh</code><span class="filecard-desc">Runs the Playwright visual gate inside the pinned Docker image (check / update modes).</span></div>
+                <div class="filecard"><code class="fileref" data-path="vite.config.ts">vite.config.ts</code><span class="filecard-desc">Vite + React + Tailwind plugins; Rolldown vendor code-splitting; dev port 5176.</span></div>
+                <div class="filecard"><code class="fileref" data-path="vitest.config.ts">vitest.config.ts</code><span class="filecard-desc">jsdom env, setup file, v8 coverage with the 100% gate and excludes.</span></div>
+                <div class="filecard"><code class="fileref" data-path="playwright.config.ts">playwright.config.ts</code><span class="filecard-desc">Visual-regression config: viewport, snapshot path, screenshot thresholds.</span></div>
+                <div class="filecard"><code class="fileref" data-path=".env.example">.env.example</code><span class="filecard-desc">Documents the only env var, <code>BI_PORT</code>.</span></div>
+              </div>
+
+              <h3 class="anchor">src/ — application source</h3>
+              <div class="filelist">
+                <div class="filecard"><code class="fileref" data-path="src/main.tsx">src/main.tsx</code><span class="filecard-desc">React DOM entry point.</span></div>
+                <div class="filecard"><code class="fileref" data-path="src/app/App.tsx">src/app/App.tsx</code><span class="filecard-desc">Root component; gates UI on chart-library load; wires Toolbar/Sidebar/ChartArea/ThemeProvider.</span></div>
+                <div class="filecard"><code class="fileref" data-path="src/index.css">src/index.css</code><span class="filecard-desc">Tailwind import + the dark/light CSS custom properties (theme variables).</span></div>
+                <div class="filecard"><code class="fileref dir" data-path="src/charts/">src/charts/</code><span class="filecard-desc">Registry, type contracts, renderer base classes, ECharts helpers, and the 193 chart files.</span></div>
+                <div class="filecard"><code class="fileref dir" data-path="src/data/">src/data/</code><span class="filecard-desc">Loader, parsers, normalization, shape detector, suggester, transforms, stats, sample data.</span></div>
+                <div class="filecard"><code class="fileref dir" data-path="src/stores/">src/stores/</code><span class="filecard-desc">Five Zustand stores: dataset, chart, ui, filter, annotation.</span></div>
+                <div class="filecard"><code class="fileref dir" data-path="src/components/">src/components/</code><span class="filecard-desc">Toolbar, Sidebar (+ tabs), ChartArea, ChartCanvas, ColumnPicker, command palette, error boundary.</span></div>
+                <div class="filecard"><code class="fileref dir" data-path="src/theme/">src/theme/</code><span class="filecard-desc">Dark/light token sets, ThemeContext + useTheme hook, ThemeProvider.</span></div>
+                <div class="filecard"><code class="fileref dir" data-path="src/lib/">src/lib/</code><span class="filecard-desc">Small pure utilities: number/byte formatters, palette indexing, download helpers.</span></div>
+                <div class="filecard"><code class="fileref dir" data-path="src/types/">src/types/</code><span class="filecard-desc">Cross-module type contracts: DataSet/DataView/ColumnMeta/DataShape/Filter, plus DeepPartial.</span></div>
+              </div>
+
+              <h3 class="anchor">src/charts/ — the rendering core</h3>
+              <div class="filelist">
+                <div class="filecard"><code class="fileref" data-path="src/charts/registry.ts">src/charts/registry.ts</code><span class="filecard-desc">The <code>chartRegistry</code> singleton: register/get/getByFamily/suggestForShape/all/count.</span></div>
+                <div class="filecard"><code class="fileref" data-path="src/charts/types.ts">src/charts/types.ts</code><span class="filecard-desc">ChartDefinition, ChartRenderer, ChartConfig, ColumnRole, ThemeTokens, ChartFamily, FAMILY_META.</span></div>
+                <div class="filecard"><code class="fileref" data-path="src/charts/option-spec.ts">src/charts/option-spec.ts</code><span class="filecard-desc">ChartOptionSpec — declarative per-chart option control descriptor.</span></div>
+                <div class="filecard"><code class="fileref" data-path="src/charts/resolve-options.ts">src/charts/resolve-options.ts</code><span class="filecard-desc">resolveOptions — single source of truth for applying option defaults + validating values.</span></div>
+                <div class="filecard"><code class="fileref" data-path="src/charts/export-image.ts">src/charts/export-image.ts</code><span class="filecard-desc">PNG (multi-canvas composite) + SVG chart image export from the render root.</span></div>
+                <div class="filecard"><code class="fileref dir" data-path="src/charts/renderers/">src/charts/renderers/</code><span class="filecard-desc">The four base renderers + their React canvas wrappers + EmptyChartState.</span></div>
+                <div class="filecard"><code class="fileref dir" data-path="src/charts/echarts/">src/charts/echarts/</code><span class="filecard-desc">Shared ECharts helpers (axes/grid/tooltip/pivot/bins/grids/multivariate) used across families.</span></div>
+                <div class="filecard"><code class="fileref dir" data-path="src/charts/families/">src/charts/families/</code><span class="filecard-desc">13 family directories; each <code>index.ts</code> barrel imports its chart files for their registration side effect.</span></div>
+              </div>
+
+              <h3 class="anchor">Agent wiring &amp; CI</h3>
+              <div class="filelist">
+                <div class="filecard"><code class="fileref dir" data-path=".codex/commands/">.codex/commands/</code><span class="filecard-desc">Slash commands: new-chart, add-family, validate-registry, review, pre-commit.</span></div>
+                <div class="filecard"><code class="fileref dir" data-path=".agents/skills/">.agents/skills/</code><span class="filecard-desc">Proactive protocol skills: build-check, chart-status, scaffold-charts.</span></div>
+                <div class="filecard"><code class="fileref" data-path=".github/workflows/ci.yml">.github/workflows/ci.yml</code><span class="filecard-desc">CI pipeline: lint, typecheck, test+coverage, build, visual regression, docker.</span></div>
+                <div class="filecard"><code class="fileref" data-path=".github/workflows/release.yml">.github/workflows/release.yml</code><span class="filecard-desc">Release pipeline that bumps the package.json version.</span></div>
+              </div>
+
+              <div class="callout note">
+                <div class="callout-title">Where the master plan lives</div>
+                <div class="callout-body">The authoritative master plan is <span class="fileref-inline"><code class="fileref" data-path="docs/BUSINESS_INTELLIGENCE_MASTER_PLAN.md">docs/BUSINESS_INTELLIGENCE_MASTER_PLAN.md</code></span>. Live state is <span class="fileref-inline"><code class="fileref" data-path="docs/status.md">docs/status.md</code></span>; the changelog is <span class="fileref-inline"><code class="fileref" data-path="docs/versions.md">docs/versions.md</code></span>; the milestone breakdown is <span class="fileref-inline"><code class="fileref" data-path="docs/EXECUTION_ROADMAP.md">docs/EXECUTION_ROADMAP.md</code></span>. Note this project uses <code>.codex/</code> + <code>.agents/</code> for agent wiring rather than the global <code>.claude/</code> convention.</div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="modules">
+          <details>
+            <summary><span class="sec-num">6</span><h2>Core modules &amp; components</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">The heart of the doc — each major subsystem with its real logic and the exact files to read or edit.</p>
+
+              <details class="sub">
+                <summary>Chart registry <span class="sub-tag">src/charts/registry.ts</span></summary>
+                <div class="sub-body">
+                  <p>A singleton class holding three indexes: by type (the canonical map), by family, and by data shape. <code>register()</code> throws if a type is registered twice — so every chart file must register exactly once, and duplicate registration is caught loudly. The registry is populated entirely by side-effect imports; no central list of charts exists.</p>
+                  <figure class="code">
+                    <figcaption>src/charts/registry.ts<span class="lang">typescript</span></figcaption>
+                    <pre><code>register(def: ChartDefinition): void {
+  if (this.charts.has(def.type)) {
+    throw new Error(`Chart type "${def.type}" already registered`);
+  }
+  this.charts.set(def.type, def);
+  // also index by family and by every compatible shape
+}</code></pre>
+                  </figure>
+                  <div class="filelist">
+                    <div class="filecard"><code class="fileref" data-path="src/charts/registry.ts">src/charts/registry.ts</code><span class="filecard-desc">The singleton + its three indexes and accessors.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/charts/families/index.ts">src/charts/families/index.ts</code><span class="filecard-desc">Eager core families + lazy <code>ensureAllFamiliesLoaded()</code> barrel.</span></div>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Renderer architecture (4 backends) <span class="sub-tag">src/charts/renderers/</span></summary>
+                <div class="sub-body">
+                  <p>Every chart's <code>createRenderer()</code> returns an object implementing the <code>ChartRenderer</code> interface: <code>render(data, config, theme) → ReactElement</code> plus an optional <code>destroy?()</code>. Four abstract base classes implement that interface and own the cross-cutting concerns so each chart only supplies its specifics:</p>
+                  <dl class="doc-dl">
+                    <dt>EChartsBaseRenderer</dt><dd>Subclasses override <code>buildOption()</code>. The base applies the empty-data guard (<code>isEmpty</code>/<code>emptyMessage</code> hooks), the theme defaults (transparent background, foreground text color, font), and — when <code>window.__E2E__</code> is set — disables ECharts animation so visual baselines are deterministic.</dd>
+                    <dt>DeckGLBaseRenderer</dt><dd>Subclasses override <code>buildLayers()</code> and optionally <code>getViewKind()</code> (map/orbit/orthographic) + <code>getInitialViewState()</code>. Renders into <code>DeckGLChart</code>, which calls <code>deck.finalize()</code> on unmount.</dd>
+                    <dt>Canvas2DBaseRenderer</dt><dd>Subclasses draw directly to a 2D context. <code>Canvas2DChart</code> owns the canvas with device-pixel-ratio scaling, resize redraw, missing-context safety, and cleanup. <code>gauge</code> is the proof chart.</dd>
+                    <dt>ReglBaseRenderer</dt><dd>Custom WebGL shaders. <code>ReglChart</code> owns the canvas + regl instance with DPR sizing, resize redraw, and regl destruction on unmount. <code>image_raster_plot</code> is the proof chart.</dd>
+                  </dl>
+                  <figure class="code">
+                    <figcaption>src/charts/renderers/echarts-renderer.tsx<span class="lang">typescript</span></figcaption>
+                    <pre><code>export abstract class EChartsBaseRenderer implements ChartRenderer {
+  abstract buildOption(data, config, theme): EChartsOption;
+  render(data, config, theme) {
+    if (this.isEmpty(data, config))
+      return createElement(EmptyChartState, { message: this.emptyMessage() });
+    const option = this.buildOption(data, config, theme);
+    option.backgroundColor = 'transparent';
+    if (window.__E2E__) option.animation = false;
+    return createElement(ReactECharts, { option, notMerge: true, /* ... */ });
+  }
+}</code></pre>
+                  </figure>
+                  <div class="filelist">
+                    <div class="filecard"><code class="fileref" data-path="src/charts/renderers/echarts-renderer.tsx">echarts-renderer.tsx</code><span class="filecard-desc">EChartsBaseRenderer abstract class.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/charts/renderers/deckgl-renderer.tsx">deckgl-renderer.tsx</code><span class="filecard-desc">DeckGLBaseRenderer with view selection.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/charts/renderers/DeckGLChart.tsx">DeckGLChart.tsx</code><span class="filecard-desc">FC wrapping &lt;DeckGL&gt;; finalize() on unmount.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/charts/renderers/canvas2d-renderer.tsx">canvas2d-renderer.tsx</code><span class="filecard-desc">Canvas2DBaseRenderer abstract class.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/charts/renderers/Canvas2DChart.tsx">Canvas2DChart.tsx</code><span class="filecard-desc">DPR-scaled canvas wrapper + cleanup.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/charts/renderers/regl-renderer.tsx">regl-renderer.tsx</code><span class="filecard-desc">ReglBaseRenderer abstract class.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/charts/renderers/ReglChart.tsx">ReglChart.tsx</code><span class="filecard-desc">regl canvas wrapper + context destruction.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/charts/renderers/EmptyChartState.tsx">EmptyChartState.tsx</code><span class="filecard-desc">Themed empty-state placeholder shown by the guard.</span></div>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>An individual chart file <span class="sub-tag">src/charts/families/distribution/histogram.ts</span></summary>
+                <div class="sub-body">
+                  <p>The template every chart follows: declare option specs, define a renderer subclass overriding <code>buildOption()</code> (or <code>buildLayers()</code>), and call <code>chartRegistry.register({...})</code> at module scope with the full <code>ChartDefinition</code> — <code>type</code>, <code>family</code>, <code>name</code>, <code>renderer</code> backend, <code>compatibleShapes</code>, <code>requiredColumns</code> (role + accepted types), optional <code>options</code>, and a <code>createRenderer()</code> factory. The histogram pulls its numeric column, filters non-finite values for the empty guard, bins via the shared <code>histogramBins</code> helper, and themes its bar via <code>categoricalColor</code>.</p>
+                  <figure class="code">
+                    <figcaption>src/charts/families/distribution/histogram.ts<span class="lang">typescript</span></figcaption>
+                    <pre><code>chartRegistry.register({
+  type: 'histogram',
+  family: 'distribution',
+  name: 'Histogram',
+  renderer: 'echarts',
+  compatibleShapes: ['single_numeric', 'category_numeric', 'many_numeric', 'generic'],
+  requiredColumns: [{ role: 'value', acceptedTypes: ['numeric','integer','float'], label: 'Value' }],
+  options: optionSpecs,
+  createRenderer: () =&gt; new HistogramRenderer(),
+});</code></pre>
+                  </figure>
+                  <p>A deck.gl geographic chart follows the same shape but extends <code>DeckGLBaseRenderer</code> and overrides <code>buildLayers()</code> + <code>getInitialViewState()</code> instead — see <span class="fileref-inline"><code class="fileref" data-path="src/charts/families/geographic/point_map.ts">point_map.ts</code></span>, which extracts finite lat/lon points, builds a <code>ScatterplotLayer</code>, and derives a bounds-centered MapView state.</p>
+                  <div class="filelist">
+                    <div class="filecard"><code class="fileref" data-path="src/charts/families/distribution/histogram.ts">histogram.ts</code><span class="filecard-desc">Canonical ECharts chart example.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/charts/families/geographic/point_map.ts">point_map.ts</code><span class="filecard-desc">Canonical deck.gl chart example.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/charts/families/specialized/gauge.ts">gauge.ts</code><span class="filecard-desc">Canvas2D chart example.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/charts/families/matrix/image_raster_plot.ts">image_raster_plot.ts</code><span class="filecard-desc">regl chart example.</span></div>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Data loader &amp; parsers <span class="sub-tag">src/data/loader.ts</span></summary>
+                <div class="sub-body">
+                  <p><code>loadFile(file)</code> dispatches by extension to the right parser, then runs a uniform post-pipeline: normalize formatted values → analyze columns → detect shape → build columnar index → assemble a <code>DataSet</code> with a fresh UUID. Adding a format means adding a parser + one branch here.</p>
+                  <div class="table-wrap"><table class="doc-table">
+                    <thead><tr><th>Extension</th><th>Parser</th><th>File</th></tr></thead>
+                    <tbody>
+                      <tr><td><code>.csv</code> / <code>.tsv</code></td><td>PapaParse (string mode, normalizer applies coercion)</td><td><code class="fileref" data-path="src/data/parsers/csv-parser.ts">csv-parser.ts</code></td></tr>
+                      <tr><td><code>.xlsx</code> / <code>.xlsm</code></td><td>read-excel-file (first non-empty row = headers, Date→ISO)</td><td><code class="fileref" data-path="src/data/parsers/excel-parser.ts">excel-parser.ts</code></td></tr>
+                      <tr><td><code>.json</code></td><td>JSON.parse (array of records)</td><td><code class="fileref" data-path="src/data/parsers/json-parser.ts">json-parser.ts</code></td></tr>
+                      <tr><td><code>.parquet</code></td><td>hyparquet (sparse-key union, bigint handling)</td><td><code class="fileref" data-path="src/data/parsers/parquet-parser.ts">parquet-parser.ts</code></td></tr>
+                    </tbody>
+                  </table></div>
+                  <div class="filelist">
+                    <div class="filecard"><code class="fileref" data-path="src/data/loader.ts">src/data/loader.ts</code><span class="filecard-desc">Extension dispatch + the DataSet assembly pipeline.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/data/normalize-values.ts">normalize-values.ts</code><span class="filecard-desc">Locale numeric + date normalization (currency, grouping, percentages, slash/month-name dates).</span></div>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Column analysis &amp; shape detection <span class="sub-tag">src/data/shape-detector.ts</span></summary>
+                <div class="sub-body">
+                  <p><code>analyzeColumns()</code> infers each column's type, null/unique counts, numeric stats (min/max/mean/median/std/q25/q75), top categorical values, and date ranges. <code>inferType()</code> is order-sensitive: geo coordinate names (<code>lat</code>/<code>lng</code>/...) take precedence over plain numeric, then boolean, numeric (int vs float), datetime (by name heuristic then string parsing), and finally category-vs-text by unique ratio. <code>detectShape()</code> then maps the column profile to one of 18 <code>DataShape</code> values via a priority ladder: OHLCV and named matrix first, then geo, survival, hierarchy, network, intervals, event logs, time-series variants, and numeric-count fallbacks.</p>
+                  <figure class="code">
+                    <figcaption>src/data/shape-detector.ts — detection priority (excerpt)<span class="lang">typescript</span></figcaption>
+                    <pre><code>if (['open','high','low','close'].every(n =&gt; names.has(n))) return 'ohlcv';
+if (['row','col','value'].every(n =&gt; names.has(n)))      return 'matrix';
+if (geoCols.length &gt;= 2) return 'geo_points';
+// ... survival, hierarchy, source/target, intervals, event_log ...
+if (dtCols.length &gt;= 1 &amp;&amp; numCols.length &gt;= 1)
+  return catCols.length &gt;= 1 ? 'time_series_numeric' : 'time_numeric';
+if (numCols.length &gt;= MANY_NUMERIC_MIN) return 'many_numeric';
+if (catCols.length &gt;= 1 &amp;&amp; numCols.length &gt;= 1) return 'category_numeric';</code></pre>
+                  </figure>
+                  <div class="filelist">
+                    <div class="filecard"><code class="fileref" data-path="src/data/shape-detector.ts">shape-detector.ts</code><span class="filecard-desc">analyzeColumns + inferType + computeStats + detectShape (named thresholds, no magic numbers).</span></div>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Chart suggester (the differentiator) <span class="sub-tag">src/data/chart-suggester.ts</span></summary>
+                <div class="sub-body">
+                  <p>The "which chart?" answer. <code>suggestCharts(shape, columns)</code> scores every registered chart and returns the applicable ones, best first. A chart scores 0 (excluded) unless its <code>compatibleShapes</code> includes the detected shape <em>and</em> every required role can be filled by a <strong>distinct</strong> column (the <code>isFillable</code> consume-on-assign check mirrors <code>ChartArea</code>'s auto-assignment). Among applicable charts, more specialized ones (fewer compatible shapes) score higher; ties break by name.</p>
+                  <figure class="code">
+                    <figcaption>src/data/chart-suggester.ts<span class="lang">typescript</span></figcaption>
+                    <pre><code>export function scoreChart(def, shape, columns): number {
+  if (!def.compatibleShapes.includes(shape)) return 0;
+  if (!isFillable(def, columns)) return 0;
+  return 1 + 1 / def.compatibleShapes.length;   // specialist &gt; generalist
+}</code></pre>
+                  </figure>
+                  <div class="filelist">
+                    <div class="filecard"><code class="fileref" data-path="src/data/chart-suggester.ts">chart-suggester.ts</code><span class="filecard-desc">scoreChart + suggestCharts + isFillable.</span></div>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Filters &amp; transforms <span class="sub-tag">src/data/transforms.ts</span></summary>
+                <div class="sub-body">
+                  <p><code>applyFilters(ds, filters)</code> turns a <code>DataSet</code> + active <code>Filter[]</code> into a <code>DataView</code> (filtered rows + recomputed columnar index). With no active filters it returns the dataset's arrays directly (zero-copy fast path). <code>matchFilter</code> supports <code>eq/neq/gt/gte/lt/lte/in/between/regex</code>; invalid regex fails closed (returns no match) rather than throwing during render. Group-by aggregation for categorical charts lives separately in <span class="fileref-inline"><code class="fileref" data-path="src/data/transforms/groupByAggregate.ts">groupByAggregate.ts</code></span>.</p>
+                  <div class="filelist">
+                    <div class="filecard"><code class="fileref" data-path="src/data/transforms.ts">transforms.ts</code><span class="filecard-desc">applyFilters + matchFilter.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/data/transforms/groupByAggregate.ts">groupByAggregate.ts</code><span class="filecard-desc">sum/mean/count/min/max/median group-by for bar/pie/lollipop/etc.</span></div>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Reference-validated stats layer <span class="sub-tag">src/data/stats/</span></summary>
+                <div class="sub-body">
+                  <p>Charts that need real math share a tested compute layer rather than re-implementing statistics. Each module is validated against documented reference values (no mocking of the math). Examples: <code>quantiles</code> (type-7 percentiles), <code>kernelDensity</code> (gaussian KDE, Silverman sample-sd bandwidth), <code>buildHierarchy</code> (flat id/parent → tree, with cycle-breaking to avoid infinite ECharts trees), <code>rocCurve</code>/<code>prCurve</code> (tie-stable AUC/AP), <code>calibrationCurve</code>, <code>normalQuantile</code> (Acklam probit) + <code>qqPoints</code>, <code>autocorrelation</code>/<code>partialAutocorrelation</code>, and <code>survivalCurve</code> (Kaplan-Meier).</p>
+                  <div class="filelist">
+                    <div class="filecard"><code class="fileref dir" data-path="src/data/stats/">src/data/stats/</code><span class="filecard-desc">All shared statistical compute, one concept per file.</span></div>
+                    <div class="filecard"><code class="fileref dir" data-path="src/charts/echarts/">src/charts/echarts/</code><span class="filecard-desc">Shared ECharts option helpers: pivotLongForm, histogramBins, matrixGrid, relationshipGrid, multivariate, axis/grid/tooltip.</span></div>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>ChartArea — orchestrator &amp; auto-assignment <span class="sub-tag">src/components/chart-area/ChartArea.tsx</span></summary>
+                <div class="sub-body">
+                  <p>The center of the UI. It reads the active dataset, layer stack, and filters; computes the filtered <code>DataView</code> (memoized); and for each layer fills any unassigned required role with a <em>distinct</em> column, preferring a column whose name matches the role (with aliases like <code>timestamp→date</code>, <code>event→label</code>). If a required role can't be filled it shows "No compatible column for: …". It renders the active layer plus any other visible, fully-filled layers into the same render root for basic compositing — each via <code>ChartCanvas</code>, which memoizes the renderer per <code>chartType</code> so unmount/cleanup only fires on a real chart switch. The header exposes per-role column pickers, optional-role pickers, and PNG/SVG export buttons. The render root carries <code>data-*</code> hooks (<code>data-chart-active</code>, <code>data-chart-unfilled</code>, etc.) that drive the Playwright gate.</p>
+                  <div class="filelist">
+                    <div class="filecard"><code class="fileref" data-path="src/components/chart-area/ChartArea.tsx">ChartArea.tsx</code><span class="filecard-desc">Auto-assignment, filtering, layer compositing, export header, e2e hooks.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/components/chart-area/ChartCanvas.tsx">ChartCanvas.tsx</code><span class="filecard-desc">Per-chartType renderer dispatch + memoization (cleanup boundary).</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/components/chart-area/ColumnPicker.tsx">ColumnPicker.tsx</code><span class="filecard-desc">The role→column &lt;select&gt; in the chart header.</span></div>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Sidebar &amp; tabs <span class="sub-tag">src/components/sidebar/</span></summary>
+                <div class="sub-body">
+                  <p><code>Sidebar.tsx</code> is only the tab host (Data / Charts / Layers / Style). Each tab is its own file: <code>DataTab</code> (dataset switcher, row preview, filter authoring with live row-count, annotations, CSV + chart-spec export), <code>ChartPicker</code> (the ranked "Suggested for &lt;shape&gt;" surface with a "Show all charts" escape hatch into family browsing), <code>LayersTab</code> (layer activation/removal, visibility, y1/y2 axis), and <code>ChartOptionsPanel</code> (generic option controls driven by each chart's <code>options</code> spec).</p>
+                  <div class="filelist">
+                    <div class="filecard"><code class="fileref" data-path="src/components/sidebar/Sidebar.tsx">Sidebar.tsx</code><span class="filecard-desc">Tab host only.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/components/sidebar/DataTab.tsx">DataTab.tsx</code><span class="filecard-desc">Dataset/filter/annotation/export controls.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/components/sidebar/ChartPicker.tsx">ChartPicker.tsx</code><span class="filecard-desc">Suggested + full-catalog chart browser.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/components/sidebar/LayersTab.tsx">LayersTab.tsx</code><span class="filecard-desc">Layer stack controls.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/components/sidebar/ChartOptionsPanel.tsx">ChartOptionsPanel.tsx</code><span class="filecard-desc">Generic, spec-driven option controls (no per-chart branches).</span></div>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Toolbar, command palette, theming <span class="sub-tag">src/components/toolbar/ · src/theme/</span></summary>
+                <div class="sub-body">
+                  <p><code>Toolbar.tsx</code> owns Upload (file input accepting all supported formats), the Samples dropdown (29 deterministic sample datasets), the Commands button, and the theme toggle. The command palette (<code>Ctrl/Cmd+K</code>) runs existing app actions. Theming: <code>tokens.ts</code> holds dark + light <code>ThemeTokens</code>; <code>ThemeProvider</code> exposes them through context and mirrors the choice to <code>localStorage</code> under <code>bi-theme</code> and the <code>data-theme</code> attribute; CSS custom properties in <code>index.css</code> drive runtime switching without a re-render cascade. No hard-coded colors live outside the token files.</p>
+                  <div class="filelist">
+                    <div class="filecard"><code class="fileref" data-path="src/components/toolbar/Toolbar.tsx">Toolbar.tsx</code><span class="filecard-desc">Upload, samples, commands, theme toggle.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/components/ui/CommandPalette.tsx">CommandPalette.tsx</code><span class="filecard-desc">Cmd+K palette running app actions.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/theme/tokens.ts">tokens.ts</code><span class="filecard-desc">darkTokens + lightTokens.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/theme/theme-provider.tsx">theme-provider.tsx</code><span class="filecard-desc">Provider + localStorage persistence.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/data/sample-data.ts">sample-data.ts</code><span class="filecard-desc">29 seeded sample datasets + getSampleOptions/loadSampleData.</span></div>
+                  </div>
+                </div>
+              </details>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="data-model">
+          <details>
+            <summary><span class="sec-num">7</span><h2>Data models &amp; contracts</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">These typed interfaces cross module boundaries and are <strong>sacred</strong> — a breaking change is a major semver bump and requires a master-plan update first.</p>
+
+              <figure class="diagram">
+                <div class="mermaid">
+classDiagram
+    class DataSet {
+      id string
+      name string
+      rows Record[]
+      columnArrays Record
+      columns ColumnMeta[]
+      rowCount number
+      shape DataShape
+    }
+    class ColumnMeta {
+      name string
+      type ColumnType
+      uniqueCount number
+      nullCount number
+      stats NumericStats
+    }
+    class DataView {
+      sourceId string
+      rows Record[]
+      columns ColumnMeta[]
+      filters Filter[]
+    }
+    class ChartDefinition {
+      type string
+      family ChartFamily
+      renderer RendererBackend
+      compatibleShapes DataShape[]
+      requiredColumns ColumnRole[]
+      createRenderer()
+    }
+    class ChartConfig {
+      chartType string
+      columns Record
+      options Record
+    }
+    DataSet --> ColumnMeta
+    DataView --> ColumnMeta
+    DataView --> Filter
+    ChartDefinition --> ColumnRole
+    ChartDefinition --> ChartRenderer
+                </div>
+                <div class="mermaid-fallback"><figure class="code"><figcaption>diagram source · mermaid</figcaption><pre><code>classDiagram
+    class DataSet {
+      id string
+      name string
+      rows Record[]
+      columnArrays Record
+      columns ColumnMeta[]
+      rowCount number
+      shape DataShape
+    }
+    class ColumnMeta {
+      name string
+      type ColumnType
+      uniqueCount number
+      nullCount number
+      stats NumericStats
+    }
+    class DataView {
+      sourceId string
+      rows Record[]
+      columns ColumnMeta[]
+      filters Filter[]
+    }
+    class ChartDefinition {
+      type string
+      family ChartFamily
+      renderer RendererBackend
+      compatibleShapes DataShape[]
+      requiredColumns ColumnRole[]
+      createRenderer()
+    }
+    class ChartConfig {
+      chartType string
+      columns Record
+      options Record
+    }
+    DataSet --&gt; ColumnMeta
+    DataView --&gt; ColumnMeta
+    DataView --&gt; Filter
+    ChartDefinition --&gt; ColumnRole
+    ChartDefinition --&gt; ChartRenderer</code></pre></figure></div>
+                <figcaption>Core data contracts and their relationships.</figcaption>
+              </figure>
+
+              <h3 class="anchor">Contract reference</h3>
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Contract</th><th>Defined in</th><th>Role</th></tr></thead>
+                <tbody>
+                  <tr><td><code>DataSet</code></td><td><code class="fileref" data-path="src/types/data.ts">src/types/data.ts</code></td><td>A loaded dataset: row records + columnar index + ColumnMeta[] + detected shape + size/timestamp.</td></tr>
+                  <tr><td><code>DataView</code></td><td><code class="fileref" data-path="src/types/data.ts">src/types/data.ts</code></td><td>A filtered view fed to renderers; carries the active filters that produced it.</td></tr>
+                  <tr><td><code>ColumnMeta</code> / <code>NumericStats</code></td><td><code class="fileref" data-path="src/types/data.ts">src/types/data.ts</code></td><td>Per-column type, null/unique counts, numeric stats, top values, date range.</td></tr>
+                  <tr><td><code>ColumnType</code></td><td><code class="fileref" data-path="src/types/data.ts">src/types/data.ts</code></td><td>numeric · integer · float · datetime · date · category · text · boolean · geo_point · geo_polygon · unknown.</td></tr>
+                  <tr><td><code>DataShape</code></td><td><code class="fileref" data-path="src/types/data.ts">src/types/data.ts</code></td><td>18-value enum of detected dataset shapes (drives suggestion).</td></tr>
+                  <tr><td><code>Filter</code></td><td><code class="fileref" data-path="src/types/data.ts">src/types/data.ts</code></td><td>column + op (eq/neq/gt/.../regex) + value + active flag.</td></tr>
+                  <tr><td><code>ChartDefinition</code></td><td><code class="fileref" data-path="src/charts/types.ts">src/charts/types.ts</code></td><td>Per-chart metadata + compatibleShapes + requiredColumns + createRenderer() factory.</td></tr>
+                  <tr><td><code>ChartConfig</code></td><td><code class="fileref" data-path="src/charts/types.ts">src/charts/types.ts</code></td><td>A layer's runtime state: chartType + role→column map + options + axes.</td></tr>
+                  <tr><td><code>ChartRenderer</code></td><td><code class="fileref" data-path="src/charts/types.ts">src/charts/types.ts</code></td><td>render(data, config, theme) → ReactElement; optional destroy().</td></tr>
+                  <tr><td><code>ChartOptionSpec</code></td><td><code class="fileref" data-path="src/charts/option-spec.ts">src/charts/option-spec.ts</code></td><td>Declarative option control (number/toggle/select/color) + default — the single source of truth for defaults.</td></tr>
+                  <tr><td><code>ThemeTokens</code></td><td><code class="fileref" data-path="src/charts/types.ts">src/charts/types.ts</code></td><td>Color scales + font scale handed to every renderer.</td></tr>
+                  <tr><td><code>LayerConfig</code></td><td><code class="fileref" data-path="src/stores/chart-store.ts">src/stores/chart-store.ts</code></td><td>A stored layer: id + chartType + columns + axis (y1/y2) + options + visible.</td></tr>
+                </tbody>
+              </table></div>
+
+              <div class="callout danger">
+                <div class="callout-title">Do not</div>
+                <div class="callout-body">Never "simplify" or rename a field in these contracts for convenience, and never redefine one of these types locally — import from <code>src/types/data.ts</code> or <code>src/charts/types.ts</code>. The additive optional <code>options?</code> field on <code>ChartDefinition</code> (added in M1) was a minor bump documented in the master plan; that's the only kind of change allowed without prior approval.</div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="state">
+          <details>
+            <summary><span class="sec-num">8</span><h2>State management (Zustand stores)</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">Five stores, one concern each, all using the Immer middleware for draft-based updates.</p>
+
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Store</th><th>Owns</th><th>Key actions / selectors</th></tr></thead>
+                <tbody>
+                  <tr><td><code class="fileref" data-path="src/stores/dataset-store.ts">dataset-store</code></td><td><code>Map&lt;id, DataSet&gt;</code>, active id, loading state</td><td>addDataset, removeDataset, setActive · <code>useActiveDataset()</code> (Immer Map/Set enabled)</td></tr>
+                  <tr><td><code class="fileref" data-path="src/stores/chart-store.ts">chart-store</code></td><td>Layer stack + active layer index</td><td>addLayer, removeLayer, updateLayer, setActiveLayer · <code>useActiveChartConfig()</code></td></tr>
+                  <tr><td><code class="fileref" data-path="src/stores/ui-store.ts">ui-store</code></td><td>theme, sidebar tab, modal type</td><td>setTheme, toggleTheme, setSidebarTab, openModal/closeModal</td></tr>
+                  <tr><td><code class="fileref" data-path="src/stores/filter-store.ts">filter-store</code></td><td>Active filters</td><td>addFilter, removeFilter, toggleFilter, clearFilters</td></tr>
+                  <tr><td><code class="fileref" data-path="src/stores/annotation-store.ts">annotation-store</code></td><td>Dataset-scoped row annotations</td><td>addAnnotation, removeAnnotation, clearAnnotations</td></tr>
+                </tbody>
+              </table></div>
+
+              <p>Cross-store derived selectors live alongside their primary store: <code>useActiveDataset</code> in dataset-store, <code>useActiveChartConfig</code> in chart-store. The dataset store uniquely enables Immer's Map/Set support so its <code>Map&lt;string, DataSet&gt;</code> updates through the same draft path as the array-backed stores.</p>
+
+              <figure class="code">
+                <figcaption>src/stores/chart-store.ts — Immer draft update<span class="lang">typescript</span></figcaption>
+                <pre><code>updateLayer: (index, patch) =&gt;
+  set((s) =&gt; {
+    const layer = s.layers[index];
+    if (layer) Object.assign(layer, patch);  // mutate the Immer draft
+  }),</code></pre>
+              </figure>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="catalog">
+          <details>
+            <summary><span class="sec-num">9</span><h2>Chart catalog &amp; shape mapping</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">193 chart types across 13 families. The full catalog (every chart's minimum columns) lives in <span class="fileref-inline"><code class="fileref" data-path="CHARTS.md">CHARTS.md</code></span>; this is the orientation map.</p>
+
+              <h3 class="anchor">Shape → suggested charts</h3>
+              <p>The <code>DataShape</code> a dataset is detected as determines which charts surface in the picker. The mapping:</p>
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>DataShape</th><th>Example columns</th><th>Typical suggested charts</th></tr></thead>
+                <tbody>
+                  <tr><td><code>single_numeric</code></td><td><code>value</code></td><td>histogram, KDE, box, violin, ECDF, QQ</td></tr>
+                  <tr><td><code>category_numeric</code></td><td><code>group, value</code></td><td>bar, box, violin, lollipop, dot, pie/donut</td></tr>
+                  <tr><td><code>time_numeric</code></td><td><code>date, value</code></td><td>line, area, sparkline, step, control chart</td></tr>
+                  <tr><td><code>time_series_numeric</code></td><td><code>date, series, value</code></td><td>multi-line, stacked area, streamgraph</td></tr>
+                  <tr><td><code>two_numeric</code></td><td><code>x, y</code></td><td>scatter, regression, hexbin, density</td></tr>
+                  <tr><td><code>three_numeric</code></td><td><code>x, y, z</code></td><td>bubble, 3D scatter, surface</td></tr>
+                  <tr><td><code>many_numeric</code></td><td><code>f1, f2, f3…</code></td><td>correlation heatmap, pair plot, parallel coords, PCA</td></tr>
+                  <tr><td><code>matrix</code></td><td><code>row, col, value</code></td><td>heatmap, confusion matrix, clustermap</td></tr>
+                  <tr><td><code>hierarchy</code></td><td><code>id, parent, value</code></td><td>treemap, sunburst, icicle</td></tr>
+                  <tr><td><code>nodes_edges</code> / <code>source_target_value</code></td><td>node + edge table</td><td>network, force graph, sankey, chord, alluvial</td></tr>
+                  <tr><td><code>geo_points</code> / <code>geo_polygons</code></td><td><code>lat, lon</code> / <code>region, value</code></td><td>point/bubble/density map · choropleth, cartogram</td></tr>
+                  <tr><td><code>intervals</code></td><td><code>task, start, end</code></td><td>Gantt, swimlane, range bar</td></tr>
+                  <tr><td><code>ohlcv</code></td><td><code>date, o, h, l, c, volume</code></td><td>candlestick, OHLC, price-volume</td></tr>
+                  <tr><td><code>survival</code></td><td><code>time, event, group</code></td><td>Kaplan-Meier, cumulative hazard</td></tr>
+                  <tr><td><code>event_log</code></td><td><code>user, event, timestamp</code></td><td>funnels, cohorts, retention, timelines</td></tr>
+                </tbody>
+              </table></div>
+
+              <h3 class="anchor">Family → backend</h3>
+              <p>Each chart picks exactly one renderer backend. The mapping is documented and machine-checked by a test (<span class="fileref-inline"><code class="fileref" data-path="tests/unit/charts/charts-doc-backends.test.ts">charts-doc-backends.test.ts</code></span>) that fails if any chart's <code>renderer</code> field drifts from the table in <code>CHARTS.md</code>:</p>
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Backend</th><th>Families / charts</th></tr></thead>
+                <tbody>
+                  <tr><td><code>echarts</code></td><td>distribution, categorical, time-series, relationships, matrix (most), hierarchical, network-flow, finance, statistical, composition, specialized (most)</td></tr>
+                  <tr><td><code>deckgl</code></td><td>all 14 geographic (MapView) + all 6 3D (OrbitView)</td></tr>
+                  <tr><td><code>regl</code></td><td><code>image_raster_plot</code></td></tr>
+                  <tr><td><code>canvas2d</code></td><td><code>gauge</code></td></tr>
+                </tbody>
+              </table></div>
+
+              <div class="callout tip">
+                <div class="callout-title">Tip</div>
+                <div class="callout-body">To see the live count and per-family breakdown without reading source, the <span class="fileref-inline"><code class="fileref dir" data-path=".agents/skills/chart-status/">chart-status</code></span> skill reports <code>193/193</code>. The catalog reference with every chart's minimum columns is <span class="fileref-inline"><code class="fileref" data-path="CHARTS.md">CHARTS.md</code></span>.</div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="config">
+          <details>
+            <summary><span class="sec-num">10</span><h2>Configuration &amp; environment</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">A single env var; everything else is in TypeScript config files. There are no secrets — this is a static client app.</p>
+
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Variable</th><th>Default</th><th>Meaning</th><th>Consumed by</th></tr></thead>
+                <tbody>
+                  <tr><td><code>BI_PORT</code></td><td><code>5176</code></td><td>Host port the nginx container is published on (container listens on :80).</td><td><code class="fileref" data-path="docker-compose.yml">docker-compose.yml</code>, <code class="fileref" data-path="bi_service.sh">bi_service.sh</code></td></tr>
+                  <tr><td><code>E2E_PORT</code></td><td><code>4173</code></td><td>Port the Playwright preview server binds (visual gate only).</td><td><code class="fileref" data-path="playwright.config.ts">playwright.config.ts</code></td></tr>
+                  <tr><td><code>E2E_WORKERS</code></td><td><code>1</code> in CI, <code>2</code> local</td><td>Playwright worker count; kept conservative to avoid preview-server memory pressure.</td><td><code class="fileref" data-path="playwright.config.ts">playwright.config.ts</code></td></tr>
+                </tbody>
+              </table></div>
+
+              <h3 class="anchor">Config files</h3>
+              <div class="filelist">
+                <div class="filecard"><code class="fileref" data-path=".env.example">.env.example</code><span class="filecard-desc">Copy to <code>.env</code>; documents <code>BI_PORT</code>.</span></div>
+                <div class="filecard"><code class="fileref" data-path="tsconfig.json">tsconfig.json</code><span class="filecard-desc">Root references → app/node/test configs.</span></div>
+                <div class="filecard"><code class="fileref" data-path="tsconfig.app.json">tsconfig.app.json</code><span class="filecard-desc">App code, strict mode.</span></div>
+                <div class="filecard"><code class="fileref" data-path="tsconfig.test.json">tsconfig.test.json</code><span class="filecard-desc">Test code (src + tests), strict.</span></div>
+                <div class="filecard"><code class="fileref" data-path="eslint.config.js">eslint.config.js</code><span class="filecard-desc">TS + react-hooks + react-refresh; ignores coverage/, respects <code>_</code>-prefix unused vars.</span></div>
+                <div class="filecard"><code class="fileref" data-path="vite.config.ts">vite.config.ts</code><span class="filecard-desc">Dev port 5176, alias <code>@ → src</code>, Rolldown vendor chunking.</span></div>
+              </div>
+
+              <p>The <code>@</code> path alias resolves to <code>src/</code> and is configured identically in <code>vite.config.ts</code>, <code>vitest.config.ts</code>, and the tsconfigs — every import in the codebase uses it (<code>@/charts/registry</code>, <code>@/types/data</code>, etc.).</p>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="run">
+          <details>
+            <summary><span class="sec-num">11</span><h2>How to run it</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">Local dev with Vite, or the full Docker/nginx production path via the launcher.</p>
+
+              <h3 class="anchor">Local development</h3>
+              <ol class="steps">
+                <li>Install dependencies on the target OS: <code>npm ci</code> (required — <code>node_modules</code> is gitignored and non-portable across OS/arch).</li>
+                <li>Start the dev server: <code>npm run dev</code> → opens on <code>http://localhost:5176</code> with hot reload.</li>
+                <li>Click <strong>Samples</strong> and pick a dataset (or <strong>Upload</strong> a CSV/JSON/Excel/Parquet file) to see shape detection + suggestions immediately.</li>
+              </ol>
+
+              <h3 class="anchor">Docker (production-equivalent)</h3>
+              <ol class="steps">
+                <li>(Optional) copy <code class="fileref" data-path=".env.example">.env.example</code> to <code>.env</code> and set <code>BI_PORT</code>.</li>
+                <li>Run <code class="fileref" data-path="bi_service.sh">bi_service.sh</code> (macOS/Linux) or <code class="fileref" data-path="bi_service.bat">bi_service.bat</code> (Windows). It runs <code>docker compose up --build -d</code> and prints the service URL.</li>
+                <li>Open <code>http://localhost:5176</code> (or your <code>BI_PORT</code>).</li>
+                <li>At the prompt choose: <code>[k]</code> stop (keep image) · <code>[q]</code> stop + remove image · <code>[v]</code> also remove volumes · <code>[r]</code> full restart (rebuild + relaunch).</li>
+              </ol>
+
+              <div class="callout warn">
+                <div class="callout-title">Watch out — non-TTY launchers</div>
+                <div class="callout-body">The launcher's <code>[k]/[q]/[v]/[r]</code> loop reads from stdin. Running <code>bi_service.bat</code> via a non-interactive runner (e.g. PyCharm right-click → Run) will hang at the prompt — run it from a real terminal, or pipe a choice (<code>'k' | cmd /c bi_service.bat</code>) as the status doc's verification did.</div>
+              </div>
+
+              <h3 class="anchor">npm scripts</h3>
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Script</th><th>Does</th></tr></thead>
+                <tbody>
+                  <tr><td><code>npm run dev</code></td><td>Vite dev server on port 5176.</td></tr>
+                  <tr><td><code>npm run build</code></td><td><code>tsc -b</code> then <code>vite build</code> → <code>dist/</code>.</td></tr>
+                  <tr><td><code>npm run typecheck</code></td><td><code>tsc -b</code> across all configs.</td></tr>
+                  <tr><td><code>npm run lint</code></td><td>ESLint over the repo.</td></tr>
+                  <tr><td><code>npm run test</code> / <code>test:watch</code></td><td>Vitest one-shot / watch.</td></tr>
+                  <tr><td><code>npm run test:coverage</code></td><td>Vitest with v8 coverage (text + cobertura + html in <code>coverage/</code>).</td></tr>
+                  <tr><td><code>npm run test:e2e</code> / <code>test:e2e:update</code></td><td>Playwright visual gate / update baselines.</td></tr>
+                </tbody>
+              </table></div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="editing">
+          <details>
+            <summary><span class="sec-num">12</span><h2>How to edit / extend it</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">Practical, owner-focused recipes. The whole architecture is designed so the common change — adding a chart — touches one new file plus one barrel line.</p>
+
+              <details class="sub">
+                <summary>Add a new chart type</summary>
+                <div class="sub-body">
+                  <ol class="steps">
+                    <li>Read the chart's spec in <code class="fileref" data-path="CHARTS.md">CHARTS.md</code> (family, minimum columns, intended renderer backend).</li>
+                    <li>Create <code>src/charts/families/&lt;family&gt;/&lt;chart_name&gt;.ts</code> (snake_case, matching the catalog name).</li>
+                    <li>Extend the correct base renderer (<code>EChartsBaseRenderer</code> → override <code>buildOption()</code>; <code>DeckGLBaseRenderer</code> → override <code>buildLayers()</code> + view hooks; or Canvas2D/regl bases).</li>
+                    <li>Call <code>chartRegistry.register({...})</code> at module scope with the full <code>ChartDefinition</code> — <code>type</code>, <code>family</code>, <code>renderer</code>, <code>compatibleShapes</code> (aligned with the shape detector), <code>requiredColumns</code> (role + acceptedTypes), optional <code>options</code>, <code>createRenderer</code>.</li>
+                    <li>Add a side-effect import to the family's <code>index.ts</code> barrel (otherwise it never registers).</li>
+                    <li>Add a unit test at <code>tests/unit/charts/families/&lt;chart_name&gt;.test.ts</code> exercising <code>buildOption</code>/<code>buildLayers</code> output + the empty-state path.</li>
+                    <li>Add the chart→sample mapping in <code class="fileref" data-path="tests/e2e/chart-samples.ts">tests/e2e/chart-samples.ts</code>, then generate a Gate-3 baseline with <code>./run_e2e.sh update</code> (or <code>run_e2e.bat update</code>) in the pinned Docker image.</li>
+                    <li>Reuse the shared helpers (<code>src/charts/echarts/</code>, <code>src/data/stats/</code>) rather than re-implementing axes/pivots/statistics.</li>
+                  </ol>
+                  <div class="callout tip">
+                    <div class="callout-title">Tip — use the scaffolders</div>
+                    <div class="callout-body">The <code class="fileref" data-path=".codex/commands/new-chart.md">new-chart</code> command and <code class="fileref dir" data-path=".agents/skills/scaffold-charts/">scaffold-charts</code> skill generate the boilerplate. The registry contract test (<code class="fileref" data-path="tests/unit/charts/registry-contract.test.ts">registry-contract.test.ts</code>) validates that your chart's declared backend matches a live base class, and the e2e drift guard (<code class="fileref" data-path="tests/unit/charts/e2e-coverage.test.ts">e2e-coverage.test.ts</code>) fails if it lacks a visual-gate entry.</div>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Add a new data format</summary>
+                <div class="sub-body">
+                  <ol class="steps">
+                    <li>Create a parser in <code class="fileref dir" data-path="src/data/parsers/">src/data/parsers/</code> returning <code>{ rows, columnNames }</code>.</li>
+                    <li>Add an extension branch in <code class="fileref" data-path="src/data/loader.ts">src/data/loader.ts</code>'s dispatch.</li>
+                    <li>Accept the extension in the upload input's <code>accept=</code> list in <code class="fileref" data-path="src/components/toolbar/Toolbar.tsx">Toolbar.tsx</code> (a test guards against forgetting this).</li>
+                    <li>Add tests at <code>tests/unit/data/parsers/&lt;format&gt;-parser.test.ts</code> + loader routing coverage.</li>
+                  </ol>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Add a new chart family</summary>
+                <div class="sub-body">
+                  <ol class="steps">
+                    <li>Create <code>src/charts/families/&lt;family&gt;/</code> with an <code>index.ts</code> barrel.</li>
+                    <li>Import the new barrel in <code class="fileref" data-path="src/charts/families/index.ts">src/charts/families/index.ts</code> (eager or lazy list).</li>
+                    <li>Add the family key to the <code>ChartFamily</code> union and <code>FAMILY_META</code> (label + icon) in <code class="fileref" data-path="src/charts/types.ts">src/charts/types.ts</code>.</li>
+                  </ol>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Add a new detected shape, or change suggestions</summary>
+                <div class="sub-body">
+                  <p>Add the variant to the <code>DataShape</code> union in <code class="fileref" data-path="src/types/data.ts">src/types/data.ts</code>, then add detection logic to <code>detectShape()</code> in <code class="fileref" data-path="src/data/shape-detector.ts">shape-detector.ts</code> (respect the priority ladder — more specific shapes first). Charts surface for the shape automatically once they list it in <code>compatibleShapes</code>. Ranking heuristics live in <code class="fileref" data-path="src/data/chart-suggester.ts">chart-suggester.ts</code>.</p>
+                  <div class="callout warn">
+                    <div class="callout-title">Watch out</div>
+                    <div class="callout-body">Aggressive name-matching in shape detection can <em>degrade</em> real suggestions (e.g. forcing a <code>time</code>+<code>event</code> time series into <code>survival</code> and emptying the suggestion list). New detection rules need a negative test proving they don't mis-fire on ordinary data.</div>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Change theming / colors</summary>
+                <div class="sub-body">
+                  <p>Edit the token sets in <code class="fileref" data-path="src/theme/tokens.ts">tokens.ts</code> (chart colors) and the CSS custom properties in <code class="fileref" data-path="src/index.css">src/index.css</code> (UI chrome). Charts must read colors from <code>theme.colorScale</code>/<code>sequentialScale</code>/etc. via helpers like <code class="fileref" data-path="src/lib/categoricalColor.ts">categoricalColor</code> — never hard-code a hex outside the token files (a self-audit rule, enforced by source grep).</p>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Add a per-chart option control</summary>
+                <div class="sub-body">
+                  <p>Add a <code>ChartOptionSpec</code> entry to the chart's <code>optionSpecs</code> and reference it in the <code>options</code> field of its <code>ChartDefinition</code>. The generic <code class="fileref" data-path="src/components/sidebar/ChartOptionsPanel.tsx">ChartOptionsPanel</code> renders it automatically (number/toggle/select/color), and <code class="fileref" data-path="src/charts/resolve-options.ts">resolveOptions</code> applies the default + validates the value in the renderer. No per-chart UI branching is needed.</p>
+                </div>
+              </details>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="testing">
+          <details>
+            <summary><span class="sec-num">13</span><h2>Testing</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">Two complementary layers: Vitest unit/component tests at 100% coverage, and a Playwright visual-regression gate that renders every chart in a real browser.</p>
+
+              <h3 class="anchor">Unit / component (Vitest)</h3>
+              <p>~1463 tests under <span class="fileref-inline"><code class="fileref dir" data-path="tests/unit/">tests/unit/</code></span>, mirroring <code>src/</code> structure. The setup file (<span class="fileref-inline"><code class="fileref" data-path="tests/setup.ts">tests/setup.ts</code></span>) imports jest-dom, calls <code>cleanup()</code> in <code>afterEach</code> (Vitest does not auto-clean like Jest), and mocks ResizeObserver/canvas/WebGL since jsdom has none. Coverage is gated at <strong>100%</strong> (statements/branches/functions/lines) in <span class="fileref-inline"><code class="fileref" data-path="vitest.config.ts">vitest.config.ts</code></span>, with <code>main.tsx</code>, <code>App.tsx</code>, type-only files, barrel <code>index.ts</code> files, and CSS excluded. A handful of genuinely-unreachable defensive branches use <code>/* v8 ignore */</code> with justifying comments.</p>
+
+              <h3 class="anchor">Visual regression (Playwright — "Gate 3")</h3>
+              <p>jsdom mocks canvas/WebGL, so unit tests cannot prove a chart actually paints. The Playwright suite (<span class="fileref-inline"><code class="fileref" data-path="tests/e2e/charts.spec.ts">tests/e2e/charts.spec.ts</code></span>) drives the <em>real UI</em> for all 193 charts: load the chart's deterministic sample → "Show all charts" → click the chart → wait for auto-assign → assert <strong>both</strong> a non-blank canvas (reads pixels) <strong>and</strong> a screenshot baseline. Baselines live in <span class="fileref-inline"><code class="fileref dir" data-path="tests/e2e/__screenshots__/">tests/e2e/__screenshots__/</code></span> (192 PNGs; <code>force_directed_graph</code> is floor-only because its layout is <code>Math.random()</code>-seeded). The chart→sample map is <span class="fileref-inline"><code class="fileref" data-path="tests/e2e/chart-samples.ts">chart-samples.ts</code></span>. Runs only in the pinned <code>mcr.microsoft.com/playwright:v1.60.0-noble</code> image so baselines are deterministic.</p>
+
+              <div class="callout key">
+                <div class="callout-title">Determinism is engineered, not lucky</div>
+                <div class="callout-body">Sample data is generated from a fixed-seed mulberry32 PRNG (<span class="fileref-inline"><code class="fileref" data-path="src/data/sample-data.ts">sample-data.ts</code></span>), and the ECharts renderer disables its animation when <code>window.__E2E__</code> is set — so screenshots capture a stable final frame. A vitest drift guard (<code class="fileref" data-path="tests/unit/charts/e2e-coverage.test.ts">e2e-coverage.test.ts</code>) fails if any registered chart lacks a visual-gate entry, and a deck.gl switch-stress spec (<code class="fileref" data-path="tests/e2e/deckgl-switch-stress.spec.ts">deckgl-switch-stress.spec.ts</code>) exercises repeated real-GL chart changes to catch cleanup leaks.</div>
+              </div>
+
+              <h3 class="anchor">Running tests</h3>
+              <div class="filelist">
+                <div class="filecard"><code class="fileref" data-path="run_e2e.sh">run_e2e.sh</code><span class="filecard-desc">Runs the visual gate in Docker; <code>update</code> arg refreshes baselines.</span></div>
+                <div class="filecard"><code class="fileref" data-path="run_e2e.bat">run_e2e.bat</code><span class="filecard-desc">Windows equivalent.</span></div>
+                <div class="filecard"><code class="fileref" data-path="tests/setup.ts">tests/setup.ts</code><span class="filecard-desc">jest-dom + cleanup + ResizeObserver/canvas/WebGL mocks.</span></div>
+                <div class="filecard"><code class="fileref" data-path="tests/unit/charts/registry-contract.test.ts">registry-contract.test.ts</code><span class="filecard-desc">Validates every registered chart against its declared backend's base class.</span></div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="ci-deploy">
+          <details>
+            <summary><span class="sec-num">14</span><h2>Build, CI &amp; deployment</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">GitHub Actions pipeline gated on a 100% coverage floor and a 193-chart visual gate, deploying via a multi-stage Docker image to nginx.</p>
+
+              <figure class="diagram">
+                <div class="mermaid">
+graph LR
+    Lint[lint] --> Type[typecheck]
+    Lint --> Test[test + coverage]
+    Type --> Build[build]
+    Test --> Build
+    Type --> E2E[visual regression]
+    Test --> E2E
+    Build --> Docker[docker build · main/staging]
+                </div>
+                <div class="mermaid-fallback"><figure class="code"><figcaption>diagram source · mermaid</figcaption><pre><code>graph LR
+    Lint[lint] --&gt; Type[typecheck]
+    Lint --&gt; Test[test + coverage]
+    Type --&gt; Build[build]
+    Test --&gt; Build
+    Type --&gt; E2E[visual regression]
+    Test --&gt; E2E
+    Build --&gt; Docker[docker build · main/staging]</code></pre></figure></div>
+                <figcaption>CI job graph from .github/workflows/ci.yml.</figcaption>
+              </figure>
+
+              <p>The pipeline in <span class="fileref-inline"><code class="fileref" data-path=".github/workflows/ci.yml">.github/workflows/ci.yml</code></span> runs on push/PR to <code>main</code>, <code>dev</code>, <code>staging</code>. <code>lint</code> gates everything; <code>typecheck</code> and <code>test</code> both depend on it; <code>build</code> and the Playwright <code>e2e</code> visual job both depend on typecheck+test; <code>docker</code> runs only on <code>main</code>/<code>staging</code>. The visual job runs in the pinned Playwright container so committed baselines render identically. Coverage drop fails the <code>test</code> stage.</p>
+
+              <h3 class="anchor">Docker image</h3>
+              <p>Two-stage build in <span class="fileref-inline"><code class="fileref" data-path="Dockerfile">Dockerfile</code></span>: stage 1 (<code>node:20-alpine</code>) runs <code>npm ci</code> + <code>npm run build</code>; stage 2 (<code>nginx:alpine</code>) copies <code>dist/</code> and the SPA <span class="fileref-inline"><code class="fileref" data-path="nginx.conf">nginx.conf</code></span> (try_files fallback to index.html, immutable asset caching, no-cache index.html). <span class="fileref-inline"><code class="fileref" data-path="docker-compose.yml">docker-compose.yml</code></span> is a single service publishing <code>${BI_PORT:-5176}:80</code> with <code>restart: unless-stopped</code> — correctly minimal since there's no database or second service.</p>
+
+              <h3 class="anchor">Releases / versioning</h3>
+              <p>Strict semver. The version field in <code>package.json</code> is the single source of truth and is bumped only by the release pipeline (<span class="fileref-inline"><code class="fileref" data-path=".github/workflows/release.yml">.github/workflows/release.yml</code></span>) — never edited by hand. Changelog entries land in <span class="fileref-inline"><code class="fileref" data-path="docs/versions.md">docs/versions.md</code></span> under the computed next version, one unreleased version at a time.</p>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="roadmap">
+          <details>
+            <summary><span class="sec-num">15</span><h2>Roadmap / phases</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">Four phases. Phase 1 and 2 are done; Phase 3 features have begun landing early; Phase 4 (backend) is the scale phase.</p>
+
+              <figure class="diagram">
+                <div class="mermaid">
+gantt
+    title Business Intelligence Roadmap
+    dateFormat YYYY-MM-DD
+    section Phase 1 Foundation
+    Architecture and tooling      :done, p1a, 2026-03-15, 2026-04-10
+    First 3 charts                :done, p1b, 2026-04-10, 2026-04-14
+    section Phase 2 Chart Coverage
+    All 193 charts                :done, p2, 2026-04-15, 2026-06-04
+    section Phase 3 Interaction
+    Filters annotations export    :active, p3, 2026-06-04, 45d
+    section Phase 4 Scale
+    Backend Parquet large data    :p4, after p3, 90d
+                </div>
+                <div class="mermaid-fallback"><figure class="code"><figcaption>diagram source · mermaid</figcaption><pre><code>gantt
+    title Business Intelligence Roadmap
+    dateFormat YYYY-MM-DD
+    section Phase 1 Foundation
+    Architecture and tooling      :done, p1a, 2026-03-15, 2026-04-10
+    First 3 charts                :done, p1b, 2026-04-10, 2026-04-14
+    section Phase 2 Chart Coverage
+    All 193 charts                :done, p2, 2026-04-15, 2026-06-04
+    section Phase 3 Interaction
+    Filters annotations export    :active, p3, 2026-06-04, 45d
+    section Phase 4 Scale
+    Backend Parquet large data    :p4, after p3, 90d</code></pre></figure></div>
+                <figcaption>Phase roadmap (see the master plan for the authoritative gantt).</figcaption>
+              </figure>
+
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Phase</th><th>Scope</th><th>Gate</th><th>State</th></tr></thead>
+                <tbody>
+                  <tr><td>1 — Foundation</td><td>Registry, renderer bases, data pipeline, theming, 3 reference charts</td><td>Upload CSV → detect shape → render one of 3 charts in dark/light</td><td>Complete</td></tr>
+                  <tr><td>2 — Chart Coverage</td><td>All 193 charts, zero new architecture</td><td>193/193 registered; each renders on its min-column shape; visual gate green</td><td>Complete</td></tr>
+                  <tr><td>3 — Interaction</td><td>Filter UI, annotations, multi-layer compositing, export, command palette, responsive layout</td><td>Load → filter → compose 2 layers → annotate → export image + data</td><td>Largely landed early (M4 slices)</td></tr>
+                  <tr><td>4 — Scale</td><td>FastAPI backend, Postgres metadata, DuckDB/Parquet, MessagePack streaming, view-based loading</td><td>10M-row Parquet renders in &lt;2s perceived latency</td><td>Not started</td></tr>
+                </tbody>
+              </table></div>
+
+              <p>The milestone-level breakdown (M0–M5 with waves/tranches/slices) is tracked in <span class="fileref-inline"><code class="fileref" data-path="docs/EXECUTION_ROADMAP.md">docs/EXECUTION_ROADMAP.md</code></span>; the authoritative phase definitions and gate criteria are in <span class="fileref-inline"><code class="fileref" data-path="docs/BUSINESS_INTELLIGENCE_MASTER_PLAN.md">docs/BUSINESS_INTELLIGENCE_MASTER_PLAN.md</code></span> §3.</p>
+
+              <div class="callout note">
+                <div class="callout-title">Open questions from the master plan</div>
+                <div class="callout-body">Geo basemaps (MapLibre vs pure deck.gl tile layers), 3D interaction UX (gizmos/slicing), the chart-spec serialization format for save/load, the legacy <code>.xls</code> decision, and the precise Phase 4 backend trigger remain open. See master plan §6.</div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="glossary">
+          <details>
+            <summary><span class="sec-num">16</span><h2>Domain glossary</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">Terms that recur across the code and docs.</p>
+              <dl class="doc-dl">
+                <dt>Chart family</dt><dd>One of 13 categories charts are grouped into (distribution, categorical, time-series, …). Defined by the <code>ChartFamily</code> union + <code>FAMILY_META</code>.</dd>
+                <dt>DataShape</dt><dd>An 18-value enum describing the overall structure of a dataset (e.g. <code>ohlcv</code>, <code>hierarchy</code>, <code>geo_points</code>). Detected from column metadata; drives which charts are suggested.</dd>
+                <dt>ColumnRole</dt><dd>A named slot a chart needs filled (e.g. <code>value</code>, <code>x</code>, <code>lat</code>) with its accepted column types. Auto-assigned from columns in ChartArea.</dd>
+                <dt>Renderer backend</dt><dd>Which engine draws a chart: <code>echarts</code>, <code>deckgl</code>, <code>regl</code>, or <code>canvas2d</code>. Each chart picks exactly one; canvases are never shared.</dd>
+                <dt>Registry / side-effect import</dt><dd>The <code>chartRegistry</code> singleton is populated by importing each chart file for the <code>register()</code> call it runs at module scope — there is no central chart list.</dd>
+                <dt>Layer</dt><dd>One chart instance in the stack (<code>LayerConfig</code>): a chart type + its column assignments + options + axis + visibility. Multiple visible layers can composite into one render root.</dd>
+                <dt>DataView</dt><dd>A filtered/transformed snapshot of a <code>DataSet</code> handed to renderers; carries the filters that produced it.</dd>
+                <dt>Suggestion / fillability</dt><dd>A chart is suggested for a dataset only if its shape matches and every required role can be filled by a distinct column (consume-on-assign).</dd>
+                <dt>OHLCV</dt><dd>Open/High/Low/Close/Volume — the financial time-series shape that drives candlestick/OHLC/price-volume charts.</dd>
+                <dt>Gate 3</dt><dd>The Playwright visual-regression harness that renders all 193 charts in a real browser and asserts non-blank canvas + screenshot baseline.</dd>
+              </dl>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="file-index">
+          <details>
+            <summary><span class="sec-num">17</span><h2>Key files index</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">A single jump-off map to the most important files.</p>
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>File</th><th>What it's for</th></tr></thead>
+                <tbody>
+                  <tr><td><code class="fileref" data-path="src/main.tsx">src/main.tsx</code></td><td>React DOM entry point.</td></tr>
+                  <tr><td><code class="fileref" data-path="src/app/App.tsx">src/app/App.tsx</code></td><td>Root component; gates UI on chart-library load.</td></tr>
+                  <tr><td><code class="fileref" data-path="src/charts/registry.ts">src/charts/registry.ts</code></td><td>The chart registry singleton.</td></tr>
+                  <tr><td><code class="fileref" data-path="src/charts/types.ts">src/charts/types.ts</code></td><td>ChartDefinition / ChartRenderer / ChartConfig / ThemeTokens / families.</td></tr>
+                  <tr><td><code class="fileref" data-path="src/charts/families/index.ts">src/charts/families/index.ts</code></td><td>Family registration barrel + ensureAllFamiliesLoaded.</td></tr>
+                  <tr><td><code class="fileref" data-path="src/charts/renderers/echarts-renderer.tsx">src/charts/renderers/echarts-renderer.tsx</code></td><td>EChartsBaseRenderer (the most-used backend).</td></tr>
+                  <tr><td><code class="fileref" data-path="src/charts/renderers/DeckGLChart.tsx">src/charts/renderers/DeckGLChart.tsx</code></td><td>deck.gl canvas wrapper with finalize() cleanup.</td></tr>
+                  <tr><td><code class="fileref" data-path="src/data/loader.ts">src/data/loader.ts</code></td><td>File → DataSet pipeline + format dispatch.</td></tr>
+                  <tr><td><code class="fileref" data-path="src/data/shape-detector.ts">src/data/shape-detector.ts</code></td><td>Column analysis + shape detection.</td></tr>
+                  <tr><td><code class="fileref" data-path="src/data/chart-suggester.ts">src/data/chart-suggester.ts</code></td><td>Shape → ranked chart suggestions.</td></tr>
+                  <tr><td><code class="fileref" data-path="src/data/transforms.ts">src/data/transforms.ts</code></td><td>Filter application → DataView.</td></tr>
+                  <tr><td><code class="fileref" data-path="src/data/sample-data.ts">src/data/sample-data.ts</code></td><td>29 deterministic sample datasets.</td></tr>
+                  <tr><td><code class="fileref" data-path="src/components/chart-area/ChartArea.tsx">src/components/chart-area/ChartArea.tsx</code></td><td>Orchestrator: auto-assign, filter, composite, export.</td></tr>
+                  <tr><td><code class="fileref" data-path="src/components/sidebar/ChartPicker.tsx">src/components/sidebar/ChartPicker.tsx</code></td><td>Suggested + full-catalog chart browser.</td></tr>
+                  <tr><td><code class="fileref" data-path="src/theme/tokens.ts">src/theme/tokens.ts</code></td><td>Dark/light theme tokens.</td></tr>
+                  <tr><td><code class="fileref" data-path="src/types/data.ts">src/types/data.ts</code></td><td>Core data contracts.</td></tr>
+                  <tr><td><code class="fileref" data-path="CHARTS.md">CHARTS.md</code></td><td>Full 193-chart catalog + backend table + shape rules.</td></tr>
+                  <tr><td><code class="fileref" data-path="docs/BUSINESS_INTELLIGENCE_MASTER_PLAN.md">docs/BUSINESS_INTELLIGENCE_MASTER_PLAN.md</code></td><td>Authoritative goals, phases, decisions, gates.</td></tr>
+                  <tr><td><code class="fileref" data-path="docs/status.md">docs/status.md</code></td><td>Live state — read first in any session.</td></tr>
+                  <tr><td><code class="fileref" data-path="docs/versions.md">docs/versions.md</code></td><td>Semver changelog.</td></tr>
+                  <tr><td><code class="fileref" data-path=".github/workflows/ci.yml">.github/workflows/ci.yml</code></td><td>CI pipeline.</td></tr>
+                  <tr><td><code class="fileref" data-path="bi_service.sh">bi_service.sh</code></td><td>Docker launcher.</td></tr>
+                </tbody>
+              </table></div>
+            </div>
+          </details>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <button id="backTop" title="Back to top"><span class="ico"></span></button>
+
+  <footer class="doc-footer">
+    <p>Human-facing documentation for <strong>business-intelligence</strong> · generated 2026-06-07.
+    Styling and behavior are inlined directly into this file — it is fully self-contained and needs no external assets. Re-open after editing source to keep this guide in sync.</p>
+  </footer>
+
+  <script>
+/* ============================================================================
+   doc.js — Shared behavior for every project's PROJECT_DOCUMENTATION.html.
+   Inlined directly into this PROJECT_DOCUMENTATION.html (self-contained; no external script).
+   Responsibilities:
+     - theme (light/dark) with persistence
+     - auto-built table of contents from <section class="doc-section"> + h3 anchors
+     - scroll-spy active highlighting
+     - live full-text section filter (search box)
+     - expand-all / collapse-all
+     - click-to-copy file references and code blocks
+     - scroll progress bar + back-to-top
+     - mermaid diagram rendering (CDN) with graceful source fallback
+     - print = expand everything
+   No build step, no framework. Pure DOM.
+   ============================================================================ */
+(function () {
+  "use strict";
+
+  var THEME_KEY = "projDocTheme";
+
+  /* ---- theme (apply ASAP to avoid flash) ---- */
+  function preferredTheme() {
+    var saved = null;
+    try { saved = localStorage.getItem(THEME_KEY); } catch (e) {}
+    if (saved === "light" || saved === "dark") return saved;
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+  function applyTheme(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    var btn = document.getElementById("themeToggle");
+    if (btn) {
+      var ico = btn.querySelector(".ico");
+      if (ico) ico.style.webkitMaskImage = ico.style.maskImage = "var(--icon-" + (t === "dark" ? "sun" : "moon") + ")";
+      btn.setAttribute("aria-label", t === "dark" ? "Switch to light theme" : "Switch to dark theme");
+    }
+  }
+  applyTheme(preferredTheme());
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+
+  function init() {
+    applyTheme(preferredTheme());
+    buildTOC();
+    wireControls();
+    wireFileRefs();
+    wireCodeCopy();
+    wireScrollProgress();
+    wireBackToTop();
+    wireScrollSpy();
+    wirePrint();
+    initMermaid();
+    handleInitialHash();
+  }
+
+  /* ---- slugify ---- */
+  function slug(s) {
+    return s.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").slice(0, 60);
+  }
+
+  /* ---- TOC ---- */
+  function buildTOC() {
+    var toc = document.getElementById("docToc");
+    if (!toc) return;
+    var sections = Array.prototype.slice.call(document.querySelectorAll("main .doc-section"));
+    if (!sections.length) return;
+    var ul = document.createElement("ul");
+    var n = 0;
+    sections.forEach(function (sec) {
+      n++;
+      if (!sec.id) sec.id = "sec-" + n;
+      var h2 = sec.querySelector("summary h2");
+      var title = h2 ? h2.textContent.trim() : ("Section " + n);
+      var li = document.createElement("li");
+      var a = document.createElement("a");
+      a.href = "#" + sec.id;
+      a.dataset.target = sec.id;
+      a.innerHTML = '<span class="toc-num">' + n + "</span>" + escapeHTML(title);
+      li.appendChild(a);
+      ul.appendChild(li);
+
+      // nested h3 anchors marked with class "anchor"
+      var subs = sec.querySelectorAll("h3.anchor");
+      Array.prototype.forEach.call(subs, function (h3) {
+        if (!h3.id) h3.id = sec.id + "-" + slug(h3.textContent);
+        var sli = document.createElement("li");
+        var sa = document.createElement("a");
+        sa.href = "#" + h3.id;
+        sa.className = "sub";
+        sa.dataset.target = h3.id;
+        sa.textContent = h3.textContent.trim();
+        sli.appendChild(sa);
+        ul.appendChild(sli);
+      });
+    });
+    toc.appendChild(ul);
+
+    // smooth scroll with header offset, and open target section
+    toc.addEventListener("click", function (e) {
+      var a = e.target.closest("a");
+      if (!a) return;
+      e.preventDefault();
+      var id = a.dataset.target;
+      revealAndScroll(id);
+      history.replaceState(null, "", "#" + id);
+    });
+  }
+
+  function revealAndScroll(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    // open the enclosing section + any parent <details>
+    var d = el.closest("details");
+    while (d) { d.open = true; d = d.parentElement ? d.parentElement.closest("details") : null; }
+    var sec = el.closest(".doc-section") || el;
+    if (sec.querySelector) {
+      var det = sec.querySelector(":scope > details");
+      if (det) det.open = true;
+    }
+    setTimeout(function () {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 30);
+  }
+
+  /* ---- controls (expand/collapse/theme/print/search) ---- */
+  function wireControls() {
+    var expand = document.getElementById("expandAll");
+    var collapse = document.getElementById("collapseAll");
+    var theme = document.getElementById("themeToggle");
+    var print = document.getElementById("printBtn");
+    var search = document.getElementById("docSearch");
+
+    if (expand) expand.addEventListener("click", function () { allDetails().forEach(function (d) { d.open = true; }); });
+    if (collapse) collapse.addEventListener("click", function () {
+      document.querySelectorAll("main .doc-section > details").forEach(function (d) { d.open = false; });
+      document.querySelectorAll("main details.sub").forEach(function (d) { d.open = false; });
+    });
+    if (theme) theme.addEventListener("click", function () {
+      var cur = document.documentElement.getAttribute("data-theme");
+      var next = cur === "dark" ? "light" : "dark";
+      try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+      applyTheme(next);
+    });
+    if (print) print.addEventListener("click", function () { window.print(); });
+    if (search) wireSearch(search);
+  }
+
+  function allDetails() { return Array.prototype.slice.call(document.querySelectorAll("main details")); }
+
+  /* ---- search / filter ---- */
+  function wireSearch(input) {
+    var countEl = document.querySelector(".search-count");
+    var sections = Array.prototype.slice.call(document.querySelectorAll("main .doc-section"));
+    var tocLinks = Array.prototype.slice.call(document.querySelectorAll("#docToc a"));
+    var debounce;
+    input.addEventListener("input", function () {
+      clearTimeout(debounce);
+      debounce = setTimeout(run, 120);
+    });
+    input.addEventListener("keydown", function (e) { if (e.key === "Escape") { input.value = ""; run(); input.blur(); } });
+
+    function run() {
+      var q = input.value.trim().toLowerCase();
+      var shown = 0;
+      if (!q) {
+        sections.forEach(function (s) { s.classList.remove("filtered-out"); });
+        tocLinks.forEach(function (a) { a.classList.remove("filtered-out"); });
+        if (countEl) countEl.textContent = "";
+        return;
+      }
+      sections.forEach(function (s) {
+        var match = s.textContent.toLowerCase().indexOf(q) !== -1;
+        s.classList.toggle("filtered-out", !match);
+        if (match) {
+          shown++;
+          var det = s.querySelector(":scope > details");
+          if (det) det.open = true;
+        }
+        var link = document.querySelector('#docToc a[data-target="' + s.id + '"]');
+        if (link) link.classList.toggle("filtered-out", !match);
+      });
+      if (countEl) countEl.textContent = shown + (shown === 1 ? " match" : " matches");
+    }
+  }
+
+  /* ---- file references: click to copy path ---- */
+  function wireFileRefs() {
+    document.body.addEventListener("click", function (e) {
+      var ref = e.target.closest("code.fileref");
+      if (!ref) return;
+      var path = ref.getAttribute("data-path") || ref.textContent.trim();
+      copyText(path).then(function () {
+        var old = ref.textContent;
+        ref.classList.add("copied");
+        ref.textContent = "copied: " + path;
+        setTimeout(function () { ref.textContent = old; ref.classList.remove("copied"); }, 1100);
+      });
+    });
+  }
+
+  /* ---- code blocks: copy button ---- */
+  function wireCodeCopy() {
+    document.querySelectorAll("figure.code").forEach(function (fig) {
+      var pre = fig.querySelector("pre");
+      if (!pre) return;
+      var btn = document.createElement("button");
+      btn.className = "btn code-copy";
+      btn.innerHTML = '<span class="ico" style="-webkit-mask:var(--icon-copy) center/contain no-repeat;mask:var(--icon-copy) center/contain no-repeat"></span><span class="label">Copy</span>';
+      btn.addEventListener("click", function () {
+        copyText(pre.innerText).then(function () {
+          var l = btn.querySelector(".label");
+          if (l) { l.textContent = "Copied"; setTimeout(function () { l.textContent = "Copy"; }, 1100); }
+        });
+      });
+      fig.appendChild(btn);
+    });
+  }
+
+  function copyText(t) {
+    if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(t).catch(fallback);
+    return fallback();
+    function fallback() {
+      try {
+        var ta = document.createElement("textarea");
+        ta.value = t; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select(); document.execCommand("copy");
+        document.body.removeChild(ta);
+      } catch (e) {}
+      return Promise.resolve();
+    }
+  }
+
+  /* ---- scroll progress ---- */
+  function wireScrollProgress() {
+    var bar = document.getElementById("scrollProgress");
+    if (!bar) return;
+    function upd() {
+      var h = document.documentElement;
+      var max = h.scrollHeight - h.clientHeight;
+      var pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
+      bar.style.width = pct + "%";
+    }
+    window.addEventListener("scroll", upd, { passive: true });
+    window.addEventListener("resize", upd);
+    upd();
+  }
+
+  /* ---- back to top ---- */
+  function wireBackToTop() {
+    var b = document.getElementById("backTop");
+    if (!b) return;
+    b.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: "smooth" }); });
+    window.addEventListener("scroll", function () {
+      b.classList.toggle("show", window.scrollY > 600);
+    }, { passive: true });
+  }
+
+  /* ---- scroll-spy ---- */
+  function wireScrollSpy() {
+    var links = {};
+    document.querySelectorAll("#docToc a").forEach(function (a) { links[a.dataset.target] = a; });
+    var targets = Array.prototype.slice.call(document.querySelectorAll("main .doc-section, main h3.anchor"));
+    if (!targets.length || !("IntersectionObserver" in window)) return;
+    var visible = new Set();
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) visible.add(en.target.id); else visible.delete(en.target.id);
+      });
+      var best = null, bestTop = Infinity;
+      visible.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var top = el.getBoundingClientRect().top;
+        if (top < bestTop) { bestTop = top; best = id; }
+      });
+      Object.keys(links).forEach(function (id) { links[id].classList.toggle("active", id === best); });
+    }, { rootMargin: "-70px 0px -65% 0px", threshold: 0 });
+    targets.forEach(function (t) { if (t.id) obs.observe(t); });
+  }
+
+  /* ---- print = expand all ---- */
+  function wirePrint() {
+    window.addEventListener("beforeprint", function () { allDetails().forEach(function (d) { d.open = true; }); });
+  }
+
+  /* ---- initial hash ---- */
+  function handleInitialHash() {
+    if (location.hash.length > 1) {
+      var id = decodeURIComponent(location.hash.slice(1));
+      setTimeout(function () { revealAndScroll(id); }, 60);
+    }
+  }
+
+  /* ---- mermaid (CDN, graceful fallback to source) ---- */
+  function initMermaid() {
+    var blocks = document.querySelectorAll(".mermaid");
+    if (!blocks.length) return;
+    // stash source for fallback
+    blocks.forEach(function (b) { if (!b.dataset.src) b.dataset.src = b.textContent; });
+    var theme = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "default";
+    var s = document.createElement("script");
+    s.type = "module";
+    s.textContent =
+      'import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";' +
+      'mermaid.initialize({ startOnLoad: false, theme: "' + theme + '", securityLevel: "loose", flowchart:{useMaxWidth:true}, themeVariables:{ fontFamily: "inherit" } });' +
+      'try { await mermaid.run({ querySelector: ".mermaid" }); }' +
+      'catch (e) { document.querySelectorAll(".mermaid").forEach(function(b){ var f=b.closest("figure.diagram"); if(f) f.classList.add("failed"); }); }';
+    s.onerror = mermaidFail;
+    document.body.appendChild(s);
+    // safety net: if CDN blocked, reveal fallbacks after a delay
+    setTimeout(function () {
+      document.querySelectorAll(".mermaid").forEach(function (b) {
+        if (!b.querySelector("svg")) { var f = b.closest("figure.diagram"); if (f) f.classList.add("failed"); }
+      });
+    }, 4000);
+  }
+  function mermaidFail() {
+    document.querySelectorAll("figure.diagram").forEach(function (f) { f.classList.add("failed"); });
+  }
+
+  function escapeHTML(s) { var d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+})();
+
+  </script>
+</body>
+</html>
