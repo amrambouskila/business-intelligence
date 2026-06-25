@@ -2,6 +2,15 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-06-25 — CI: fix e2e visual-regression failure + Node 24 action modernization
+
+No chart-count change: **193/193** registered charts.
+
+- Fixed the failing **Visual Regression (Playwright)** stage. `dorny/test-reporter` shells out to `git ls-files` inside the pinned `mcr.microsoft.com/playwright` container, where the host-mounted workspace is owned by a different uid than the in-container git user, so git aborted with `fatal: detected dubious ownership` (exit 128). Added a `git config --global --add safe.directory "$GITHUB_WORKSPACE"` step before the reporter, gated on the same `if: ${{ !cancelled() }}` so it also runs when the E2E step fails.
+- Modernized every GitHub Action to its Node 24 major ahead of the **Sept 16 2026** removal of Node 20 from runners (Node 20 actions have been force-run on Node 24 with a deprecation warning since Jun 2 2026): `actions/checkout` v4→v7, `actions/setup-node` v4→v6, `actions/upload-artifact` v4→v7, `dorny/test-reporter` v1→v3, `docker/setup-buildx-action` v3→v4, `docker/build-push-action` v5→v7. Latest majors confirmed against the GitHub releases API.
+- The project's `node-version: 20` for build/test steps is intentionally unchanged (matches `node:20-alpine` in the Dockerfile) — only action runtimes moved to Node 24.
+- Verification: `ci.yml` parses as valid YAML locally and every action tag was confirmed as the current Node-24 major via the GitHub API. Final confirmation is the next pipeline run on push.
+
 ### 2026-06-04 - Generated artifact tracking audit
 
 No chart-count change: **193/193** registered charts.
