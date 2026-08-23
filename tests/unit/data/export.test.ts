@@ -163,4 +163,18 @@ describe('data export helpers', () => {
     expect(exportFileName('Sales Data.csv', 'filtered', 'csv')).toBe('sales-data-filtered.csv');
     expect(exportFileName('...csv', 'chart-spec', 'json')).toBe('dataset-chart-spec.json');
   });
+
+  it('neutralises spreadsheet formula triggers in string cells but leaves numbers intact', () => {
+    const hostile: DataView = {
+      ...view(),
+      rows: [
+        { name: '=HYPERLINK("http://x")', value: -5, note: '+1+1', when: '@SUM(A1)' },
+        { name: '-cmd', value: 0, note: '\tTAB', when: '\rCR' },
+      ],
+      rowCount: 2,
+    };
+    const [, first, second] = dataViewToCSV(hostile).split('\n');
+    expect(first).toBe(`"'=HYPERLINK(""http://x"")",-5,'+1+1,'@SUM(A1)`);
+    expect(second).toBe(`'-cmd,0,'\tTAB,"'\rCR"`);
+  });
 });

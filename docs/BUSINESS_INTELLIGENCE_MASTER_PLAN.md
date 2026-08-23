@@ -84,6 +84,7 @@ graph LR
 | Data-shape-driven UX | `DataShape` enum → ranked chart suggestions | User uploads data; we detect shape; registry returns compatible charts sorted by fit. Eliminates the "which chart?" paralysis. |
 | Styling | Tailwind CSS v4 + CSS custom properties for theme | Utility-first speed. Theme tokens in `theme/tokens.ts` driven through CSS variables for runtime dark/light switching without re-render cascades. |
 | Client-only (no backend) | Phase 1–3 | Browser-parseable data sizes are sufficient for the target audience this phase. Backend considered for Phase 4+ when datasets cross memory limits. |
+| Security | SAST stage in CI from the first pipeline onward + injection-safe boundaries | Every pipeline runs Semgrep + CodeQL + `npm audit` + gitleaks (Trivy in `docker`) and fails on HIGH/CRITICAL. Every untrusted-input boundary (file parsers, filter/annotation inputs, exports, nginx headers) has a named injection class and defense in `CLAUDE.md` `<security>`. See §4 Security. |
 
 ### Data contracts (sacred — see global CLAUDE.md §7)
 
@@ -135,6 +136,10 @@ Deliverables:
 
 **Gate:** ✅ User can upload a CSV, see shape detected, pick one of three working chart types, and render it in dark or light mode.
 
+Retroactive security gate (added 2026-08-20, applies to the Phase 1 boundaries — file upload, nginx serving):
+- SAST stage green — zero HIGH/CRITICAL findings; MEDIUM findings triaged with written justification.
+- New input boundaries in this phase are injection-safe and documented in `CLAUDE.md` `<security>`.
+
 ### Phase 2 — Chart Coverage
 
 **Scope:** Implement the remaining 190 chart types across 13 families. Zero new architecture — every chart is a file in `charts/families/<family>/<chart>.ts` registered via side-effect import.
@@ -151,6 +156,9 @@ Deliverable per chart: one file, registered, rendered, type-checked, at least on
 
 **Gate:** all 193 charts registered; `/chart-status` reports 193/193; each chart renders correctly with a representative sample dataset; no chart throws on its documented minimum-column shape.
 
+- SAST stage green — zero HIGH/CRITICAL findings; MEDIUM findings triaged with written justification.
+- New input boundaries in this phase are injection-safe and documented in `CLAUDE.md` `<security>`.
+
 ### Phase 3 — Interaction & UX polish
 
 **Scope:** Move from "renders charts" to "is usable for real analysis."
@@ -166,6 +174,9 @@ Deliverables:
 
 **Gate:** a user can load a dataset, filter it, compose two layers, annotate a point, and export both the chart image and the filtered data.
 
+- SAST stage green — zero HIGH/CRITICAL findings; MEDIUM findings triaged with written justification.
+- New input boundaries in this phase are injection-safe and documented in `CLAUDE.md` `<security>`.
+
 ### Phase 4 — Scale (backend)
 
 **Scope:** Handle datasets that don't fit in browser memory.
@@ -178,6 +189,9 @@ Deliverables:
 - docker-compose gains backend + postgres services with healthchecks and `depends_on: service_healthy`
 
 **Gate:** 10M-row Parquet file renders a histogram, scatter (hexbinned), and time-series line in under 2s perceived latency on a dev laptop.
+
+- SAST stage green — zero HIGH/CRITICAL findings; MEDIUM findings triaged with written justification.
+- Every FastAPI endpoint and WebSocket channel added in this phase is an input boundary that are injection-safe and documented in `CLAUDE.md` `<security>`.
 
 ---
 
@@ -205,6 +219,16 @@ Per global CLAUDE.md §5: chart files are `snake_case.ts` (`grouped_bar.ts`, `co
 - Unit tests for every shape-detector branch, suggester rule, and data transform
 - Per-chart smoke test: given a representative fixture, `createRenderer().render(...)` returns a ReactElement without throwing
 - Coverage target 100% per global CLAUDE.md §7 (enforced in CI once CI is wired up)
+- CI stage order: `lint → sast → typecheck → test+coverage → build → docker` — see Security below
+
+### Security
+
+Per global instructions §19 and [`CLAUDE.md`](../CLAUDE.md) `<security>` (§10a), which holds the full input-boundary table — do not duplicate it here.
+
+- **SAST is a mandatory pipeline stage in every phase**, from the first pipeline onward: `lint → sast → typecheck → test+coverage → build → docker` in `.github/workflows/ci.yml`. The `sast` job fails on any HIGH/CRITICAL finding; MEDIUM findings are triaged with a written justification. No `continue-on-error`.
+- **Tool set (public GitHub repo):** Semgrep (`p/default`, `p/owasp-top-ten`, `p/typescript`, `p/react`, `p/docker`) uploading SARIF + CodeQL (`javascript-typescript`) via `github/codeql-action`; `eslint-plugin-security` + `eslint-plugin-no-unsanitized` in `lint`; `npm audit --audit-level=high`; `gitleaks`; Trivy image scan in the `docker` job. Phase 4 adds ruff `S` rules, `pip-audit`, CodeQL `python`, Semgrep `p/python` for the backend.
+- **Injection-safety principles applied to this project:** (1) file parsers (`loader.ts` → PapaParse / `JSON.parse` / `read-excel-file` / `hyparquet`) are the primary attack surface — extension allowlist, size caps, prototype-pollution-safe row construction, dependencies kept audit-clean; (2) dataset strings (file name, headers, cells, annotations) are rendered only through React JSX or ECharts' escaping formatters — no `dangerouslySetInnerHTML`, no HTML-returning tooltip formatters; (3) the `regex` filter op is bounded (compile once per pass, pattern-length cap); (4) exports neutralise CSV formula injection and only download in-process data/blob URLs; (5) `nginx.conf` ships CSP + `nosniff` + `X-Frame-Options: DENY` + `Referrer-Policy`; (6) no outbound `fetch`, no LLM calls — adding either requires a new boundary row first; (7) Phase 3 chart-spec import and every Phase 4 endpoint get a boundary row (schema validation, registry allowlists, SQLAlchemy bound params, msgpack size limits, CORS allowlist) before they ship.
+- **Outstanding task (CI already exists, stage missing):** wire the `sast` job (Semgrep SARIF + CodeQL + `npm audit --audit-level=high` + gitleaks; Trivy in `docker`), add the ESLint security plugins, add a `sast` npm script, and add the CSP/security headers to `nginx.conf`. Until it lands, the Phase 2/3 gates below are not satisfied.
 
 ### Reuse discipline
 
@@ -228,6 +252,8 @@ A chart type is done when:
 10. `/chart-status` count increments by one.
 11. No hard-coded colors — theme tokens only.
 12. `docs/status.md` and `docs/versions.md` updated per global CLAUDE.md §6.
+13. SAST stage green — zero HIGH/CRITICAL findings; MEDIUM findings triaged with written justification.
+14. If the chart adds a custom tooltip/label formatter or any new data-derived string rendering, it is injection-safe (no HTML built from data) and, if it is a new boundary, documented in `CLAUDE.md` `<security>`.
 
 ---
 

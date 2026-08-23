@@ -2,6 +2,27 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### 2026-08-20 — Security documentation (SAST stage + input-boundary inventory)
+
+No chart-count change: **193/193** registered charts. Documentation first, then the wiring — see the following subsection.
+
+- Added a `<security>` section (§10a) to `CLAUDE.md`/`AGENTS.md`: the `sast` CI stage requirement (`lint → sast → typecheck → test+coverage → build → docker`; Semgrep SARIF + CodeQL + `npm audit --audit-level=high` + gitleaks, Trivy in `docker`, fail on HIGH/CRITICAL, MEDIUM triaged with written justification), the ESLint security-plugin requirement, the local-parity SAST command set, and a full input-boundary inventory (file parsers, chart rendering, filter/annotation inputs, exports, chart-spec import, persisted state, env/build config, nginx static serving, Phase 4 backend) with named injection classes and required defenses.
+- Master plan: new §4 "Security" subsection, a Security row in the cross-phase concerns table, and the two SAST/injection-safety gate lines on every phase gate (Phase 1 retroactively) plus the Phase 2 definition-of-done list.
+- `docs/status.md`: new "Security" section, rewritten into Wired / Pending once the wiring landed.
+- `.codex/commands/pre-commit.md`: new SAST audit step and a `SAST` row in the verdict table.
+
+### 2026-08-20 — Security wiring (SAST stage, lint plugins, CSP, CSV formula neutralisation)
+
+No chart-count change: **193/193**.
+
+- **`.github/workflows/ci.yml`**: new `sast` job (`needs: lint`, `permissions: security-events: write`) running CodeQL `javascript-typescript`, `pipx run semgrep scan --config auto --config p/owasp-top-ten --config p/typescript --config p/react --config p/docker --severity ERROR --error` with SARIF upload plus a fail-on-findings step, `gitleaks/gitleaks-action@v2`, and `npm audit --audit-level=high`. `typecheck` and `test` now carry `needs: sast`. The `docker` job builds with `load: true` and runs `aquasecurity/trivy-action@0.28.0` (`HIGH,CRITICAL`, `exit-code: 1`, `ignore-unfixed: true`).
+- **`eslint.config.js`**: added `eslint-plugin-security` + `eslint-plugin-no-unsanitized` (recommended configs). `npm run lint` reports 0 errors (`detect-object-injection` warnings only).
+- **`nginx.conf`**: added `Content-Security-Policy`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`. `style-src` keeps `'unsafe-inline'` with an inline comment explaining the ECharts/Tailwind runtime-style requirement; `script-src` is `'self'` only.
+  - **Correction (same version): the headers above were not actually being delivered.** nginx inherits `add_header` from an enclosing level only when the current level declares none of its own, and `/assets/` and `= /index.html` declare their own `add_header Cache-Control`, which silently dropped all four security headers there. Because `location /` resolves the SPA through `try_files ... /index.html`, **the document itself was served with zero security headers** — verified by serving the config in `nginx:alpine` and curling `/`: 0 security headers before, 4 after. The four headers are now repeated inside each affected location block (with a comment explaining why the duplication must stay). `nginx -t` passes on the repaired config.
+- **`package.json`**: added a `sast` script for local parity.
+- **`src/data/export.ts`**: `escapeCSVCell` neutralises spreadsheet formula triggers — a string cell starting `=`, `+`, `-`, `@`, tab, or CR is prefixed with `'` before the existing quoting rule. Numbers, dates, and nulls are unaffected. This closes the CSV-injection row of the §10a boundary inventory; covered by a new case in `tests/unit/data/export.test.ts` (8 tests pass).
+- Patch scope: CI, lint config, static-serving headers, and one export-escaping fix — no chart, contract, or store change. Pending: `.semgrep/` rules; parser prototype-pollution/size caps; `exportFileName` control-character stripping; regex pattern-length cap; local Semgrep/gitleaks/Trivy runs.
+
 ### 2026-06-25 — CI: fix e2e visual-regression failure + Node 24 action modernization
 
 No chart-count change: **193/193** registered charts.

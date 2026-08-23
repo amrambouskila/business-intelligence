@@ -118,7 +118,7 @@ business-intelligence/
 │   └── skills/                          # build-check, chart-status, scaffold-charts
 ├── .github/
 │   └── workflows/
-│       └── ci.yml                       # lint → typecheck → test+coverage → build → docker
+│       └── ci.yml                       # lint → sast → typecheck → test+coverage → build → docker
 ├── docker-compose.yml                   # Single-service compose (nginx + built dist)
 ├── Dockerfile                           # Multi-stage: node:20-alpine build → nginx:alpine serve
 ├── nginx.conf                           # SPA routing config
@@ -351,12 +351,65 @@ npm run test:coverage # Coverage report (text + cobertura + html in coverage/)
 ## 10. CI/CD
 
 - **Pipeline:** `.github/workflows/ci.yml`
-- **Stages:** `lint → typecheck → test+coverage → build → docker`
+- **Stages:** `lint → sast → typecheck → test+coverage → build → docker` (`sast` = Semgrep SARIF + CodeQL + `npm audit --audit-level=high` + gitleaks, failing on HIGH/CRITICAL; Trivy image scan inside `docker`). See §10a.
 - **Coverage gate:** `test` stage fails if coverage drops below the threshold in `vitest.config.ts`. `build` needs `test`.
 - **Docker stage** only runs on `main` and `staging` branches.
 - **Release:** manual pipeline trigger bumps `package.json` version — do NOT edit the `version` field directly (per global §6).
 
 </ci_cd>
+
+---
+
+<security>
+
+## 10a. Security — SAST Scanning & Injection Safety (Non-Negotiable)
+
+Per global instructions §19 `<security>`. Security is part of the Definition of Done for every task, not a later phase.
+
+### SAST scanning — required in `.github/workflows/ci.yml`
+
+- **Stage position (wired):** the `sast` job runs after `lint` and before `typecheck`/`test` (`needs: lint`; `typecheck` and `test` carry `needs: sast`). It **fails on any HIGH/CRITICAL finding**. `continue-on-error: true` is non-compliant. MEDIUM findings are triaged — fixed, or suppressed inline with a written justification.
+- **Provider wiring (public GitHub repo, wired):** `github/codeql-action` (init → analyze, language `javascript-typescript`) **plus** `pipx run semgrep scan` uploading SARIF via `github/codeql-action/upload-sarif` (a following step fails the job when Semgrep reported findings), so findings land in Security → Code scanning. `gitleaks/gitleaks-action@v2` for secrets. `aquasecurity/trivy-action@0.28.0` (`severity: HIGH,CRITICAL`, `exit-code: 1`) against the image built in the `docker` job. Job-level `permissions: { security-events: write, contents: read }`.
+- **Tool set for this stack (TypeScript-only until Phase 4):**
+  - Semgrep rulesets (as wired): `auto`, `p/owasp-top-ten`, `p/typescript`, `p/react`, `p/docker`, at `--severity ERROR`. A `.semgrep/` project-rules directory does not exist yet — create it at the repo root with the first repo-specific rule.
+  - ESLint: `eslint-plugin-security` + `eslint-plugin-no-unsanitized` added to `eslint.config.js` so `dangerouslySetInnerHTML`, `eval`, `new Function`, raw `innerHTML`/`outerHTML`/`insertAdjacentHTML` writes, and unsafe regex fail `lint`.
+  > **Severity caveat (verified against the installed plugin):** every rule in `eslint-plugin-security`'s `recommended` config is `warn`, and this project's `lint` script is a bare `eslint .` with no `--max-warnings 0` — so those rules are *reported but cannot fail the build*. Only `eslint-plugin-no-unsanitized` (severity `error`, covering `innerHTML` / `outerHTML` / `insertAdjacentHTML` / `document.write`) actually gates today. Neither plugin covers `new Function` or the React `dangerouslySetInnerHTML` prop. To make the security rules gate, set them to `error` explicitly (and expect to triage `security/detect-object-injection`, which is noisy).
+  - Dependency audit: `npm audit --audit-level=high` (this project uses npm — see §3). A vulnerable transitive dependency fails the pipeline like a code finding.
+  - Secrets: `gitleaks detect --no-git --redact`.
+  - Container: Trivy in the `docker` job.
+  - When the Phase 4 FastAPI backend lands: ruff `select = ["E", "F", "I", "N", "UP", "ANN", "S"]` (`S101` excluded only under `tests/`), `uv run pip-audit`, CodeQL language `python`, Semgrep `p/python`.
+- **Local parity:** run the same set before pushing; `/pre-commit` reports the result in its verdict table.
+  ```bash
+  npx semgrep scan --config auto --config p/typescript --config p/react --error
+  npm audit --audit-level=high
+  gitleaks detect --no-git --redact
+  ```
+  `package.json` has a `sast` script wrapping these three (`npm run sast`). Semgrep and gitleaks are not project dependencies — install them on the host before running.
+
+### Injection safety — input boundary inventory
+
+This is a client-only SPA: no server endpoints, no database, no LLM calls (prompt injection does not apply until a model is introduced — if one ever is, add its entry here first). Every boundary below treats its input as hostile until it crosses a typed check.
+
+| Boundary | Where | Injection classes | Required defense |
+|---|---|---|---|
+| File upload (CSV/TSV, JSON, XLSX/XLSM, Parquet) | `src/data/loader.ts` → `src/data/parsers/{csv,json,excel,parquet}-parser.ts` (PapaParse, `JSON.parse`, `read-excel-file`, `hyparquet`/`apache-arrow`) | Resource exhaustion; prototype pollution; unsafe deserialization; XSS (file name, column names, cell values) | Dispatch on the extension allowlist only (the existing `else → throw`). Row/column/byte caps enforced before `analyzeColumns`. Parsed rows are built with `Object.create(null)` or keys filtered against `__proto__`/`constructor`/`prototype` — never `obj[key] = value` on a plain `{}` with a key taken from the file. Binary parsers run only on a `File` the user picked; no remote fetch. File name and headers are display strings only — rendered through React JSX (auto-escaped), never interpolated into HTML, never used as a path. |
+| Chart rendering of dataset values | `src/charts/renderers/*`, `src/charts/families/**` (ECharts tooltips/labels, deck.gl, regl, Canvas2D) | XSS (ECharts tooltip default `renderMode: 'html'`) | No string-template or callback `formatter` that returns HTML assembled from data values or column names; ECharts' built-in formatter escaping is the mechanism. If rich tooltips are ever needed, use `renderMode: 'richText'` or escape every interpolated value. `dangerouslySetInnerHTML` is banned repo-wide (ESLint). |
+| Filter / annotation / column-role inputs | `src/stores/filter-store.ts`, `src/stores/annotation-store.ts`, `src/components/sidebar/DataTab.tsx`, `src/data/transforms.ts` | XSS; resource exhaustion (ReDoS — the `regex` filter op compiles a user pattern and tests it per row) | Text rendered only via JSX. `regex` filters: compile the `RegExp` once per `applyFilters` call (not per row), cap pattern length, reject on `SyntaxError` (already caught) — never `eval` a predicate. Filter `op` and `column` are validated against the `Filter` union and the active dataset's `ColumnMeta` names. |
+| Export (CSV, chart-spec JSON, PNG/SVG) | `src/data/export.ts` (`dataViewToCSV`, `buildChartSpecExport`), `src/charts/export-image.ts`, `src/lib/downloadTextFile.ts`, `src/lib/downloadDataUrlFile.ts` | CSV formula injection (cells starting `=`, `+`, `-`, `@`, `\t`, `\r` execute in Excel/Sheets); unsafe download file names | `escapeCSVCell` neutralises formula-leading cells — a string cell starting `=`, `+`, `-`, `@`, tab, or CR is prefixed with `'` before the quoting rule (wired; covered in `tests/unit/data/export.test.ts`). `downloadDataUrlFile` accepts only data URLs produced in-process by `canvas.toDataURL` — never a user-supplied `href`. Export file names are derived from the dataset name through `exportFileName`, which must strip path separators and control characters. `URL.createObjectURL` handles are revoked after use (already done). |
+| Chart-spec JSON import (Phase 3, planned — master plan §6) | future `src/data/` loader | Unsafe deserialization; prototype pollution; XSS | `JSON.parse`, then validate the whole object with a type guard/schema before any field is read; `chartType` must exist in `chartRegistry`; `columns` must name columns in the active dataset; unknown keys are dropped. Never spread a parsed spec into a store. |
+| Persisted client state | `src/theme/theme-provider.tsx` (`localStorage` theme key) | Tampered storage | Value accepted only if it equals `'dark'` or `'light'` (already enforced). Any future persisted store follows the same allowlist-on-read rule. |
+| Environment / build config | `BI_PORT` (compose, launchers); `import.meta.env` is not used in `src/` | Secrets exposure | No secrets in the bundle. Anything prefixed `VITE_` ships to the browser — never put a credential there. `.env` is gitignored and write-blocked by the `PreToolUse` hook. |
+| Static serving | `nginx.conf`, `Dockerfile` (`nginx:alpine`) | XSS amplification, clickjacking, MIME sniffing | `nginx.conf` sends (wired) `Content-Security-Policy` (`default-src 'self'; img-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'self'` — no `unsafe-inline` for scripts; if `style-src` needs `'unsafe-inline'` for ECharts/Tailwind runtime styles, that exception is documented in the config), `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`. Uploads never reach nginx (they are parsed in-browser), so `client_max_body_size` is not a control here. |
+| Phase 4 backend (planned) | FastAPI + Postgres + MessagePack WebSocket | SQL, SSRF, unsafe deserialization, auth/CORS, resource exhaustion | SQLAlchemy bound parameters only (`text()` only with `:named` binds); `msgpack` decode with `raw=False` and size limits + Pydantic `model_validate`; explicit CORS origin allowlist; request body and pagination caps. Add a row per endpoint here when it is created. |
+
+### Project-specific additions
+
+- **Third-party parsers are the largest attack surface.** `hyparquet`, `apache-arrow`, `read-excel-file`, and `papaparse` parse attacker-controlled bytes in the browser; keep them `npm audit`-clean and pinned in `package-lock.json`. A parser upgrade is a security-relevant change — run the local SAST set before proposing it.
+- **All data stays in the browser.** There is no upload endpoint and no outbound `fetch`; do not add either without adding an SSRF/CORS row above and a master-plan update.
+- **Chart option values** (`ChartOptionSpec` — `number`/`toggle`/`select`/`color`) are validated by `resolveOptions`; `select` values must be in the spec's allowed list, `color` values reach the renderer as CSS colors only, never HTML.
+- The **task-completion self-audit (§13) includes a Security check** item.
+
+</security>
 
 ---
 
@@ -386,7 +439,9 @@ Phase 2 is done when:
 5. Every chart has at least one smoke test.
 6. `npm run build` clean.
 7. Full CI pipeline green on `main`.
-8. `docs/status.md` and `docs/versions.md` updated.
+8. SAST stage green — zero HIGH/CRITICAL findings; MEDIUM findings triaged with written justification.
+9. All input boundaries injection-safe and documented in `<security>` (§10a).
+10. `docs/status.md` and `docs/versions.md` updated.
 
 </definition_of_done>
 
@@ -403,6 +458,7 @@ After every non-trivial task, run yourself through the global §15 checklist. Pr
 - **Theme-token-only check:** no hard-coded colors outside `src/theme/tokens.ts`.
 - **Side-effect-import check:** every new chart file is imported in its family's `index.ts`.
 - **Coverage check:** report what `npm run test:coverage` shows for files you touched.
+- **Security check:** local SAST set (§10a) clean; every touched input boundary names its injection class(es) and defense; `<security>` section updated if a boundary was added.
 
 </self_audit>
 

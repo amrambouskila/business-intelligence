@@ -99,8 +99,11 @@ export function exportFileName(datasetName: string, suffix: string, extension: s
   return `${slug || 'dataset'}-${suffix}.${extension}`;
 }
 
+const FORMULA_TRIGGER = /^[=+\-@\t\r]/;
+
 function escapeCSVCell(value: unknown): string {
   if (value == null) return '';
-  const text = value instanceof Date ? value.toISOString() : String(value);
+  const raw = value instanceof Date ? value.toISOString() : String(value);
+  const text = typeof value === 'string' && FORMULA_TRIGGER.test(raw) ? `'${raw}` : raw;
   return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }

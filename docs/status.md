@@ -99,7 +99,7 @@ Empirically verified for Phase 2 catalog completion: focused QQ/confusion-matrix
 - **Theming**: dark/light tokens through `ThemeProvider` (`theme-provider.tsx`) + `useTheme` hook (`theme-context.ts`), with `localStorage` persistence under `bi-theme`
 - **Testing**: Vitest 4 + @testing-library/react + jsdom. **1495 tests, 100% stmts / 100% branches / 100% funcs / 100% lines** on `src/**` (excluding `main.tsx`, `App.tsx`, `src/types/**`, `src/**/index.ts` barrels, `*.css`). Includes a registry contract harness that validates every registered chart.
 - **Visual gate (Gate 3)**: Playwright `tests/e2e/charts.spec.ts` renders all 193 charts in real Chromium (non-blank floor + screenshot baselines), run in Docker via `run_e2e.{sh,bat}` and a CI job. Baselines live in `tests/e2e/__screenshots__/` (192 screenshot baselines plus the non-deterministic `force_directed_graph` floor-only check); the chart→sample map is `tests/e2e/chart-samples.ts`. (NOT part of vitest coverage; separate from the 1495 unit tests.)
-- **CI**: `.github/workflows/ci.yml` — lint → typecheck → test+coverage → build → **visual (Playwright)** → docker (staging/main only). Coverage gate = 100% in `vitest.config.ts`; test stage fails on drop. All actions are pinned to their Node-24 majors (`checkout@v7`, `setup-node@v6`, `upload-artifact@v7`, `dorny/test-reporter@v3`, `docker/setup-buildx-action@v4`, `docker/build-push-action@v7`) ahead of the Sept 16 2026 Node 20 runner removal; the project's build/test `node-version: 20` is unchanged. The Playwright `e2e` container job marks the workspace a git `safe.directory` before `test-reporter` shells out to `git ls-files`, fixing the in-container "dubious ownership" exit-128.
+- **CI**: `.github/workflows/ci.yml` — lint → **sast** → typecheck → test+coverage → build → **visual (Playwright)** → docker (staging/main only). The `sast` job (CLAUDE.md §10a) is wired: `needs: lint`, with `typecheck` and `test` carrying `needs: sast`; Trivy scans the built image in `docker` — see "Security" below. Coverage gate = 100% in `vitest.config.ts`; test stage fails on drop. All actions are pinned to their Node-24 majors (`checkout@v7`, `setup-node@v6`, `upload-artifact@v7`, `dorny/test-reporter@v3`, `docker/setup-buildx-action@v4`, `docker/build-push-action@v7`) ahead of the Sept 16 2026 Node 20 runner removal; the project's build/test `node-version: 20` is unchanged. The Playwright `e2e` container job marks the workspace a git `safe.directory` before `test-reporter` shells out to `git ls-files`, fixing the in-container "dubious ownership" exit-128.
 - **Docker**: multi-stage `Dockerfile` (node:20-alpine → nginx:alpine), single-service `docker-compose.yml`
 - **Launchers**: `bi_service.sh` / `bi_service.bat` with banner + URL block + `[k]/[q]/[v]/[r]` loop
 - **Env template**: `.env.example` documents `BI_PORT`
@@ -143,6 +143,22 @@ Shared compute: `src/data/stats/` (`quantiles`, `kernelDensity`, `buildHierarchy
 - **Build still emits large vendor chunks** — app/chart-family chunks are split, but ECharts and deck.gl vendor internals still exceed Vite's 500 kB warning threshold. Further reduction would require deeper renderer-level lazy loading or ECharts-on-demand imports.
 - **deck.gl cleanup is correct and exercised by real-browser paths.** `DeckGLChart`'s finalize() uses the mount-snapshot pattern, which is the *correct* React idiom (React nulls a child's imperative ref before the parent's passive cleanup runs — reading `ref.current` at unmount would yield null). The audit's "finalize leak" was re-examined and is a false positive; `tests/e2e/deckgl-switch-stress.spec.ts` now covers repeated real-GL chart changes across deck.gl map and 3D views.
 - **npm vs pnpm override** (CLAUDE.md §3) — revisit in Phase 4.
+
+## Security
+
+Requirements are documented (`CLAUDE.md` §10a `<security>`, master plan §4 "Security", gate lines on every phase) **and enforced**. Current state: `npm audit` clean (0 vulnerabilities); no `dangerouslySetInnerHTML` or outbound `fetch` in `src/`; `.env*`/secrets writes blocked by the `PreToolUse` hook; theme `localStorage` value allowlisted on read; invalid `regex` filters fail closed.
+
+Wired:
+- `sast` job in `.github/workflows/ci.yml` (`needs: lint`; `typecheck` and `test` carry `needs: sast`; `permissions: security-events: write`): CodeQL `javascript-typescript`, `pipx run semgrep scan` (`auto` + `p/owasp-top-ten` + `p/typescript` + `p/react` + `p/docker`, `--severity ERROR --error`) with SARIF upload to Security → Code scanning and a fail-on-findings step, `gitleaks/gitleaks-action@v2`, `npm audit --audit-level=high`. No `continue-on-error`.
+- Trivy (`aquasecurity/trivy-action@0.28.0`, `HIGH,CRITICAL`, `exit-code: 1`, `ignore-unfixed: true`) against the image built in the `docker` job, which now builds with `load: true`.
+- `eslint.config.js` extends `security.configs.recommended` + `noUnsanitized.configs.recommended` (0 errors; the `detect-object-injection` heuristic reports warnings only).
+- `package.json` has a `sast` script (Semgrep + gitleaks + `npm audit`) for local parity with `/pre-commit`.
+- `nginx.conf` sends CSP (`default-src 'self'`, `script-src 'self'`, `connect-src 'self'`, `object-src 'none'`, `frame-ancestors 'none'`; `style-src 'unsafe-inline'` documented as required by ECharts/Tailwind runtime styles), `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`.
+- **CSV formula injection closed:** `escapeCSVCell` (`src/data/export.ts`) now prefixes `'` to string cells beginning `=`, `+`, `-`, `@`, tab, or CR before quoting; numeric cells are untouched. Covered by a dedicated case in `tests/unit/data/export.test.ts`.
+
+Still pending:
+- `.semgrep/` project-rules directory.
+- Remaining boundary defenses the inventory requires but that are unverified in code: prototype-pollution-safe row construction and row/byte caps in the parsers, path/control-character stripping in `exportFileName`, regex pattern-length cap (ReDoS) on the `regex` filter op.
 
 ## What's Next
 
