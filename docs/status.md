@@ -146,6 +146,17 @@ Shared compute: `src/data/stats/` (`quantiles`, `kernelDensity`, `buildHierarchy
 
 ## Security
 
+### Verified state (2026-08-24)
+
+- **Semgrep: clean.** Verified locally by running this repo's own CI command against the working tree (0 findings). The invocation itself was broken before today — `semgrep ci` rejects `--severity`/`--error` and exited 2 without scanning.
+- **Dependency audit: clean.** Verified with the repo's own audit command and threshold, after the override/upgrade remediation; install and build re-verified in the CI image.
+- **Security headers verified delivered** — confirmed by serving the config in `nginx:alpine` and inspecting the response for `/` (0 headers before the fix, 4 after).
+
+Open:
+- ESLint security rules are reported but cannot fail the build (see fleet note below).
+
+- Not run locally: gitleaks and Trivy are not part of any project toolchain here; both were exercised through their official images during verification, and CI runs them on every pipeline.
+
 Requirements are documented (`CLAUDE.md` §10a `<security>`, master plan §4 "Security", gate lines on every phase) **and enforced**. Current state: `npm audit` clean (0 vulnerabilities); no `dangerouslySetInnerHTML` or outbound `fetch` in `src/`; `.env*`/secrets writes blocked by the `PreToolUse` hook; theme `localStorage` value allowlisted on read; invalid `regex` filters fail closed.
 
 Wired:

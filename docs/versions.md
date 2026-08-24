@@ -2,6 +2,16 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### CI hardening + dependency remediation (2026-08-24)
+
+- **Semgrep invocation corrected.** The job used `semgrep ci` with `--severity` and `--error`, which that subcommand does not accept — it exits 2 with a usage error before scanning. Switched to `semgrep scan`, which supports both.
+- **Release workflow hardened against script injection.** `${{ inputs.bump }}` and `${{ steps.bump.outputs.new_version }}` were interpolated directly into `run:` blocks, where the value becomes shell code. Both now pass through `env:` and are read as quoted shell variables. The input is `type: choice`, so this was not exploitable today — it is the pattern that breaks the moment the input type changes.
+- **Security headers now actually delivered.** nginx inherits `add_header` from an enclosing level only when the current level declares none of its own, and the cache-control `location` blocks declared their own — silently dropping CSP, `nosniff`, `X-Frame-Options` and `Referrer-Policy` there. Because the SPA resolves through `try_files ... /index.html`, the document itself was served with **zero** security headers. Verified by serving the config in `nginx:alpine` and curling `/`: 0 headers before, 4 after. They are now repeated in each affected block, with a comment explaining why the duplication must stay.
+- **Dockerfile `missing-user` suppressed with written justification**, per global CLAUDE.md section 9 (non-root is not required for personal local-dev containers). The nginx images additionally cannot run as non-root without the unprivileged image and a port change. Revisit before any deployment beyond localhost.
+- **Removed the unused `@deck.gl/geo-layers` dependency.** All 8 high advisories reached this project through it (`-> @luma.gl/gltf -> @loaders.gl/textures -> texture-compressor -> image-size`, whose advisory has no patched release in any version). The package was declared but never imported — the code uses `@deck.gl/core`, `/layers`, `/aggregation-layers` and `/react`. Removing it takes `npm audit --audit-level=high` to zero and made the previously-added `image-size` override unnecessary, so that was removed too. npm's own suggested fix was a `@deck.gl/geo-layers` 9.3 -> 8.9 downgrade, which would have broken the app.
+- Verified after removal: production build succeeds, 229 test files / 1509 tests pass.
+
+
 ### 2026-08-20 — Security documentation (SAST stage + input-boundary inventory)
 
 No chart-count change: **193/193** registered charts. Documentation first, then the wiring — see the following subsection.
