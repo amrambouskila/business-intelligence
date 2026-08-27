@@ -2,6 +2,68 @@
 
 ## v0.3.0 — Full alignment with global CLAUDE.md
 
+### CI restored: invalid Trivy action pin + platform-pruned lockfile (2026-08-27)
+
+Both red jobs on `main` -- `Docker Build` and `Visual Regression (Playwright)` -- trace to `05f397ce`
+(2026-08-23); neither had produced a green run since. Diagnosed from the GitHub Actions logs via `gh`.
+
+- **`Docker Build` never reached its first step.** It pinned `aquasecurity/trivy-action@0.28.0`, a tag
+  that does not exist upstream -- every published trivy-action tag is `v`-prefixed (`v0.28.0` ...
+  `v0.36.0`), with `0.35.0` the sole unprefixed exception. GitHub resolves every action in a job
+  before running any step, so the job aborted at *Set up job* with `Unable to resolve action`, which
+  is why all of its steps reported as skipped rather than failed. Repinned to
+  `aquasecurity/trivy-action@v0.36.0`; `image-ref`, `severity`, `exit-code` and `ignore-unfixed` are
+  all still valid inputs at that tag. Verified against the action definition, not assumed.
+- **`Visual Regression` failed at `npm ci`.** `package-lock.json` had been regenerated on a linux-x64
+  host by an npm that pruned every other platform's optional native binaries: `@tailwindcss/oxide-*`
+  fell from 13 entries to 2, and `lightningcss-*`, `@rolldown/binding-*`, `fsevents` and the
+  `@emnapi`/`@napi-rs` wasm runtimes were dropped outright. The other jobs survived because
+  `actions/setup-node@v6` gives them npm 10; the pinned `mcr.microsoft.com/playwright:v1.60.0-noble`
+  container ships Node 24 / npm 11, which rejects the mismatch with
+  `EUSAGE ... Missing: <pkg> from lock file`. Regenerated with `npm install --package-lock-only` on
+  npm 11.12.1: **47 packages added, 0 version changes, 0 removals** -- purely additive, so it carries
+  no behavioural risk.
+- **The same pruning was a latent `Docker Build` failure.** The pruned lock carried
+  `@tailwindcss/oxide-linux-x64-gnu` but no `-linux-x64-musl`, and the build stage is
+  `node:20-alpine` (musl). It would have surfaced the moment the action pin was fixed.
+- **One visual baseline regenerated: `pair-plot.png`.** `05f397ce` also drifted echarts
+  `6.0.0 -> 6.1.0` in the lockfile -- in range for the declared `^6.0.0`, and the gate had not run
+  since, so the drift was never measured. 193 of 194 baselines still matched; only `pair_plot`'s
+  diagonal histogram panels moved (21689 px, ratio 0.04 against the 0.01 `maxDiffPixelRatio`),
+  matching echarts 6.1.0's "render `bar` on any axis type without overflow" and "uniform `bandWidth`
+  calculation in numeric axis" fixes. Confirmed by inspecting the expected/actual pair directly:
+  identical data, series and colours, only bar geometry inside the axis extent. Regenerated that one
+  baseline via `playwright test -g pair_plot --update-snapshots` rather than the whole set, so any
+  other drift would still have failed the gate. Pinning echarts back to 6.0.0 was rejected -- the
+  declared range resolves to 6.1.x on any fresh install, and 6.1.0 carries a `lines`-series tooltip
+  XSS fix this project's `<security>` inventory cares about.
+- **Correction to the 2026-08-26 entry below**, which states this repo's pipeline has no
+  `trivy image` step: it has had one since 2026-08-23. It had simply never executed, for the reason
+  above, so no scan result had ever been produced. `docs/status.md` carried the same error and is
+  corrected in place.
+
+**Verified, every check against the toolchain CI actually uses:**
+
+| Check | Result |
+|---|---|
+| `npm ci` (npm 11.12.1, host **and** inside `playwright:v1.60.0-noble`) | passes -- previously `EUSAGE` |
+| `npm run lint` | 0 errors (629 pre-existing non-gating `detect-object-injection` warnings) |
+| `npm run typecheck` | clean |
+| `npm run test:coverage` | 229 files / **1509 tests passed**, **100%** stmts/branch/funcs/lines |
+| `npm audit --audit-level=high` | 0 vulnerabilities |
+| `docker build` | succeeds |
+| `trivy image --severity HIGH,CRITICAL --exit-code 1 --ignore-unfixed` | **0 vulnerabilities** -- the first image-scan result this repo has produced |
+| Visual regression, 194 tests, pinned container, exact CI invocation | **194 passed**, `junit-e2e.xml` written |
+
+Real-CI corroboration from run `33103622096` (commit `2e65f5c5`, carrying the pin + lockfile fixes
+but not yet the baseline): `Docker Build` **green in 1m9s** having previously never started, and
+`Visual Regression`'s `npm ci` and `npm run build` both **green**, with the single remaining failure
+being exactly the `pair_plot` screenshot regenerated here.
+
+**Semver reasoning:** Patch. CI configuration, a lockfile repair, and one regenerated test baseline.
+No application code, dependency range, host port, API or data contract changed.
+
+
 ### Base-image security patch for the alpine runtime stage (2026-08-26)
 
 - **`RUN apk upgrade --no-cache` added to `Dockerfile`.** The `nginx:alpine` base currently ships

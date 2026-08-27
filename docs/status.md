@@ -146,6 +146,21 @@ Shared compute: `src/data/stats/` (`quantiles`, `kernelDensity`, `buildHierarchy
 
 ## Security
 
+### Verified state (2026-08-27)
+
+- **CI is green end-to-end again.** Both long-red jobs are fixed: `Docker Build` (invalid
+  `aquasecurity/trivy-action@0.28.0` pin -> `@v0.36.0`) and `Visual Regression` (`package-lock.json`
+  had been regenerated with every non-linux-x64 optional native binary pruned, which npm 11 inside
+  the pinned Playwright container rejects). See the 2026-08-27 entry in
+  [`docs/versions.md`](versions.md) for the full diagnosis.
+- **First image scan this repo has ever produced: 0 HIGH/CRITICAL.** `trivy image --severity
+  HIGH,CRITICAL --exit-code 1 --ignore-unfixed` against the locally built image, and green in CI's
+  `docker` job in 1m9s. The `apk upgrade` layer added on 2026-08-26 is doing its job.
+- **`npm audit --audit-level=high`: 0 vulnerabilities** against the regenerated lockfile.
+- **Unit suite: 1509 tests passing, 100% coverage** on statements, branches, functions and lines.
+- **Visual gate: 194/194 passing** in `mcr.microsoft.com/playwright:v1.60.0-noble`, after
+  regenerating exactly one baseline (`pair-plot.png`) for echarts 6.0.0 -> 6.1.0 bar-geometry drift.
+
 ### Verified state (2026-08-26)
 
 - **Alpine base-image CVEs patched at build time.** `CVE-2026-14456` (`libcrypto3`/`libssl3`
