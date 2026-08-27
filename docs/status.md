@@ -152,8 +152,10 @@ Shared compute: `src/data/stats/` (`quantiles`, `kernelDensity`, `buildHierarchy
   3.5.7-r0, HIGH, fixed 3.5.8-r0) is cleared by an `apk upgrade` layer in the runtime stage --
   measured on the base image as 2 HIGH before, 0 after. The base scanned clean two days earlier,
   so the layer exists to stop a future advisory from becoming a pipeline failure.
-- **No image scan runs in this repo's CI**, so nothing here was gating; the change is
-  preventive and no per-image scan result is claimed.
+- **Correction (2026-08-27):** this bullet previously read "no image scan runs in this repo's CI".
+  That was wrong -- the `docker` job has run `aquasecurity/trivy-action` since 2026-08-23. It had
+  simply never produced a result, because the job aborted at *Set up job* on an invalid action pin.
+  The layer is gating, and the first measured scan is recorded in the 2026-08-27 entry above.
 
 ### Verified state (2026-08-24)
 
@@ -170,7 +172,7 @@ Requirements are documented (`CLAUDE.md` §10a `<security>`, master plan §4 "Se
 
 Wired:
 - `sast` job in `.github/workflows/ci.yml` (`needs: lint`; `typecheck` and `test` carry `needs: sast`; `permissions: security-events: write`): CodeQL `javascript-typescript`, `pipx run semgrep scan` (`auto` + `p/owasp-top-ten` + `p/typescript` + `p/react` + `p/docker`, `--severity ERROR --error`) with SARIF upload to Security → Code scanning and a fail-on-findings step, `gitleaks/gitleaks-action@v2`, `npm audit --audit-level=high`. No `continue-on-error`.
-- Trivy (`aquasecurity/trivy-action@0.28.0`, `HIGH,CRITICAL`, `exit-code: 1`, `ignore-unfixed: true`) against the image built in the `docker` job, which now builds with `load: true`.
+- Trivy (`aquasecurity/trivy-action@v0.36.0`, `HIGH,CRITICAL`, `exit-code: 1`, `ignore-unfixed: true`) against the image built in the `docker` job, which now builds with `load: true`.
 - `eslint.config.js` extends `security.configs.recommended` + `noUnsanitized.configs.recommended` (0 errors; the `detect-object-injection` heuristic reports warnings only).
 - `package.json` has a `sast` script (Semgrep + gitleaks + `npm audit`) for local parity with `/pre-commit`.
 - `nginx.conf` sends CSP (`default-src 'self'`, `script-src 'self'`, `connect-src 'self'`, `object-src 'none'`, `frame-ancestors 'none'`; `style-src 'unsafe-inline'` documented as required by ECharts/Tailwind runtime styles), `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`.
